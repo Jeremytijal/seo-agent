@@ -290,6 +290,9 @@ const Integrations = () => {
         );
     }
 
+    // Check if user has made a choice (connected site, expert request, or manual)
+    const hasMadeChoice = sites.length > 0 || expertRequests.length > 0;
+
     return (
         <div className="page-container integrations-page">
             <header className="page-header">
@@ -298,6 +301,26 @@ const Integrations = () => {
                     <p className="text-muted">Publiez automatiquement vos articles SEO</p>
                 </div>
             </header>
+
+            {/* Connect Site Banner */}
+            {!hasMadeChoice && (
+                <div className="connect-banner">
+                    <div className="connect-banner-content">
+                        <AlertCircle size={20} />
+                        <div>
+                            <strong>Connectez votre site pour publier automatiquement</strong>
+                            <p>Choisissez WordPress, publication manuelle ou demandez l'aide d'un expert</p>
+                        </div>
+                    </div>
+                    <button 
+                        className="btn-banner-connect"
+                        onClick={() => setShowConnectModal(true)}
+                    >
+                        Connecter maintenant
+                        <ArrowRight size={16} />
+                    </button>
+                </div>
+            )}
 
             {/* Connected Sites Section */}
             <section className="section-block">

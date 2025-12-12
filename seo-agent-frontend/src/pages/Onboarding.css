@@ -569,146 +569,259 @@
 
 .activation-cta {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 16px;
-    padding: 20px;
+    padding: 24px;
     background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    border-radius: 14px;
+    border-radius: 16px;
     color: white;
     text-align: left;
-    margin-top: 24px;
+    margin-top: 32px;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s;
+}
+
+.activation-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
 }
 
 .activation-cta svg {
     flex-shrink: 0;
-    margin-top: 2px;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px;
+    border-radius: 10px;
 }
 
 .activation-cta strong {
     display: block;
-    font-size: 1rem;
-    margin-bottom: 4px;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    font-weight: 700;
 }
 
 .activation-cta p {
-    font-size: 0.85rem;
-    opacity: 0.9;
+    font-size: 0.9rem;
+    opacity: 0.95;
     margin: 0;
+    line-height: 1.5;
 }
 
 /* Calendar Preview Step */
+.calendar-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.calendar-header-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.calendar-header h2 {
+    margin: 0 0 6px 0;
+    font-size: 1.75rem;
+}
+
+.calendar-header p {
+    margin: 0;
+    color: #6B7280;
+    font-size: 0.95rem;
+}
+
 .calendar-preview {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 24px;
-    max-height: 320px;
+    gap: 16px;
+    margin-bottom: 32px;
+    max-height: 400px;
     overflow-y: auto;
+    padding-right: 4px;
+}
+
+.calendar-preview::-webkit-scrollbar {
+    width: 6px;
+}
+
+.calendar-preview::-webkit-scrollbar-track {
+    background: #F3F4F6;
+    border-radius: 10px;
+}
+
+.calendar-preview::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 10px;
+}
+
+.calendar-preview::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
 }
 
 .calendar-item {
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 16px;
+    padding: 18px 20px;
     background: white;
-    border: 1px solid #E5E7EB;
-    border-radius: 12px;
+    border: 2px solid #E5E7EB;
+    border-radius: 16px;
     text-align: left;
+    transition: all 0.3s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-item:hover {
+    border-color: #10B981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+    transform: translateY(-2px);
 }
 
 .calendar-item.generating {
     border-color: #FCD34D;
-    background: #FFFBEB;
+    background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+    box-shadow: 0 4px 16px rgba(251, 191, 36, 0.2);
 }
 
 .calendar-date {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 50px;
-    padding: 8px 12px;
-    background: #F3F4F6;
-    border-radius: 8px;
+    justify-content: center;
+    min-width: 64px;
+    height: 64px;
+    padding: 10px;
+    background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+    border-radius: 12px;
+    flex-shrink: 0;
 }
 
 .calendar-item.generating .calendar-date {
-    background: #FEF3C7;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border: 1px solid #FCD34D;
 }
 
 .calendar-date .day {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: 800;
     color: #111;
     line-height: 1;
+    margin-bottom: 2px;
 }
 
 .calendar-date .month {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #6B7280;
     text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.calendar-item.generating .calendar-date .month {
+    color: #92400E;
 }
 
 .calendar-content {
     flex: 1;
+    min-width: 0;
 }
 
 .keyword-name {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 600;
+    gap: 10px;
+    font-weight: 700;
     color: #111;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    font-size: 1rem;
 }
 
 .keyword-name .spin {
     color: #D97706;
+    animation: spin 1s linear infinite;
 }
 
 .keyword-meta {
     display: flex;
-    gap: 12px;
-    font-size: 0.8rem;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.85rem;
+}
+
+.keyword-meta > span:first-child {
     color: #6B7280;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.keyword-meta > span:first-child::before {
+    content: '📊';
+    font-size: 0.9rem;
 }
 
 .keyword-meta .difficulty {
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
 }
 
 .keyword-meta .difficulty.easy {
-    background: #D1FAE5;
-    color: #059669;
+    background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+    color: #065F46;
+    border: 1px solid #10B981;
 }
 
 .keyword-meta .difficulty.medium {
-    background: #FEF3C7;
-    color: #D97706;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    color: #92400E;
+    border: 1px solid #FCD34D;
 }
 
 .keyword-meta .difficulty.hard {
-    background: #FEE2E2;
-    color: #DC2626;
+    background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+    color: #991B1B;
+    border: 1px solid #F87171;
+}
+
+.calendar-status {
+    flex-shrink: 0;
 }
 
 .calendar-status .badge {
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 20px;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
 }
 
 .badge.generating {
-    background: #FEF3C7;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
     color: #92400E;
+    border: 1px solid #FCD34D;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
 }
 
 .badge.scheduled {
-    background: #E0E7FF;
+    background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
     color: #3730A3;
+    border: 1px solid #818CF8;
 }
 
 .summary-card {

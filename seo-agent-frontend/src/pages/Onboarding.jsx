@@ -433,8 +433,15 @@ const Onboarding = () => {
                             </>
                         ) : (
                             <>
-                                <h2>Votre calendrier de contenu 📅</h2>
-                                <p>Voici vos articles planifiés. Le premier est en cours de génération !</p>
+                                <div className="calendar-header">
+                                    <div className="calendar-header-icon">
+                                        <Calendar size={28} />
+                                    </div>
+                                    <div>
+                                        <h2>Votre calendrier de contenu</h2>
+                                        <p>Voici vos articles planifiés. Le premier est en cours de génération !</p>
+                                    </div>
+                                </div>
                                 
                                 <div className="calendar-preview">
                                     {getCalendarPreview().map((item, index) => (

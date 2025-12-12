@@ -45,6 +45,73 @@
 }
 
 /* ==========================================================================
+   CONNECT BANNER
+   ========================================================================== */
+
+.connect-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 24px;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border: 2px solid #FCD34D;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
+}
+
+.connect-banner-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+}
+
+.connect-banner-content svg {
+    color: #92400E;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.connect-banner-content strong {
+    display: block;
+    color: #92400E;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.connect-banner-content p {
+    color: #78350F;
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.btn-banner-connect {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #92400E;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-banner-connect:hover {
+    background: #78350F;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(146, 64, 14, 0.3);
+}
+
+/* ==========================================================================
    SECTION BLOCKS
    ========================================================================== */
 
@@ -960,6 +1027,22 @@
 @media (max-width: 768px) {
     .integrations-page {
         padding: 20px;
+    }
+    
+    .connect-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+        gap: 16px;
+    }
+    
+    .connect-banner-content {
+        flex-direction: row;
+    }
+    
+    .btn-banner-connect {
+        width: 100%;
+        justify-content: center;
     }
     
     .section-header {
