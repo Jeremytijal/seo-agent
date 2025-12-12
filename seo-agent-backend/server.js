@@ -910,9 +910,10 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
         }
 
         // Coupon ID for -50% (EARLYBIRD50) - create in Stripe Dashboard
+        // Le coupon est toujours appliqué automatiquement pour l'offre de lancement
         const earlyBirdCouponId = process.env.STRIPE_EARLYBIRD_COUPON_ID || null;
-        const shouldApplyCoupon = promoCode === 'EARLYBIRD50' && earlyBirdCouponId;
-        console.log('Promo code:', promoCode, '| Applying coupon:', shouldApplyCoupon ? earlyBirdCouponId : 'none');
+        const shouldApplyCoupon = earlyBirdCouponId ? true : false; // Toujours appliquer si le coupon existe
+        console.log('Applying coupon:', shouldApplyCoupon ? earlyBirdCouponId : 'none (no coupon ID configured)');
 
         const sessionConfig = {
             customer_email: userEmail,

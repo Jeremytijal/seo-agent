@@ -19,8 +19,6 @@ const Subscription = () => {
     const [selectedPlan, setSelectedPlan] = useState('pro');
     const [loading, setLoading] = useState(false);
     const [currentSubscription, setCurrentSubscription] = useState(null);
-    const [promoCode, setPromoCode] = useState('');
-    const [promoApplied, setPromoApplied] = useState(false);
     const [spotsLeft] = useState(12);
 
     useEffect(() => {
@@ -49,8 +47,8 @@ const Subscription = () => {
             id: 'starter',
             name: 'Starter',
             description: 'Idéal pour démarrer votre stratégie SEO',
-            price: 59,
-            priceWithPromo: 29.50,
+            originalPrice: 59,
+            price: 29,
             features: [
                 '10 articles SEO / mois',
                 'Recherche de mots-clés illimitée',
@@ -66,8 +64,8 @@ const Subscription = () => {
             id: 'pro',
             name: 'Pro',
             description: 'Pour les créateurs de contenu sérieux',
-            price: 99,
-            priceWithPromo: 49.50,
+            originalPrice: 99,
+            price: 49,
             features: [
                 '50 articles SEO / mois',
                 'Recherche de mots-clés illimitée',
@@ -83,14 +81,6 @@ const Subscription = () => {
         }
     ];
 
-    const applyPromoCode = () => {
-        if (promoCode.toUpperCase() === 'EARLYBIRD50') {
-            setPromoApplied(true);
-        } else {
-            alert('Code promo invalide');
-        }
-    };
-
     const handleStartTrial = async (planId, stripePriceId) => {
         setLoading(true);
         setSelectedPlan(planId);
@@ -105,7 +95,7 @@ const Subscription = () => {
                     planId: planId,
                     priceId: stripePriceId,
                     trialDays: 7,
-                    promoCode: promoApplied ? 'EARLYBIRD50' : null,
+                    promoCode: 'EARLYBIRD50', // Toujours appliquer le code promo
                     successUrl: `${window.location.origin}/?activated=true`,
                     cancelUrl: `${window.location.origin}/subscription`
                 })
@@ -147,39 +137,11 @@ const Subscription = () => {
                     </div>
                     <div className="early-bird-content">
                         <div className="early-bird-title">
-                            🎉 Offre Early Bird : -50% avec le code EARLYBIRD50
+                            🎉 Offre de lancement : -50% appliqué automatiquement !
                         </div>
                         <div className="early-bird-text">
                             Plus que <strong>{spotsLeft} places</strong> à ce tarif exclusif
                         </div>
-                    </div>
-                </div>
-
-                {/* Promo Code Input */}
-                <div className="promo-section">
-                    <div className="promo-input-wrapper">
-                        <input
-                            type="text"
-                            placeholder="Code promo"
-                            value={promoCode}
-                            onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                            disabled={promoApplied}
-                            className={promoApplied ? 'applied' : ''}
-                        />
-                        <button 
-                            onClick={applyPromoCode} 
-                            disabled={promoApplied || !promoCode}
-                            className={promoApplied ? 'applied' : ''}
-                        >
-                            {promoApplied ? (
-                                <>
-                                    <CheckCircle size={16} />
-                                    -50% appliqué !
-                                </>
-                            ) : (
-                                'Appliquer'
-                            )}
-                        </button>
                     </div>
                 </div>
 
@@ -216,24 +178,14 @@ const Subscription = () => {
                             </div>
 
                             <div className="plan-price">
-                                {promoApplied ? (
-                                    <>
-                                        <div className="price-row">
-                                            <span className="price-old">{plan.price}€</span>
-                                            <span className="price-current">{plan.priceWithPromo}€</span>
-                                            <span className="price-period">/mois</span>
-                                        </div>
-                                        <span className="price-note promo">-50% avec EARLYBIRD50</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="price-row">
-                                            <span className="price-current">{plan.price}€</span>
-                                            <span className="price-period">/mois</span>
-                                        </div>
-                                        <span className="price-note">Utilisez EARLYBIRD50 pour -50%</span>
-                                    </>
-                                )}
+                                <div className="price-row">
+                                    <span className="price-old">{plan.originalPrice}€</span>
+                                    <span className="price-current">{plan.price}€</span>
+                                    <span className="price-period">/mois</span>
+                                </div>
+                                <span className="price-note promo">
+                                    <CheckCircle size={14} /> -50% offre de lancement
+                                </span>
                             </div>
 
                             <ul className="plan-features">
