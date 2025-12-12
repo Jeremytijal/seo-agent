@@ -4,7 +4,7 @@ import {
     Calendar, ChevronLeft, ChevronRight, Plus, Sparkles, 
     FileText, Target, GripVertical, X, Clock, CheckCircle,
     MoreHorizontal, Edit3, Trash2, ExternalLink, Eye,
-    Globe, Loader2, PartyPopper, ArrowRight
+    Globe, Loader2, PartyPopper, ArrowRight, Headphones, Zap
 } from 'lucide-react';
 import './ContentPlanner.css';
 
@@ -23,6 +23,49 @@ const ContentPlanner = () => {
     const [showConnectBanner, setShowConnectBanner] = useState(false);
     const [showActivatedBanner, setShowActivatedBanner] = useState(false);
     const [showGeneratingBanner, setShowGeneratingBanner] = useState(false);
+    const [showExpertModal, setShowExpertModal] = useState(false);
+
+    // Load scheduled articles from localStorage on mount
+    useEffect(() => {
+        // Load articles from localStorage (saved during onboarding)
+        const savedKeywords = localStorage.getItem('seoagent_selected_keywords');
+        if (savedKeywords) {
+            try {
+                const keywords = JSON.parse(savedKeywords);
+                const today = new Date();
+                const articles = {};
+                
+                const formatDateKey = (date) => {
+                    return date.toISOString().split('T')[0];
+                };
+                
+                keywords.forEach((kw, index) => {
+                    const scheduledDate = new Date(today);
+                    scheduledDate.setDate(today.getDate() + (index * 3)); // Every 3 days
+                    const dateKey = formatDateKey(scheduledDate);
+                    
+                    if (!articles[dateKey]) {
+                        articles[dateKey] = [];
+                    }
+                    
+                    articles[dateKey].push({
+                        id: Date.now() + index,
+                        title: `Article sur "${kw.keyword}"`,
+                        keyword: kw.keyword,
+                        volume: kw.volume || 0,
+                        difficulty: kw.difficulty || 0,
+                        type: 'Guide',
+                        status: index === 0 ? 'generating' : 'scheduled',
+                        scheduledFor: scheduledDate.toISOString()
+                    });
+                });
+                
+                setScheduledArticles(articles);
+            } catch (e) {
+                console.error('Error loading articles from localStorage:', e);
+            }
+        }
+    }, []);
 
     // Check for banners and URL params on mount
     useEffect(() => {
@@ -39,6 +82,13 @@ const ContentPlanner = () => {
         const showConnect = localStorage.getItem('seoagent_show_connect_banner');
         if (showConnect === 'true') {
             setShowConnectBanner(true);
+            // Show expert modal after 3 seconds if no site connected
+            setTimeout(() => {
+                const stillShowConnect = localStorage.getItem('seoagent_show_connect_banner');
+                if (stillShowConnect === 'true') {
+                    setShowExpertModal(true);
+                }
+            }, 3000);
         }
 
         // Check if first article is generating
@@ -205,6 +255,8 @@ const ContentPlanner = () => {
                 return <span className="article-status published"><CheckCircle size={10} /> Publié</span>;
             case 'scheduled':
                 return <span className="article-status scheduled"><Clock size={10} /> Planifié</span>;
+            case 'generating':
+                return <span className="article-status generating"><Loader2 size={10} className="spin" /> En génération</span>;
             case 'draft':
                 return <span className="article-status draft">Brouillon</span>;
             default:
@@ -446,6 +498,55 @@ const ContentPlanner = () => {
                         setInitialKeywordData(null);
                     }}
                 />
+            )}
+
+            {/* Expert Meeting Modal */}
+            {showExpertModal && (
+                <div className="modal-overlay" onClick={() => setShowExpertModal(false)}>
+                    <div className="modal-content expert-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <div className="expert-modal-icon">
+                                <Headphones size={32} />
+                            </div>
+                            <h2>Besoin d'aide pour connecter votre site ?</h2>
+                            <p>Un expert SEO Agent vous aide gratuitement à configurer votre intégration WordPress</p>
+                        </div>
+                        <div className="modal-body">
+                            <div className="expert-benefits">
+                                <div className="benefit-item">
+                                    <CheckCircle size={18} />
+                                    <span>Configuration WordPress complète</span>
+                                </div>
+                                <div className="benefit-item">
+                                    <CheckCircle size={18} />
+                                    <span>Publication automatique activée</span>
+                                </div>
+                                <div className="benefit-item">
+                                    <CheckCircle size={18} />
+                                    <span>Support personnalisé gratuit</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button 
+                                className="btn-secondary-modal" 
+                                onClick={() => setShowExpertModal(false)}
+                            >
+                                Plus tard
+                            </button>
+                            <a 
+                                href="https://zcal.co/i/7LMkT11o" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="btn-primary-modal"
+                            >
+                                <Calendar size={18} />
+                                Prendre rendez-vous
+                                <ArrowRight size={16} />
+                            </a>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

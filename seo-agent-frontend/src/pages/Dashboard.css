@@ -61,6 +61,73 @@
 }
 
 /* ==========================================================================
+   CONNECT BANNER
+   ========================================================================== */
+
+.dashboard-connect-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 24px;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border: 2px solid #FCD34D;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
+}
+
+.dashboard-connect-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+}
+
+.dashboard-connect-content svg {
+    color: #92400E;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.dashboard-connect-content strong {
+    display: block;
+    color: #92400E;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.dashboard-connect-content p {
+    color: #78350F;
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.btn-banner-connect-dash {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #92400E;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-banner-connect-dash:hover {
+    background: #78350F;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(146, 64, 14, 0.3);
+}
+
+/* ==========================================================================
    QUICK ACTIONS
    ========================================================================== */
 
@@ -693,6 +760,22 @@
     }
     
     .gs-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dashboard-connect-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+        gap: 16px;
+    }
+    
+    .dashboard-connect-content {
+        flex-direction: row;
+    }
+    
+    .btn-banner-connect-dash {
         width: 100%;
         justify-content: center;
     }

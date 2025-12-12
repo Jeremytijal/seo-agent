@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -32,6 +33,7 @@ const Dashboard = () => {
     const [recentContents, setRecentContents] = useState([]);
     const [weeklyData, setWeeklyData] = useState([]);
     const [sitePerformance, setSitePerformance] = useState([]);
+    const [hasMadeChoice, setHasMadeChoice] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -41,14 +43,36 @@ const Dashboard = () => {
 
     const loadDashboardData = async () => {
         try {
+            // Check if user has made a choice (connected site or expert request)
+            let sites = [];
+            let expertRequests = [];
+            
+            try {
+                const sitesRes = await fetch(`${API_URL}/api/sites/${user.id}`);
+                const sitesData = await sitesRes.json();
+                sites = sitesData.sites || [];
+            } catch (e) {
+                console.error('Error fetching sites:', e);
+        }
+
+        try {
+                const requestsRes = await fetch(`${API_URL}/api/expert-requests/${user.id}`);
+                const requestsData = await requestsRes.json();
+                expertRequests = requestsData.requests || [];
+            } catch (e) {
+                console.error('Error fetching expert requests:', e);
+            }
+            
+            setHasMadeChoice(sites.length > 0 || expertRequests.length > 0);
+            
             // For now, load demo data - will be replaced with real data later
-            setMetrics({
+        setMetrics({
                 totalArticles: 24,
                 publishedArticles: 18,
                 draftArticles: 6,
                 totalKeywords: 156,
                 totalAudits: 8,
-                connectedSites: 2,
+                connectedSites: sites.length || 2,
                 imagesGenerated: 42
             });
 
@@ -188,6 +212,26 @@ const Dashboard = () => {
                 </div>
             </header>
 
+            {/* Connect Site Banner */}
+            {!hasMadeChoice && (
+                <div className="dashboard-connect-banner">
+                    <div className="dashboard-connect-content">
+                        <AlertCircle size={20} />
+                        <div>
+                            <strong>Connectez votre site pour publier automatiquement</strong>
+                            <p>Choisissez WordPress, publication manuelle ou demandez l'aide d'un expert gratuitement</p>
+                        </div>
+                    </div>
+                    <button 
+                        className="btn-banner-connect-dash"
+                        onClick={() => navigate('/integrations')}
+                    >
+                        Connecter un site
+                        <ArrowRight size={16} />
+                    </button>
+                </div>
+            )}
+
             {/* Quick Actions */}
             <div className="quick-actions-grid">
                 {quickActions.map((action, index) => (
@@ -206,7 +250,7 @@ const Dashboard = () => {
                         <ArrowRight size={18} className="qa-arrow" />
                     </button>
                 ))}
-            </div>
+                </div>
 
             {/* Main KPIs */}
             <div className="kpi-grid-seo">
@@ -274,7 +318,7 @@ const Dashboard = () => {
                     <div className="kpi-content">
                         <span className="kpi-value-seo">{metrics.imagesGenerated}</span>
                         <span className="kpi-label-seo">Images générées</span>
-                    </div>
+                </div>
                 </div>
             </div>
 
@@ -287,7 +331,7 @@ const Dashboard = () => {
                         <div className="chart-legend-inline">
                             <span><i style={{ background: '#10B981' }}></i> Articles</span>
                             <span><i style={{ background: '#3B82F6' }}></i> Mots-clés</span>
-                        </div>
+                            </div>
                     </div>
                     <div className="chart-wrapper">
                         <ResponsiveContainer width="100%" height={220}>
@@ -365,7 +409,7 @@ const Dashboard = () => {
                                         {content.date}
                                     </span>
                                 </div>
-                            </div>
+                        </div>
                             <div className="content-actions">
                                 <span className={`status-badge ${content.status}`}>
                                     {getStatusLabel(content.status)}
@@ -379,9 +423,9 @@ const Dashboard = () => {
                                 <button className="btn-icon-small">
                                     <ExternalLink size={14} />
                                 </button>
-                            </div>
-                        </div>
-                    ))}
+                                    </div>
+                                </div>
+                            ))}
                 </div>
             </div>
 
