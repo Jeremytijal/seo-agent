@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SIDEBAR - Light Theme
+   SIDEBAR - Light Theme SEO Agent
    ========================================================================== */
 
 .sidebar {
@@ -28,11 +28,17 @@
 }
 
 .logo-container {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 12px;
+}
+
+.logo-container.seo-gradient {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
 }
 
 .logo-img {
@@ -42,10 +48,14 @@
 }
 
 .app-title {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     margin: 0;
     color: #1a1a1a !important;
     font-weight: 700;
+}
+
+.text-green {
+    color: #10B981 !important;
 }
 
 .text-orange {
@@ -56,7 +66,7 @@
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     flex: 1;
 }
 
@@ -64,14 +74,14 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
+    padding: 11px 14px;
     color: #6b7280 !important;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 10px;
     transition: all 0.2s ease;
     border: 1px solid transparent;
     background: transparent !important;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 500;
     width: 100%;
     text-align: left;
@@ -84,13 +94,13 @@
 }
 
 .nav-item.active {
-    background: rgba(255, 71, 15, 0.08) !important;
-    color: #FF470F !important;
-    border-color: rgba(255, 71, 15, 0.15) !important;
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #059669 !important;
+    border-color: rgba(16, 185, 129, 0.2) !important;
 }
 
 .nav-item.active svg {
-    color: #FF470F !important;
+    color: #10B981 !important;
 }
 
 /* Logout Button */
@@ -110,8 +120,18 @@
 }
 
 .account-btn:hover {
-    color: #FF470F !important;
-    background: rgba(255, 71, 15, 0.08) !important;
+    color: #10B981 !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 16px;
+    border-top: 1px solid #f3f4f6;
+    margin-top: 8px;
 }
 
 /* Account Modal */
@@ -190,24 +210,28 @@
     text-transform: uppercase;
 }
 
+.account-avatar.seo-gradient {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
 .account-info {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .account-info-item {
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    padding: 14px 16px;
+    padding: 12px 14px;
     background: #f9fafb;
-    border-radius: 12px;
+    border-radius: 10px;
 }
 
 .account-info-item svg {
-    color: #FF470F;
+    color: #10B981;
     flex-shrink: 0;
     margin-top: 2px;
 }
@@ -219,7 +243,7 @@
 }
 
 .info-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #9ca3af;
     text-transform: uppercase;
@@ -227,14 +251,14 @@
 }
 
 .info-value {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 500;
     color: #1a1a1a;
 }
 
 .info-id {
     font-family: monospace;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #6b7280;
 }
 
@@ -243,7 +267,7 @@
     display: inline-block;
     padding: 3px 8px;
     border-radius: 6px;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
     margin-left: 8px;
     text-transform: uppercase;
@@ -278,7 +302,7 @@
     gap: 8px;
     width: 100%;
     padding: 14px 20px;
-    background: linear-gradient(135deg, #FF470F 0%, #FF6B35 100%);
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
     border: none;
     border-radius: 12px;
     color: white;
@@ -287,12 +311,12 @@
     cursor: pointer;
     margin-top: 16px;
     transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(255, 71, 15, 0.25);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
 .btn-upgrade-account:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(255, 71, 15, 0.35);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
 
 .account-modal-footer {
@@ -336,12 +360,12 @@
 
 .account-modal-footer .btn-tour:hover {
     background: #f9fafb;
-    color: #FF470F;
-    border-color: #FF470F;
+    color: #10B981;
+    border-color: #10B981;
 }
 
 /* ==========================================================================
-   USAGE INDICATOR
+   USAGE INDICATOR - SEO THEME
    ========================================================================== */
 
 .usage-card {
@@ -358,8 +382,8 @@
 }
 
 .usage-card.trial {
-    background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
-    border-color: #FB923C;
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    border-color: #34D399;
 }
 
 .usage-header {
@@ -372,7 +396,7 @@
 .usage-icon {
     width: 24px;
     height: 24px;
-    background: #FF470F;
+    background: #10B981;
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -385,7 +409,7 @@
 }
 
 .usage-icon.trial {
-    background: linear-gradient(135deg, #FB923C, #F97316);
+    background: linear-gradient(135deg, #10B981, #059669);
 }
 
 .usage-plan {
@@ -401,7 +425,7 @@
 }
 
 .usage-card.trial .usage-plan {
-    color: #C2410C;
+    color: #047857;
     font-weight: 700;
 }
 
@@ -448,9 +472,13 @@
 
 .usage-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #FF470F, #FF6B35);
+    background: linear-gradient(90deg, #10B981, #059669);
     border-radius: 3px;
     transition: width 0.5s ease;
+}
+
+.usage-bar-fill.seo-green {
+    background: linear-gradient(90deg, #10B981, #34D399);
 }
 
 .usage-card.warning .usage-bar-fill {
@@ -458,15 +486,15 @@
 }
 
 .usage-card.trial .usage-bar-fill {
-    background: linear-gradient(90deg, #EA580C, #FB923C);
+    background: linear-gradient(90deg, #059669, #10B981);
 }
 
 .usage-card.trial .usage-upgrade {
-    background: linear-gradient(135deg, #EA580C, #F97316);
+    background: linear-gradient(135deg, #059669, #10B981);
 }
 
 .usage-card.trial .usage-upgrade:hover {
-    background: linear-gradient(135deg, #C2410C, #EA580C);
+    background: linear-gradient(135deg, #047857, #059669);
 }
 
 .usage-upgrade {

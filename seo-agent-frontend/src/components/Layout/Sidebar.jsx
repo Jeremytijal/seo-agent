@@ -2,24 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
-  MessageSquare,
-  Users,
+  Search,
+  FileText,
+  Image,
+  Send,
+  Globe,
   Settings,
   LogOut,
-  Link2,
-  Megaphone,
   User,
   X,
   Mail,
-  Building2,
   Calendar,
-  FileText,
-  Ban,
   Zap,
   TrendingUp,
   HelpCircle,
   CreditCard,
-  Clock
+  Clock,
+  Target,
+  PenTool,
+  Layers
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../supabaseClient';
@@ -40,25 +41,23 @@ const Sidebar = () => {
 
   const fetchUsage = async () => {
     try {
-      // Get contacts count this month
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
+      // Count articles created this month
       const { count } = await supabase
-        .from('contacts')
+        .from('contents')
         .select('*', { count: 'exact', head: true })
-        .eq('agent_id', user.id)
+        .eq('user_id', user.id)
         .gte('created_at', startOfMonth.toISOString());
 
-      // Get user's subscription plan
       const { data: profile } = await supabase
         .from('profiles')
         .select('subscription_plan, subscription_status, trial_ends_at')
         .eq('id', user.id)
         .single();
 
-      // Set subscription info for account modal
       setSubscription({
         plan: profile?.subscription_plan || null,
         status: profile?.subscription_status || null,
@@ -66,17 +65,15 @@ const Sidebar = () => {
       });
 
       const planLimits = {
-        'starter': 150,
-        'growth': 500,
+        'starter': 10,
+        'growth': 50,
         'scale': 9999
       };
 
-      // Check if user has an active paid subscription
       const hasActiveSubscription = profile?.subscription_status === 'active' && profile?.subscription_plan;
       const planName = hasActiveSubscription ? profile.subscription_plan : null;
       
-      // Trial = 10 leads, Paid = plan limit
-      const limit = hasActiveSubscription ? (planLimits[planName.toLowerCase()] || 150) : 10;
+      const limit = hasActiveSubscription ? (planLimits[planName.toLowerCase()] || 10) : 5;
       const displayPlan = hasActiveSubscription 
         ? (planName.charAt(0).toUpperCase() + planName.slice(1))
         : 'Essai gratuit';
@@ -106,11 +103,12 @@ const Sidebar = () => {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Tableau de bord', path: '/' },
-    { icon: MessageSquare, label: 'Conversations', path: '/conversations' },
-    { icon: Users, label: 'Contacts', path: '/contacts' },
-    { icon: Megaphone, label: 'Campagnes', path: '/campaigns' },
-    { icon: Ban, label: 'Liste noire', path: '/blacklist' },
-    { icon: Link2, label: 'Intégrations', path: '/integrations' },
+    { icon: Search, label: 'Audit SEO', path: '/audit' },
+    { icon: Target, label: 'Mots-clés', path: '/keywords' },
+    { icon: PenTool, label: 'Contenus', path: '/contents' },
+    { icon: Image, label: 'Images IA', path: '/images' },
+    { icon: Send, label: 'Publications', path: '/publish' },
+    { icon: Globe, label: 'Sites connectés', path: '/integrations' },
     { icon: Settings, label: 'Configuration', path: '/settings' },
   ];
 
@@ -127,8 +125,8 @@ const Sidebar = () => {
     <>
       <aside className="sidebar glass-panel">
         <div className="sidebar-header">
-          <div className="logo-container">
-            <img src="/seo-agent-icon.png" alt="Agent IA SEO" className="logo-img" />
+          <div className="logo-container seo-gradient">
+            <Layers size={24} />
           </div>
           <h1 className="app-title text-green">Agent IA SEO</h1>
         </div>
@@ -152,7 +150,7 @@ const Sidebar = () => {
         <div className={`usage-card ${isNearLimit ? 'warning' : ''} ${usage.isTrial ? 'trial' : ''}`}>
           <div className="usage-header">
             <div className={`usage-icon ${usage.isTrial ? 'trial' : ''}`}>
-              <Zap size={16} />
+              <FileText size={16} />
             </div>
             <span className="usage-plan">{usage.plan}</span>
           </div>
@@ -160,11 +158,11 @@ const Sidebar = () => {
             <span className="usage-current">{usage.current}</span>
             <span className="usage-separator">/</span>
             <span className="usage-limit">{usage.limit === 9999 ? '∞' : usage.limit}</span>
-            <span className="usage-label">leads {usage.isTrial ? 'gratuits' : 'ce mois'}</span>
+            <span className="usage-label">articles {usage.isTrial ? 'gratuits' : 'ce mois'}</span>
           </div>
           <div className="usage-bar">
             <div 
-              className="usage-bar-fill" 
+              className="usage-bar-fill seo-green" 
               style={{ width: `${usagePercent}%` }}
             ></div>
           </div>
@@ -200,7 +198,7 @@ const Sidebar = () => {
             </div>
             
             <div className="account-modal-body">
-              <div className="account-avatar">
+              <div className="account-avatar seo-gradient">
                 <span>{user?.email?.charAt(0).toUpperCase() || 'U'}</span>
               </div>
               
@@ -229,7 +227,6 @@ const Sidebar = () => {
                   </div>
                 </div>
 
-                {/* Subscription Info */}
                 <div className="account-info-item subscription-item">
                   <CreditCard size={18} />
                   <div>
