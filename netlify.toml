@@ -1,0 +1,26 @@
+# Netlify configuration for SEO Agent Frontend
+
+[build]
+  base = "seo-agent-frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# SPA redirect - all routes go to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment variables prefix
+[build.environment]
+  NODE_VERSION = "20"
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
