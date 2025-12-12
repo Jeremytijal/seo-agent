@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { 
     Calendar, ChevronLeft, ChevronRight, Plus, Sparkles, 
     FileText, Target, GripVertical, X, Clock, CheckCircle,
@@ -9,6 +9,7 @@ import {
 import './ContentPlanner.css';
 
 const ContentPlanner = () => {
+    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [scheduledArticles, setScheduledArticles] = useState({});
@@ -314,7 +315,7 @@ const ContentPlanner = () => {
             {showConnectBanner && (
                 <div className="banner connect-banner">
                     <Globe size={18} />
-                    <span>Connectez votre site WordPress pour publier automatiquement vos articles.</span>
+                    <span>Connectez votre site pour publier automatiquement vos articles.</span>
                     <Link to="/integrations" className="banner-btn">
                         Connecter
                         <ArrowRight size={14} />
@@ -332,7 +333,7 @@ const ContentPlanner = () => {
                     <p>Planifiez et organisez vos articles SEO</p>
                 </div>
                 <div className="header-actions">
-                    <button className="btn-generate">
+                    <button className="btn-generate" onClick={() => navigate('/keywords')}>
                         <Sparkles size={18} />
                         Générer des idées
                     </button>
@@ -500,51 +501,32 @@ const ContentPlanner = () => {
                 />
             )}
 
-            {/* Expert Meeting Modal */}
+            {/* Expert Meeting Toast - Bottom Right */}
             {showExpertModal && (
-                <div className="modal-overlay" onClick={() => setShowExpertModal(false)}>
-                    <div className="modal-content expert-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <div className="expert-modal-icon">
-                                <Headphones size={32} />
+                <div className="expert-toast">
+                    <div className="toast-content">
+                        <div className="toast-header">
+                            <div className="toast-icon">
+                                <Headphones size={20} />
                             </div>
-                            <h2>Besoin d'aide pour connecter votre site ?</h2>
-                            <p>Un expert SEO Agent vous aide gratuitement à configurer votre intégration WordPress</p>
-                        </div>
-                        <div className="modal-body">
-                            <div className="expert-benefits">
-                                <div className="benefit-item">
-                                    <CheckCircle size={18} />
-                                    <span>Configuration WordPress complète</span>
-                                </div>
-                                <div className="benefit-item">
-                                    <CheckCircle size={18} />
-                                    <span>Publication automatique activée</span>
-                                </div>
-                                <div className="benefit-item">
-                                    <CheckCircle size={18} />
-                                    <span>Support personnalisé gratuit</span>
-                                </div>
+                            <div className="toast-text">
+                                <strong>Besoin d'aide ?</strong>
+                                <p>Un expert vous aide gratuitement</p>
                             </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button 
-                                className="btn-secondary-modal" 
-                                onClick={() => setShowExpertModal(false)}
-                            >
-                                Plus tard
+                            <button className="toast-close" onClick={() => setShowExpertModal(false)}>
+                                <X size={16} />
                             </button>
-                            <a 
-                                href="https://zcal.co/i/7LMkT11o" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="btn-primary-modal"
-                            >
-                                <Calendar size={18} />
-                                Prendre rendez-vous
-                                <ArrowRight size={16} />
-                            </a>
                         </div>
+                        <a 
+                            href="https://zcal.co/i/7LMkT11o" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="toast-button"
+                        >
+                            <Calendar size={16} />
+                            Prendre rendez-vous
+                            <ArrowRight size={14} />
+                        </a>
                     </div>
                 </div>
             )}

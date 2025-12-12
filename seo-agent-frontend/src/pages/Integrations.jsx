@@ -73,7 +73,7 @@ const Integrations = () => {
             icon: '📝', 
             color: '#21759b',
             available: true,
-            description: 'Publiez automatiquement sur votre blog WordPress'
+            description: 'Publiez automatiquement sur votre site'
         },
         { 
             id: 'webflow', 
@@ -264,7 +264,7 @@ const Integrations = () => {
                 .from('profiles')
                 .update({ agent_config: { ...(currentData?.agent_config || {}), calendarUrl } })
                 .eq('id', user.id);
-            
+
             alert('URL de l\'agenda sauvegardée !');
         } catch (error) {
             alert('Erreur lors de la sauvegarde.');
@@ -309,7 +309,7 @@ const Integrations = () => {
                         <AlertCircle size={20} />
                         <div>
                             <strong>Connectez votre site pour publier automatiquement</strong>
-                            <p>Choisissez WordPress, publication manuelle ou demandez l'aide d'un expert</p>
+                            <p>Choisissez une plateforme, publication manuelle ou demandez l'aide d'un expert</p>
                         </div>
                     </div>
                     <button 
@@ -338,7 +338,7 @@ const Integrations = () => {
                         <p>Connectez votre premier site pour publier automatiquement vos articles SEO.</p>
                         <div className="empty-actions">
                             <button className="btn-primary" onClick={() => setShowConnectModal(true)}>
-                                <Plus size={16} /> Connecter WordPress
+                                <Plus size={16} /> Connecter un site
                             </button>
                             <button className="btn-secondary" onClick={() => setShowExpertModal(true)}>
                                 <Headphones size={16} /> Aide d'un expert (gratuit)
@@ -400,7 +400,7 @@ const Integrations = () => {
                     </div>
                     <div className="expert-text">
                         <h3>Besoin d'aide pour connecter votre site ?</h3>
-                        <p>Un expert SEO Agent vous aide gratuitement à configurer votre intégration WordPress.</p>
+                        <p>Un expert SEO Agent vous aide gratuitement à configurer votre intégration.</p>
                     </div>
                     <button className="btn-expert" onClick={() => setShowExpertModal(true)}>
                         <Headphones size={18} />
@@ -462,84 +462,84 @@ const Integrations = () => {
                 <h2><Webhook size={20} /> Webhooks & Intégrations</h2>
                 <div className="integrations-grid">
                     {/* Inbound Webhook */}
-                    <div className="integration-card">
-                        <div className="card-icon-wrapper blue">
-                            <Link2 size={24} />
-                        </div>
-                        <h3>Webhook Entrant</h3>
-                        <p className="card-description">
+                <div className="integration-card">
+                    <div className="card-icon-wrapper blue">
+                        <Link2 size={24} />
+                    </div>
+                    <h3>Webhook Entrant</h3>
+                    <p className="card-description">
                             Recevez des leads depuis Zapier ou votre site web.
-                        </p>
-                        <div className="card-content">
-                            <label>URL DE VOTRE WEBHOOK</label>
-                            <div className="url-display-box">
-                                <code className="url-text" title={inboundWebhookUrl}>
-                                    {`${WEBHOOK_BASE_URL}/${user?.id?.slice(0, 8)}••••/leads`}
-                                </code>
+                    </p>
+                    <div className="card-content">
+                        <label>URL DE VOTRE WEBHOOK</label>
+                        <div className="url-display-box">
+                            <code className="url-text" title={inboundWebhookUrl}>
+                                {`${WEBHOOK_BASE_URL}/${user?.id?.slice(0, 8)}••••/leads`}
+                            </code>
                                 <button className="btn-copy" onClick={() => copyToClipboard(inboundWebhookUrl)}>
-                                    {copied ? <Check size={16} /> : <Copy size={16} />}
-                                    {copied ? 'Copié !' : 'Copier'}
-                                </button>
-                            </div>
+                                {copied ? <Check size={16} /> : <Copy size={16} />}
+                                {copied ? 'Copié !' : 'Copier'}
+                            </button>
+                        </div>
                             <button className="btn-secondary btn-json" onClick={() => setShowJson(!showJson)}>
                                 {showJson ? 'Masquer le format JSON' : 'Voir le format JSON'}
-                            </button>
-                            {showJson && (
-                                <pre className="json-preview">
+                        </button>
+                        {showJson && (
+                            <pre className="json-preview">
 {`{
   "name": "Jean Dupont",
   "phone": "+33612345678",
   "email": "jean@example.com"
 }`}
-                                </pre>
-                            )}
-                        </div>
+                            </pre>
+                        )}
                     </div>
+                </div>
 
                     {/* CRM Webhook */}
-                    <div className="integration-card">
-                        <div className="card-icon-wrapper orange">
-                            <Webhook size={24} />
-                        </div>
-                        <div className="card-status-row">
-                            <h3>CRM Webhook</h3>
-                            {crmWebhookUrl && <span className="status-badge connected"><CheckCircle size={12} /> Actif</span>}
-                        </div>
-                        <p className="card-description">Envoyez les leads qualifiés vers votre CRM.</p>
-                        <div className="card-content">
-                            <label>URL DU WEBHOOK (SORTANT)</label>
-                            <input
-                                type="url"
-                                placeholder="https://hooks.zapier.com/..."
-                                value={crmWebhookUrl}
-                                onChange={(e) => setCrmWebhookUrl(e.target.value)}
-                                className="input-field"
-                            />
-                            <button className="btn-primary btn-save" onClick={saveCrmWebhook} disabled={saving === 'crm'}>
-                                {saving === 'crm' ? 'Sauvegarde...' : <><Save size={16} /> Sauvegarder</>}
-                            </button>
-                        </div>
+                <div className="integration-card">
+                    <div className="card-icon-wrapper orange">
+                        <Webhook size={24} />
                     </div>
+                    <div className="card-status-row">
+                        <h3>CRM Webhook</h3>
+                            {crmWebhookUrl && <span className="status-badge connected"><CheckCircle size={12} /> Actif</span>}
+                    </div>
+                        <p className="card-description">Envoyez les leads qualifiés vers votre CRM.</p>
+                    <div className="card-content">
+                        <label>URL DU WEBHOOK (SORTANT)</label>
+                        <input
+                            type="url"
+                            placeholder="https://hooks.zapier.com/..."
+                            value={crmWebhookUrl}
+                            onChange={(e) => setCrmWebhookUrl(e.target.value)}
+                            className="input-field"
+                        />
+                            <button className="btn-primary btn-save" onClick={saveCrmWebhook} disabled={saving === 'crm'}>
+                            {saving === 'crm' ? 'Sauvegarde...' : <><Save size={16} /> Sauvegarder</>}
+                        </button>
+                    </div>
+                </div>
 
                     {/* Calendar */}
-                    <div className="integration-card">
-                        <div className="card-icon-wrapper green">
-                            <Calendar size={24} />
-                        </div>
-                        <div className="card-status-row">
-                            <h3>Agenda</h3>
+                <div className="integration-card">
+                    <div className="card-icon-wrapper green">
+                        <Calendar size={24} />
+                    </div>
+                    <div className="card-status-row">
+                        <h3>Agenda</h3>
                             {calendarUrl && <span className="status-badge connected"><CheckCircle size={12} /> Actif</span>}
-                        </div>
+                    </div>
                         <p className="card-description">URL de prise de rendez-vous (Calendly, Cal.com...).</p>
-                        <div className="card-content">
+                    <div className="card-content">
                             <label>URL DE VOTRE AGENDA</label>
-                            <input
-                                type="url"
-                                placeholder="https://calendly.com/votre-nom"
-                                value={calendarUrl}
-                                onChange={(e) => setCalendarUrl(e.target.value)}
-                                className="input-field"
-                            />
+                        <input
+                            type="url"
+                            placeholder="https://calendly.com/votre-nom"
+                            value={calendarUrl}
+                            onChange={(e) => setCalendarUrl(e.target.value)}
+                            className="input-field"
+                        />
                             <button className="btn-primary btn-save" onClick={saveCalendarUrl} disabled={saving === 'calendar'}>
                                 {saving === 'calendar' ? 'Sauvegarde...' : <><Save size={16} /> Sauvegarder</>}
                             </button>
@@ -558,13 +558,13 @@ const Integrations = () => {
 
                         <div className="modal-header">
                             <div className="modal-icon wordpress">📝</div>
-                            <h2>Connecter WordPress</h2>
-                            <p>Publiez automatiquement vos articles SEO sur votre blog</p>
+                            <h2>Connecter un site</h2>
+                            <p>Publiez automatiquement vos articles SEO sur votre site</p>
                         </div>
 
                         <div className="modal-body">
                             <div className="form-group">
-                                <label>URL de votre site WordPress</label>
+                                <label>URL de votre site</label>
                                 <input
                                     type="url"
                                     placeholder="https://monsite.com"
@@ -584,7 +584,7 @@ const Integrations = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Nom d'utilisateur WordPress</label>
+                                <label>Nom d'utilisateur</label>
                                 <input
                                     type="text"
                                     placeholder="admin"
@@ -607,7 +607,7 @@ const Integrations = () => {
                                     onChange={(e) => setConnectionForm({ ...connectionForm, appPassword: e.target.value })}
                                 />
                                 <p className="form-hint">
-                                    Allez dans WordPress → Utilisateurs → Profil → Mots de passe d'application
+                                    Créez un mot de passe d'application dans les paramètres de votre site
                                 </p>
                             </div>
 
@@ -632,7 +632,7 @@ const Integrations = () => {
                                 {connectionStatus === 'testing' ? <Loader2 className="spin" size={16} /> : <RefreshCw size={16} />}
                                 Tester la connexion
                             </button>
-                            <button 
+                        <button
                                 className="btn-primary" 
                                 onClick={connectSite}
                                 disabled={connectionStatus !== 'success' || connecting}

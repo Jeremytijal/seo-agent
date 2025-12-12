@@ -812,114 +812,109 @@
 }
 
 /* ==========================================================================
-   EXPERT MODAL
+   EXPERT TOAST - Bottom Right
    ========================================================================== */
 
-.expert-modal {
-    max-width: 520px;
+.expert-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    animation: slideInUp 0.3s ease-out;
 }
 
-.expert-modal .modal-header {
-    text-align: center;
-    padding-bottom: 24px;
+@keyframes slideInUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
-.expert-modal-icon {
-    width: 80px;
-    height: 80px;
+.toast-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid #E5E7EB;
+    overflow: hidden;
+    min-width: 320px;
+    max-width: 400px;
+}
+
+.toast-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border-bottom: 1px solid #FCD34D;
+}
+
+.toast-icon {
+    width: 40px;
+    height: 40px;
     background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    border-radius: 20px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
     color: white;
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-}
-
-.expert-modal h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #111;
-    margin: 0 0 8px;
-}
-
-.expert-modal .modal-header p {
-    color: #6B7280;
-    font-size: 0.95rem;
-    margin: 0;
-    line-height: 1.5;
-}
-
-.expert-benefits {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 20px;
-    background: #F9FAFB;
-    border-radius: 12px;
-    margin-bottom: 8px;
-}
-
-.benefit-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #374151;
-    font-size: 0.9rem;
-}
-
-.benefit-item svg {
-    color: #10B981;
     flex-shrink: 0;
 }
 
-.modal-footer {
-    display: flex;
-    gap: 12px;
-    padding-top: 24px;
-    border-top: 1px solid #E5E7EB;
-}
-
-.btn-secondary-modal {
+.toast-text {
     flex: 1;
-    padding: 12px 20px;
-    background: #F3F4F6;
+}
+
+.toast-text strong {
+    display: block;
+    color: #92400E;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.toast-text p {
+    color: #78350F;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.toast-close {
+    background: transparent;
     border: none;
-    border-radius: 10px;
-    color: #374151;
-    font-size: 0.9rem;
-    font-weight: 600;
+    color: #92400E;
     cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
     transition: all 0.2s;
+    flex-shrink: 0;
 }
 
-.btn-secondary-modal:hover {
-    background: #E5E7EB;
+.toast-close:hover {
+    background: rgba(146, 64, 14, 0.1);
 }
 
-.btn-primary-modal {
-    flex: 2;
+.toast-button {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 20px;
+    padding: 14px 18px;
     background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    border: none;
-    border-radius: 10px;
     color: white;
+    text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
-    cursor: pointer;
     transition: all 0.2s;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.btn-primary-modal:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+.toast-button:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {
@@ -956,18 +951,15 @@
         grid-template-columns: 1fr;
     }
     
-    .expert-modal {
-        max-width: 90vw;
-        margin: 16px;
+    .expert-toast {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
     }
     
-    .modal-footer {
-        flex-direction: column;
-    }
-    
-    .btn-secondary-modal,
-    .btn-primary-modal {
-        width: 100%;
+    .toast-content {
+        min-width: auto;
+        max-width: 100%;
     }
 }
 

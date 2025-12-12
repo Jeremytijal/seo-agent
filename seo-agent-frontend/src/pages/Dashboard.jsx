@@ -219,7 +219,7 @@ const Dashboard = () => {
                         <AlertCircle size={20} />
                         <div>
                             <strong>Connectez votre site pour publier automatiquement</strong>
-                            <p>Choisissez WordPress, publication manuelle ou demandez l'aide d'un expert gratuitement</p>
+                            <p>Choisissez une plateforme, publication manuelle ou demandez l'aide d'un expert gratuitement</p>
                         </div>
                     </div>
                     <button 
