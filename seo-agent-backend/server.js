@@ -1,3 +1,6 @@
+console.log('🚀 Starting SEO Agent Backend...');
+console.log('📦 Loading dependencies...');
+
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -5,6 +8,17 @@ const cors = require('cors');
 const twilio = require('twilio');
 const { OpenAI } = require('openai');
 const { createClient } = require('@supabase/supabase-js');
+
+console.log('✅ Core dependencies loaded');
+
+// Check environment variables
+console.log('🔍 Checking environment variables...');
+console.log('- PORT:', process.env.PORT || '3000 (default)');
+console.log('- SUPABASE_URL:', process.env.SUPABASE_URL ? '✓ Set' : '✗ MISSING');
+console.log('- SUPABASE_SERVICE_KEY:', process.env.SUPABASE_SERVICE_KEY ? '✓ Set' : '✗ MISSING');
+console.log('- OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '✓ Set' : '✗ MISSING');
+console.log('- FRONTEND_URL:', process.env.FRONTEND_URL || 'Not set');
+
 const agentService = require('./services/agentService');
 const openaiService = require('./services/openaiService');
 const historyService = require('./services/historyService');
@@ -18,11 +32,25 @@ const tagService = require('./services/tagService');
 const blacklistService = require('./services/blacklistService');
 const emailService = require('./services/emailService');
 
+console.log('✅ Services loaded');
+
 // Initialize OpenAI for playground
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let openai;
+try {
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    console.log('✅ OpenAI initialized');
+} catch (error) {
+    console.error('❌ OpenAI initialization failed:', error.message);
+}
 
 // Initialize Supabase client
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+let supabase;
+try {
+    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+    console.log('✅ Supabase initialized');
+} catch (error) {
+    console.error('❌ Supabase initialization failed:', error.message);
+}
 
 const app = express();
 const port = process.env.PORT || 3000;
