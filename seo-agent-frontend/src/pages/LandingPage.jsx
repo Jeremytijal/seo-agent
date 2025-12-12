@@ -142,7 +142,7 @@ const LandingPage = () => {
         { name: "WordPress", icon: "🔵" },
         { name: "Webflow", icon: "🟣" },
         { name: "Framer", icon: "⚫" },
-        { name: "Shopify", icon: "🟢" },
+        { name: "Wix", icon: "🟡" },
     ];
 
     return (
@@ -205,13 +205,13 @@ const LandingPage = () => {
                     </div>
 
                     <h1>
-                        Créez du contenu SEO<br />
-                        <span className="gradient-text">qui se classe vraiment</span>
+                        Le meilleur Agent IA SEO<br />
+                        <span className="gradient-text">pour WordPress</span>
                     </h1>
                     
                     <p className="hero-desc">
-                        Audit, mots-clés, rédaction, images, publication. 
-                        Un seul outil IA pour dominer Google et multiplier votre trafic organique.
+                        Générez, optimisez et publiez automatiquement vos articles SEO sur WordPress. 
+                        Audit, mots-clés, rédaction IA, images et publication en un clic.
                     </p>
 
                     <div className="hero-cta-group">
@@ -299,6 +299,181 @@ const LandingPage = () => {
                             <span>{logo.name}</span>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* Benefits Section with Screenshots */}
+            <section className="benefits-screenshots">
+                <div className="section-container">
+                    <div className="section-header-outrank">
+                        <span className="section-tag">Bénéfices</span>
+                        <h2>Voyez SEO Agent en action</h2>
+                        <p>Découvrez comment notre agent IA transforme votre workflow SEO</p>
+                    </div>
+
+                    {/* Dashboard Screenshot */}
+                    <div className="benefit-item-screenshot">
+                        <div className="benefit-content">
+                            <div className="benefit-icon-large">
+                                <BarChart3 size={32} />
+                            </div>
+                            <h3>Tableau de bord complet</h3>
+                            <p>Visualisez toutes vos métriques SEO en un coup d'œil : articles créés, mots-clés suivis, audits réalisés, et bien plus.</p>
+                            <ul className="benefit-features">
+                                <li><CheckCircle size={16} /> KPIs en temps réel</li>
+                                <li><CheckCircle size={16} /> Graphiques d'activité</li>
+                                <li><CheckCircle size={16} /> Contenu récent</li>
+                            </ul>
+                        </div>
+                        <div className="screenshot-wrapper">
+                            <div className="screenshot-placeholder dashboard">
+                                <div className="screenshot-header">
+                                    <div className="screenshot-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <span>Dashboard SEO Agent</span>
+                                </div>
+                                <div className="screenshot-content">
+                                    <div className="screenshot-kpis">
+                                        <div className="kpi-item">24 Articles</div>
+                                        <div className="kpi-item">156 Mots-clés</div>
+                                        <div className="kpi-item">8 Audits</div>
+                                    </div>
+                                    <div className="screenshot-chart">📊 Graphique activité</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Planner Screenshot */}
+                    <div className="benefit-item-screenshot reverse">
+                        <div className="benefit-content">
+                            <div className="benefit-icon-large">
+                                <Calendar size={32} />
+                            </div>
+                            <h3>Planificateur de contenu intelligent</h3>
+                            <p>Organisez vos articles avec un calendrier visuel. Glissez-déposez, planifiez et suivez votre stratégie de contenu.</p>
+                            <ul className="benefit-features">
+                                <li><CheckCircle size={16} /> Vue calendrier mensuelle</li>
+                                <li><CheckCircle size={16} /> Drag & drop intuitif</li>
+                                <li><CheckCircle size={16} /> Planification automatique</li>
+                            </ul>
+                        </div>
+                        <div className="screenshot-wrapper">
+                            <div className="screenshot-placeholder planner">
+                                <div className="screenshot-header">
+                                    <div className="screenshot-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <span>Planificateur de contenu</span>
+                                </div>
+                                <div className="screenshot-content">
+                                    <div className="calendar-preview">
+                                        <div className="calendar-day">13</div>
+                                        <div className="calendar-day">16</div>
+                                        <div className="calendar-day">19</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content Creation Screenshot */}
+                    <div className="benefit-item-screenshot">
+                        <div className="benefit-content">
+                            <div className="benefit-icon-large">
+                                <PenTool size={32} />
+                            </div>
+                            <h3>Génération d'articles optimisés</h3>
+                            <p>Créez des articles de 2000+ mots optimisés SEO en moins de 30 secondes. L'IA analyse votre mot-clé et génère un contenu prêt à publier.</p>
+                            <ul className="benefit-features">
+                                <li><CheckCircle size={16} /> 2000+ mots par article</li>
+                                <li><CheckCircle size={16} /> Optimisation SEO automatique</li>
+                                <li><CheckCircle size={16} /> FAQ et meta tags inclus</li>
+                            </ul>
+                        </div>
+                        <div className="screenshot-wrapper">
+                            <div className="screenshot-placeholder content">
+                                <div className="screenshot-header">
+                                    <div className="screenshot-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <span>Création d'article</span>
+                                </div>
+                                <div className="screenshot-content">
+                                    <div className="article-preview">
+                                        <div className="article-title">📝 Titre de l'article</div>
+                                        <div className="article-meta">2000 mots • SEO optimisé</div>
+                                        <div className="article-content">Contenu généré par IA...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* CMS Integration Section */}
+            <section className="cms-integration">
+                <div className="section-container">
+                    <div className="section-header-outrank">
+                        <span className="section-tag">Publication automatique</span>
+                        <h2>Publiez directement sur votre CMS</h2>
+                        <p>Connectez votre site une fois, publiez automatiquement à chaque fois</p>
+                    </div>
+
+                    <div className="cms-flow">
+                        <div className="cms-step">
+                            <div className="cms-icon">
+                                <Zap size={24} />
+                            </div>
+                            <h3>1. Connectez votre CMS</h3>
+                            <p>WordPress, Webflow, Framer ou Wix. Une seule connexion suffit.</p>
+                        </div>
+                        <div className="cms-arrow">→</div>
+                        <div className="cms-step">
+                            <div className="cms-icon">
+                                <FileText size={24} />
+                            </div>
+                            <h3>2. Générez votre article</h3>
+                            <p>L'IA crée le contenu optimisé avec images et meta tags.</p>
+                        </div>
+                        <div className="cms-arrow">→</div>
+                        <div className="cms-step">
+                            <div className="cms-icon">
+                                <Send size={24} />
+                            </div>
+                            <h3>3. Publication automatique</h3>
+                            <p>Un clic et votre article est en ligne avec toutes les optimisations.</p>
+                        </div>
+                    </div>
+
+                    <div className="cms-platforms-grid">
+                        <div className="cms-platform-card">
+                            <div className="cms-platform-icon wordpress">W</div>
+                            <h4>WordPress</h4>
+                            <p>Publiez directement via l'API REST. Images, catégories et tags inclus.</p>
+                            <div className="cms-badge">✓ Intégré</div>
+                        </div>
+                        <div className="cms-platform-card">
+                            <div className="cms-platform-icon webflow">W</div>
+                            <h4>Webflow</h4>
+                            <p>Publication automatique avec gestion des collections et des champs personnalisés.</p>
+                            <div className="cms-badge">✓ Intégré</div>
+                        </div>
+                        <div className="cms-platform-card">
+                            <div className="cms-platform-icon framer">F</div>
+                            <h4>Framer</h4>
+                            <p>Connectez votre site Framer et publiez vos articles automatiquement.</p>
+                            <div className="cms-badge">✓ Intégré</div>
+                        </div>
+                        <div className="cms-platform-card">
+                            <div className="cms-platform-icon wix">W</div>
+                            <h4>Wix</h4>
+                            <p>Intégration en cours. Bientôt disponible pour tous les sites Wix.</p>
+                            <div className="cms-badge coming">Bientôt</div>
+                        </div>
+                    </div>
                 </div>
             </section>
 

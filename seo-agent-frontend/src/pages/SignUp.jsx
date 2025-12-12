@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Loader2, Rocket, Play } from 'lucide-react';
+import { ArrowRight, Loader2, Sparkles, Search, Target, PenTool, TrendingUp, CheckCircle, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { enableDemoMode } from '../data/demoData';
 import { API_URL } from '../config';
 import './Auth.css';
 
@@ -12,9 +11,8 @@ const SignUp = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isDemoLoading, setIsDemoLoading] = useState(false);
     const [error, setError] = useState('');
-    const { signup, login } = useAuth();
+    const { signup } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -40,24 +38,13 @@ const SignUp = () => {
             navigate('/onboarding');
         } catch (error) {
             console.error('Signup failed', error);
-            setError('Erreur lors de l\'inscription. Veuillez réessayer.');
+            if (error.message.includes('already registered')) {
+                setError('Cet email est déjà utilisé. Connectez-vous ou utilisez un autre email.');
+            } else {
+                setError('Erreur lors de l\'inscription. Veuillez réessayer.');
+            }
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const handleDemoLogin = async () => {
-        setIsDemoLoading(true);
-        setError('');
-        try {
-            await login('demo@agentiaseo.com', 'demo123456');
-            enableDemoMode();
-            navigate('/');
-        } catch (error) {
-            console.error('Demo login failed', error);
-            setError('Impossible de charger le compte démo. Veuillez réessayer.');
-        } finally {
-            setIsDemoLoading(false);
         }
     };
 
@@ -72,15 +59,19 @@ const SignUp = () => {
                     transition={{ duration: 0.5 }}
                 >
                     <div className="auth-logo-section">
-                        <div className="auth-logo-icon">
-                            <Rocket size={24} />
+                        <div className="auth-logo-container">
+                            <img src="/seo-agent-icon.png" alt="SEO Agent" className="auth-logo-img" />
+                            <div className="auth-logo-glow"></div>
                         </div>
-                        <span className="auth-logo-text">Agent IA SEO</span>
+                        <div className="auth-logo-text-wrapper">
+                            <span className="auth-logo-text">SEO Agent</span>
+                            <span className="auth-logo-subtitle">Agent IA</span>
+                        </div>
                     </div>
 
                     <div className="auth-header-section">
-                        <h1>Créer un compte</h1>
-                        <p>Boostez votre SEO avec l'intelligence artificielle</p>
+                        <h1>Créer un compte 🚀</h1>
+                        <p>Commencez à générer du contenu SEO optimisé en quelques minutes</p>
                     </div>
 
                     {error && (
@@ -130,7 +121,7 @@ const SignUp = () => {
                             En vous inscrivant, vous acceptez nos <Link to="/terms">Conditions d'utilisation</Link> et notre <Link to="/privacy">Politique de confidentialité</Link>.
                         </p>
 
-                        <button type="submit" className="btn-signup" disabled={isLoading}>
+                        <button type="submit" className="btn-primary-auth" disabled={isLoading}>
                             {isLoading ? (
                                 <Loader2 size={20} className="animate-spin" />
                             ) : (
@@ -139,19 +130,20 @@ const SignUp = () => {
                         </button>
                     </form>
 
-                    <div className="auth-divider">
-                        <span>ou</span>
+                    <div className="auth-benefits">
+                        <div className="benefit-item">
+                            <CheckCircle size={16} />
+                            <span>7 jours d'essai gratuit</span>
+                        </div>
+                        <div className="benefit-item">
+                            <CheckCircle size={16} />
+                            <span>Sans carte bancaire</span>
+                        </div>
+                        <div className="benefit-item">
+                            <CheckCircle size={16} />
+                            <span>Annulation à tout moment</span>
+                        </div>
                     </div>
-
-                    <a 
-                        href="https://www.loom.com/share/2ba3fd2dc31d40a0a1984625ceec14f4" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-demo"
-                    >
-                        <Play size={18} />
-                        Voir la démo
-                    </a>
 
                     <div className="auth-footer-section">
                         <p>Vous avez déjà un compte ? <Link to="/login" className="link-accent">Se connecter</Link></p>
@@ -159,61 +151,85 @@ const SignUp = () => {
                 </motion.div>
             </div>
 
-            {/* Right Side - Testimonial */}
-            <div className="auth-testimonial-side">
+            {/* Right Side - Features */}
+            <div className="auth-features-side">
                 <motion.div
-                    className="testimonial-content"
+                    className="features-content"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                    <div className="testimonial-header">
-                        <h2>La vitesse de réponse fait <span className="highlight">toute la différence</span></h2>
+                    <div className="features-header">
+                        <h2>Générez du contenu SEO <span className="highlight-green">automatiquement</span></h2>
+                        <p>Votre agent IA crée, optimise et publie vos articles 24/7</p>
                     </div>
 
-                    <div className="testimonial-card">
-                        <div className="testimonial-photo">
-                            <img 
-                                src="https://www.acquisition.com/hubfs/ACQ_Web_Bio-AlexHormozi%202.png" 
-                                alt="Alex Hormozi" 
-                                className="photo-image" 
-                            />
-                            <div className="photo-accent"></div>
-                        </div>
-                        
-                        <div className="testimonial-quote">
-                            <div className="quote-mark">"</div>
-                            <p className="quote-highlight">
-                                Si vous mettez plus de 5 minutes à répondre à un lead, votre taux de closing chute de 80%.
-                            </p>
-                            <p className="quote-text">
-                                Je connais des entrepreneurs qui payent plus de 60 000 $ par an quelqu'un dont le seul job est de répondre aux leads en moins de 5 minutes…
-                            </p>
-                            <p className="quote-text">
-                                Parce que rien ne fait augmenter le revenu plus vite que la vitesse.
-                            </p>
-                            
-                            <div className="quote-author">
-                                <div className="author-info">
-                                    <span className="author-name">Alex Hormozi</span>
-                                    <span className="author-title">Entrepreneur & Auteur de $100M Offers</span>
-                                </div>
+                    <div className="features-grid">
+                        <motion.div 
+                            className="feature-card"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                        >
+                            <div className="feature-icon">
+                                <Search size={24} />
                             </div>
-                        </div>
+                            <h3>Audit SEO Intelligent</h3>
+                            <p>Analysez n'importe quel site en profondeur et obtenez des recommandations actionnables</p>
+                        </motion.div>
+
+                        <motion.div 
+                            className="feature-card"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            <div className="feature-icon">
+                                <Target size={24} />
+                            </div>
+                            <h3>Recherche de Mots-clés</h3>
+                            <p>Découvrez des opportunités cachées avec notre analyse IA de mots-clés</p>
+                        </motion.div>
+
+                        <motion.div 
+                            className="feature-card"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                        >
+                            <div className="feature-icon">
+                                <PenTool size={24} />
+                            </div>
+                            <h3>Contenu Optimisé</h3>
+                            <p>Générez des articles de 2000+ mots optimisés SEO en quelques secondes</p>
+                        </motion.div>
+
+                        <motion.div 
+                            className="feature-card"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6 }}
+                        >
+                            <div className="feature-icon">
+                                <TrendingUp size={24} />
+                            </div>
+                            <h3>Publication Automatique</h3>
+                            <p>Publiez directement sur WordPress, Webflow ou Framer sans intervention</p>
+                        </motion.div>
                     </div>
 
-                    <div className="testimonial-stats">
-                        <div className="stat-item">
-                            <span className="stat-value">-80%</span>
-                            <span className="stat-label">Taux de closing après 5 min</span>
-                        </div>
+                    <div className="features-stats">
                         <div className="stat-item">
                             <span className="stat-value">&lt;30s</span>
-                            <span className="stat-label">Génération de contenu SEO</span>
+                            <span className="stat-label">Génération d'article</span>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-value">2000+</span>
+                            <span className="stat-label">Mots par article</span>
                         </div>
                         <div className="stat-item">
                             <span className="stat-value">24/7</span>
-                            <span className="stat-label">Disponibilité de l'agent</span>
+                            <span className="stat-label">Disponibilité</span>
                         </div>
                     </div>
                 </motion.div>
