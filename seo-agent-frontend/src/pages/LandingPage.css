@@ -1273,35 +1273,7 @@
 .dashboard-preview-content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-}
-
-.preview-quick-actions {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-}
-
-.preview-action {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px;
-    background: #FAFAFA;
-    border: 1px solid #E5E7EB;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    color: #374151;
-}
-
-.preview-action-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    gap: 16px;
 }
 
 .preview-kpis {
@@ -1314,17 +1286,17 @@
     background: white;
     border: 1px solid #E5E7EB;
     border-radius: 12px;
-    padding: 16px;
+    padding: 14px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     position: relative;
 }
 
 .preview-kpi-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1351,35 +1323,16 @@
 }
 
 .preview-kpi-value {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: #111;
     line-height: 1;
 }
 
 .preview-kpi-label {
-    font-size: 0.75rem;
-    color: #6B7280;
-    margin-top: 4px;
-}
-
-.preview-kpi-badge {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    background: #ECFDF5;
-    border-radius: 6px;
     font-size: 0.7rem;
-    color: #059669;
-    font-weight: 600;
-}
-
-.preview-recent h4 {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #111;
-    margin: 0 0 12px 0;
+    color: #6B7280;
+    margin-top: 2px;
 }
 
 .preview-articles {
@@ -1391,11 +1344,11 @@
 .preview-article-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px;
+    gap: 8px;
+    padding: 8px 10px;
     background: #FAFAFA;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #374151;
 }
 
@@ -1477,66 +1430,62 @@
     aspect-ratio: 1;
     background: white;
     border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    padding: 4px;
+    border-radius: 6px;
+    padding: 3px;
     position: relative;
-    min-height: 60px;
+    min-height: 55px;
+    display: flex;
+    flex-direction: column;
 }
 
 .preview-cal-day.has-article {
     background: #F0FDF4;
     border-color: #10B981;
+    border-width: 2px;
 }
 
 .preview-cal-day-number {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: #111;
     display: block;
     margin-bottom: 2px;
+    line-height: 1;
 }
 
 .preview-cal-article {
     background: white;
     border: 1px solid #10B981;
-    border-radius: 6px;
-    padding: 4px;
-    font-size: 0.65rem;
+    border-radius: 4px;
+    padding: 3px 4px;
+    font-size: 0.6rem;
     margin-top: 2px;
 }
 
 .preview-cal-article-type {
     font-weight: 700;
     color: #10B981;
-    font-size: 0.6rem;
-    margin-bottom: 2px;
+    font-size: 0.55rem;
+    margin-bottom: 1px;
+    line-height: 1.2;
 }
 
 .preview-cal-article-title {
     font-weight: 600;
     color: #111;
-    margin-bottom: 2px;
+    font-size: 0.6rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.preview-cal-article-meta {
-    display: flex;
-    gap: 4px;
-    font-size: 0.55rem;
-    color: #6B7280;
-    margin-bottom: 2px;
+    line-height: 1.2;
 }
 
 .preview-cal-article-status {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 0.55rem;
-    font-weight: 600;
-    color: #F59E0B;
+    justify-content: center;
     margin-top: 2px;
+    color: #F59E0B;
 }
 
 .preview-cal-article-status.generating svg {
@@ -1557,25 +1506,24 @@
 
 .preview-form {
     background: #FAFAFA;
-    padding: 20px;
+    padding: 16px;
     border-radius: 12px;
     border: 1px solid #E5E7EB;
 }
 
 .preview-form-group {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .preview-form-group label {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #374151;
     margin-bottom: 6px;
 }
 
-.preview-form-group input,
-.preview-form-group select {
+.preview-form-group input {
     width: 100%;
     padding: 10px 12px;
     background: white;
@@ -1583,12 +1531,6 @@
     border-radius: 8px;
     font-size: 0.85rem;
     color: #111;
-}
-
-.preview-form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
 }
 
 .preview-generate-btn {
@@ -1605,76 +1547,69 @@
     justify-content: center;
     gap: 8px;
     cursor: pointer;
+    margin-top: 8px;
 }
 
 .preview-article-result {
     background: white;
     border: 1px solid #E5E7EB;
     border-radius: 12px;
-    padding: 20px;
+    padding: 16px;
 }
 
 .preview-article-header h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #111;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
 }
 
 .preview-article-meta {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #6B7280;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .preview-article-content {
     color: #374151;
-    line-height: 1.7;
-    font-size: 0.85rem;
+    line-height: 1.6;
+    font-size: 0.8rem;
 }
 
 .preview-article-content h4 {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #111;
-    margin: 16px 0 8px 0;
+    margin: 12px 0 6px 0;
 }
 
 .preview-article-content p {
-    margin: 0 0 12px 0;
+    margin: 0 0 8px 0;
 }
 
 .preview-article-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-    padding-top: 20px;
+    margin-top: 16px;
+    padding-top: 16px;
     border-top: 1px solid #E5E7EB;
 }
 
 .preview-action-btn {
-    flex: 1;
+    width: 100%;
     padding: 10px;
-    background: #FAFAFA;
-    border: 1px solid #E5E7EB;
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+    border: none;
     border-radius: 8px;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #374151;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     cursor: pointer;
-}
-
-.preview-action-btn.primary {
-    background: linear-gradient(135deg, #10B981, #059669);
-    color: white;
-    border-color: transparent;
 }
 
 /* ==========================================================================
@@ -2064,8 +1999,17 @@
         font-size: 0.7rem;
     }
 
-    .preview-form-row {
-        grid-template-columns: 1fr;
+    .preview-cal-day {
+        min-height: 45px;
+        font-size: 0.65rem;
+    }
+
+    .preview-cal-article {
+        padding: 2px 3px;
+    }
+
+    .preview-cal-article-title {
+        font-size: 0.55rem;
     }
 }
 

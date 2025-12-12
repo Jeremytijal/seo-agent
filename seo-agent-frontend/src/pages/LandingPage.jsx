@@ -334,28 +334,6 @@ const LandingPage = () => {
                                     <span>Tableau de bord - SEO Agent</span>
                                 </div>
                                 <div className="preview-content dashboard-preview-content">
-                                    {/* Quick Actions */}
-                                    <div className="preview-quick-actions">
-                                        <div className="preview-action">
-                                            <div className="preview-action-icon" style={{ background: '#10B98115', color: '#10B981' }}>
-                                                <Search size={16} />
-                                            </div>
-                                            <span>Nouvel audit SEO</span>
-                                        </div>
-                                        <div className="preview-action">
-                                            <div className="preview-action-icon" style={{ background: '#3B82F615', color: '#3B82F6' }}>
-                                                <Target size={16} />
-                                            </div>
-                                            <span>Recherche mots-clés</span>
-                                        </div>
-                                        <div className="preview-action">
-                                            <div className="preview-action-icon" style={{ background: '#8B5CF615', color: '#8B5CF6' }}>
-                                                <PenTool size={16} />
-                                            </div>
-                                            <span>Créer un article</span>
-                                        </div>
-                                    </div>
-                                    
                                     {/* KPIs */}
                                     <div className="preview-kpis">
                                         <div className="preview-kpi-card">
@@ -365,10 +343,6 @@ const LandingPage = () => {
                                             <div className="preview-kpi-content">
                                                 <span className="preview-kpi-value">24</span>
                                                 <span className="preview-kpi-label">Articles créés</span>
-                                            </div>
-                                            <div className="preview-kpi-badge">
-                                                <TrendingUp size={10} />
-                                                <span>+5</span>
                                             </div>
                                         </div>
                                         <div className="preview-kpi-card">
@@ -386,23 +360,22 @@ const LandingPage = () => {
                                             </div>
                                             <div className="preview-kpi-content">
                                                 <span className="preview-kpi-value">156</span>
-                                                <span className="preview-kpi-label">Mots-clés suivis</span>
+                                                <span className="preview-kpi-label">Mots-clés</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Recent Content */}
                                     <div className="preview-recent">
-                                        <h4>Contenu récent</h4>
                                         <div className="preview-articles">
                                             <div className="preview-article-item">
                                                 <FileText size={14} />
-                                                <span>10 Techniques SEO pour 2025</span>
+                                                <span>Guide SEO 2025</span>
                                                 <span className="preview-status published">Publié</span>
                                             </div>
                                             <div className="preview-article-item">
                                                 <FileText size={14} />
-                                                <span>Guide du référencement local</span>
+                                                <span>Marketing digital</span>
                                                 <span className="preview-status scheduled">Programmé</span>
                                             </div>
                                         </div>
@@ -458,25 +431,36 @@ const LandingPage = () => {
                                         ))}
                                         {Array.from({ length: 35 }, (_, i) => {
                                             const day = i + 1;
-                                            const hasArticle = [13, 16, 19].includes(day);
+                                            
+                                            // Articles marketing/SEO répartis sur le mois
+                                            const articles = {
+                                                3: { title: 'SEO local', type: 'Guide', vol: 2400, kd: 28 },
+                                                5: { title: 'Content marketing', type: 'How-to', vol: 1800, kd: 32 },
+                                                8: { title: 'Backlinks stratégie', type: 'Guide', vol: 3200, kd: 45 },
+                                                10: { title: 'Email marketing', type: 'Liste', vol: 1500, kd: 25 },
+                                                13: { title: 'SEO technique', type: 'Guide', vol: 2100, kd: 38, generating: true },
+                                                15: { title: 'Growth hacking', type: 'How-to', vol: 1900, kd: 30 },
+                                                17: { title: 'Marketing automation', type: 'Guide', vol: 2800, kd: 42 },
+                                                19: { title: 'SEO on-page', type: 'Tutorial', vol: 2200, kd: 35 },
+                                                22: { title: 'Social media SEO', type: 'Guide', vol: 1600, kd: 28 },
+                                                24: { title: 'Inbound marketing', type: 'How-to', vol: 2000, kd: 33 },
+                                                26: { title: 'SEO e-commerce', type: 'Guide', vol: 3500, kd: 48 },
+                                                28: { title: 'Marketing digital', type: 'Liste', vol: 1700, kd: 27 },
+                                                30: { title: 'SEO international', type: 'Guide', vol: 1200, kd: 22 }
+                                            };
+                                            
+                                            const article = articles[day];
+                                            
                                             return (
-                                                <div key={i} className={`preview-cal-day ${hasArticle ? 'has-article' : ''}`}>
+                                                <div key={i} className={`preview-cal-day ${article ? 'has-article' : ''}`}>
                                                     <span className="preview-cal-day-number">{day <= 31 ? day : ''}</span>
-                                                    {hasArticle && (
+                                                    {article && (
                                                         <div className="preview-cal-article">
-                                                            <div className="preview-cal-article-type">Guide</div>
-                                                            <div className="preview-cal-article-title">
-                                                                {day === 13 && 'Article sur "SFR avis"'}
-                                                                {day === 16 && 'Article sur "mot-clé 2"'}
-                                                                {day === 19 && 'Article sur "mot-clé 3"'}
-                                                            </div>
-                                                            <div className="preview-cal-article-meta">
-                                                                <span>Vol: 1381</span>
-                                                                <span>KD: 34</span>
-                                                            </div>
-                                                            {day === 13 && (
+                                                            <div className="preview-cal-article-type">{article.type}</div>
+                                                            <div className="preview-cal-article-title">{article.title}</div>
+                                                            {article.generating && (
                                                                 <div className="preview-cal-article-status generating">
-                                                                    <Loader2 size={10} className="spin" /> En génération
+                                                                    <Loader2 size={8} className="spin" />
                                                                 </div>
                                                             )}
                                                         </div>
@@ -517,21 +501,7 @@ const LandingPage = () => {
                                     <div className="preview-form">
                                         <div className="preview-form-group">
                                             <label>Mot-clé principal</label>
-                                            <input type="text" value="techniques SEO 2025" readOnly />
-                                        </div>
-                                        <div className="preview-form-row">
-                                            <div className="preview-form-group">
-                                                <label>Tone</label>
-                                                <select value="professional" readOnly>
-                                                    <option>Professionnel</option>
-                                                </select>
-                                            </div>
-                                            <div className="preview-form-group">
-                                                <label>Longueur</label>
-                                                <select value="2000" readOnly>
-                                                    <option>2000 mots</option>
-                                                </select>
-                                            </div>
+                                            <input type="text" value="marketing digital 2025" readOnly />
                                         </div>
                                         <button className="preview-generate-btn">
                                             <Sparkles size={16} />
@@ -542,27 +512,19 @@ const LandingPage = () => {
                                     {/* Article Preview */}
                                     <div className="preview-article-result">
                                         <div className="preview-article-header">
-                                            <h3>10 Techniques SEO pour 2025 : Guide Complet</h3>
+                                            <h3>Marketing Digital 2025 : Guide Complet</h3>
                                             <div className="preview-article-meta">
                                                 <span>2000 mots</span>
                                                 <span>•</span>
                                                 <span>SEO optimisé</span>
-                                                <span>•</span>
-                                                <span>FAQ inclus</span>
                                             </div>
                                         </div>
                                         <div className="preview-article-content">
-                                            <p>Le référencement naturel évolue constamment. En 2025, de nouvelles techniques SEO permettent d'améliorer significativement votre visibilité sur Google...</p>
-                                            <h4>1. Optimisation Core Web Vitals</h4>
-                                            <p>Les Core Web Vitals sont devenus un facteur de classement majeur. Optimisez votre temps de chargement, votre stabilité visuelle...</p>
-                                            <h4>2. Contenu optimisé pour E-E-A-T</h4>
-                                            <p>Google privilégie le contenu démontrant Expertise, Expérience, Autorité et Fiabilité...</p>
+                                            <p>Le marketing digital évolue rapidement. Découvrez les stratégies qui fonctionnent en 2025 pour générer plus de leads et augmenter vos ventes...</p>
+                                            <h4>1. SEO et Content Marketing</h4>
+                                            <p>Combinez SEO et content marketing pour maximiser votre visibilité organique et convertir vos visiteurs...</p>
                                         </div>
                                         <div className="preview-article-actions">
-                                            <button className="preview-action-btn">
-                                                <Eye size={14} />
-                                                Prévisualiser
-                                            </button>
                                             <button className="preview-action-btn primary">
                                                 <Send size={14} />
                                                 Publier
