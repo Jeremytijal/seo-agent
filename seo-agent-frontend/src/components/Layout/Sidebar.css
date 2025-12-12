@@ -404,6 +404,73 @@
    USAGE INDICATOR - SEO THEME
    ========================================================================== */
 
+/* Help Card */
+.help-card {
+    margin: 16px 8px;
+    padding: 14px;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border: 1px solid #F59E0B;
+    border-radius: 14px;
+}
+
+.help-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.help-icon {
+    width: 24px;
+    height: 24px;
+    background: #F59E0B;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.help-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #92400E;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.help-description {
+    font-size: 0.75rem;
+    color: #78350F;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+}
+
+.help-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.help-button:hover {
+    background: linear-gradient(135deg, #D97706, #B45309);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(217, 119, 6, 0.3);
+}
+
 .usage-card {
     margin: 16px 8px;
     padding: 14px;

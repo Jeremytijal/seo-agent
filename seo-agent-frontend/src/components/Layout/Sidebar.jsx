@@ -147,6 +147,26 @@ const Sidebar = () => {
           ))}
         </nav>
 
+        {/* Help Card */}
+        <div className="help-card">
+          <div className="help-header">
+            <div className="help-icon">
+              <HelpCircle size={16} />
+            </div>
+            <span className="help-title">Besoin d'aide ?</span>
+          </div>
+          <p className="help-description">Un expert vous aide gratuitement</p>
+          <a 
+            href="https://zcal.co/i/7LMkT11o" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="help-button"
+          >
+            <Calendar size={14} />
+            Prendre rendez-vous
+          </a>
+        </div>
+
         {/* Usage Indicator */}
         <div className={`usage-card ${isNearLimit ? 'warning' : ''} ${usage.isTrial ? 'trial' : ''}`}>
           <div className="usage-header">

@@ -11,19 +11,12 @@ import {
     Loader2,
     X,
     AlertCircle,
-    Webhook,
-    Calendar,
-    Copy,
-    Check,
-    Save,
-    Link2,
     Headphones,
     ArrowRight,
     Sparkles
 } from 'lucide-react';
-import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { API_URL, WEBHOOK_BASE_URL } from '../config';
+import { API_URL } from '../config';
 import './Integrations.css';
 
 const Integrations = () => {
@@ -56,15 +49,6 @@ const Integrations = () => {
         message: ''
     });
     const [submittingExpert, setSubmittingExpert] = useState(false);
-    
-    // Legacy webhook/calendar states
-    const [saving, setSaving] = useState(null);
-    const [copied, setCopied] = useState(false);
-    const [showJson, setShowJson] = useState(false);
-    const [crmWebhookUrl, setCrmWebhookUrl] = useState('');
-    const [calendarUrl, setCalendarUrl] = useState('');
-
-    const inboundWebhookUrl = `${WEBHOOK_BASE_URL}/${user?.id}/leads`;
 
     const platforms = [
         { 
@@ -111,18 +95,6 @@ const Integrations = () => {
             const requestsRes = await fetch(`${API_URL}/api/expert-requests/${user.id}`);
             const requestsData = await requestsRes.json();
             setExpertRequests(requestsData.requests || []);
-
-            // Fetch profile config
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('webhook_url, agent_config')
-                .eq('id', user.id)
-                .single();
-
-            if (!error && data) {
-                setCrmWebhookUrl(data.webhook_url || '');
-                setCalendarUrl(data.agent_config?.calendarUrl || '');
-            }
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -237,46 +209,6 @@ const Integrations = () => {
         setConnectionForm({ siteUrl: '', siteName: '', username: '', appPassword: '' });
         setConnectionStatus(null);
         setConnectionError('');
-    };
-
-    const saveCrmWebhook = async () => {
-        setSaving('crm');
-        try {
-            await supabase.from('profiles').update({ webhook_url: crmWebhookUrl }).eq('id', user.id);
-            alert('Webhook CRM sauvegardé !');
-        } catch (error) {
-            alert('Erreur lors de la sauvegarde.');
-        } finally {
-            setSaving(null);
-        }
-    };
-
-    const saveCalendarUrl = async () => {
-        setSaving('calendar');
-        try {
-            const { data: currentData } = await supabase
-                .from('profiles')
-                .select('agent_config')
-                .eq('id', user.id)
-                .single();
-
-            await supabase
-                .from('profiles')
-                .update({ agent_config: { ...(currentData?.agent_config || {}), calendarUrl } })
-                .eq('id', user.id);
-
-            alert('URL de l\'agenda sauvegardée !');
-        } catch (error) {
-            alert('Erreur lors de la sauvegarde.');
-        } finally {
-            setSaving(null);
-        }
-    };
-
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
     };
 
     if (loading) {
@@ -457,96 +389,6 @@ const Integrations = () => {
                 </div>
             </section>
 
-            {/* Legacy Webhooks Section */}
-            <section className="section-block">
-                <h2><Webhook size={20} /> Webhooks & Intégrations</h2>
-                <div className="integrations-grid">
-                    {/* Inbound Webhook */}
-                <div className="integration-card">
-                    <div className="card-icon-wrapper blue">
-                        <Link2 size={24} />
-                    </div>
-                    <h3>Webhook Entrant</h3>
-                    <p className="card-description">
-                            Recevez des leads depuis Zapier ou votre site web.
-                    </p>
-                    <div className="card-content">
-                        <label>URL DE VOTRE WEBHOOK</label>
-                        <div className="url-display-box">
-                            <code className="url-text" title={inboundWebhookUrl}>
-                                {`${WEBHOOK_BASE_URL}/${user?.id?.slice(0, 8)}••••/leads`}
-                            </code>
-                                <button className="btn-copy" onClick={() => copyToClipboard(inboundWebhookUrl)}>
-                                {copied ? <Check size={16} /> : <Copy size={16} />}
-                                {copied ? 'Copié !' : 'Copier'}
-                            </button>
-                        </div>
-                            <button className="btn-secondary btn-json" onClick={() => setShowJson(!showJson)}>
-                                {showJson ? 'Masquer le format JSON' : 'Voir le format JSON'}
-                        </button>
-                        {showJson && (
-                            <pre className="json-preview">
-{`{
-  "name": "Jean Dupont",
-  "phone": "+33612345678",
-  "email": "jean@example.com"
-}`}
-                            </pre>
-                        )}
-                    </div>
-                </div>
-
-                    {/* CRM Webhook */}
-                <div className="integration-card">
-                    <div className="card-icon-wrapper orange">
-                        <Webhook size={24} />
-                    </div>
-                    <div className="card-status-row">
-                        <h3>CRM Webhook</h3>
-                            {crmWebhookUrl && <span className="status-badge connected"><CheckCircle size={12} /> Actif</span>}
-                    </div>
-                        <p className="card-description">Envoyez les leads qualifiés vers votre CRM.</p>
-                    <div className="card-content">
-                        <label>URL DU WEBHOOK (SORTANT)</label>
-                        <input
-                            type="url"
-                            placeholder="https://hooks.zapier.com/..."
-                            value={crmWebhookUrl}
-                            onChange={(e) => setCrmWebhookUrl(e.target.value)}
-                            className="input-field"
-                        />
-                            <button className="btn-primary btn-save" onClick={saveCrmWebhook} disabled={saving === 'crm'}>
-                            {saving === 'crm' ? 'Sauvegarde...' : <><Save size={16} /> Sauvegarder</>}
-                        </button>
-                    </div>
-                </div>
-
-                    {/* Calendar */}
-                <div className="integration-card">
-                    <div className="card-icon-wrapper green">
-                        <Calendar size={24} />
-                    </div>
-                    <div className="card-status-row">
-                        <h3>Agenda</h3>
-                            {calendarUrl && <span className="status-badge connected"><CheckCircle size={12} /> Actif</span>}
-                    </div>
-                        <p className="card-description">URL de prise de rendez-vous (Calendly, Cal.com...).</p>
-                    <div className="card-content">
-                            <label>URL DE VOTRE AGENDA</label>
-                        <input
-                            type="url"
-                            placeholder="https://calendly.com/votre-nom"
-                            value={calendarUrl}
-                            onChange={(e) => setCalendarUrl(e.target.value)}
-                            className="input-field"
-                        />
-                            <button className="btn-primary btn-save" onClick={saveCalendarUrl} disabled={saving === 'calendar'}>
-                                {saving === 'calendar' ? 'Sauvegarde...' : <><Save size={16} /> Sauvegarder</>}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* Connect Site Modal */}
             {showConnectModal && (
