@@ -1,0 +1,558 @@
+/* ==========================================================================
+   PUBLISH PAGE
+   ========================================================================== */
+
+.publish-page {
+    padding: 24px 32px;
+    background: #FAFAFA;
+    min-height: 100vh;
+}
+
+.publish-header {
+    margin-bottom: 24px;
+}
+
+.publish-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 4px 0;
+}
+
+.publish-header p {
+    font-size: 0.9rem;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* ==========================================================================
+   STATS
+   ========================================================================== */
+
+.publish-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-item {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6B7280;
+}
+
+.stat-item.published .stat-number { color: #10B981; }
+.stat-item.scheduled .stat-number { color: #3B82F6; }
+.stat-item.failed .stat-number { color: #EF4444; }
+
+/* ==========================================================================
+   LAYOUT
+   ========================================================================== */
+
+.publish-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
+}
+
+.publish-main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ==========================================================================
+   FILTERS
+   ========================================================================== */
+
+.publish-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.publish-filters h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111;
+    margin: 0;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-buttons button {
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-buttons button:hover {
+    border-color: #10B981;
+    color: #10B981;
+}
+
+.filter-buttons button.active {
+    background: #10B981;
+    border-color: #10B981;
+    color: white;
+}
+
+/* ==========================================================================
+   PUBLICATIONS LIST
+   ========================================================================== */
+
+.publications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.publication-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    transition: all 0.2s;
+}
+
+.publication-card:hover {
+    border-color: #D1D5DB;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.publication-card.failed {
+    border-color: #FECACA;
+    background: #FEF2F2;
+}
+
+.pub-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.pub-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10B981;
+    flex-shrink: 0;
+}
+
+.publication-card.failed .pub-icon {
+    background: linear-gradient(135deg, #FEE2E2, #FECACA);
+    color: #EF4444;
+}
+
+.pub-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.pub-info h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111;
+    margin: 0 0 6px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pub-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.meta-site {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #374151;
+    font-weight: 500;
+}
+
+.meta-no-site {
+    font-size: 0.8rem;
+    color: #9CA3AF;
+    font-style: italic;
+}
+
+.meta-sep {
+    color: #D1D5DB;
+    font-size: 0.5rem;
+}
+
+.meta-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: #6B7280;
+}
+
+.meta-date.scheduled {
+    color: #3B82F6;
+}
+
+.pub-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #FEE2E2;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #DC2626;
+}
+
+.pub-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.published {
+    background: #D1FAE5;
+    color: #059669;
+}
+
+.status-badge.scheduled {
+    background: #DBEAFE;
+    color: #2563EB;
+}
+
+.status-badge.draft {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.status-badge.failed {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #F3F4F6;
+    border: none;
+    border-radius: 8px;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-icon:hover {
+    background: #E5E7EB;
+    color: #374151;
+}
+
+.btn-icon.publish-btn:hover {
+    background: #D1FAE5;
+    color: #10B981;
+}
+
+.btn-icon.retry-btn:hover {
+    background: #DBEAFE;
+    color: #3B82F6;
+}
+
+.btn-icon.cancel-btn:hover {
+    background: #FEE2E2;
+    color: #EF4444;
+}
+
+.publications-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 48px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    color: #9CA3AF;
+}
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+
+.publish-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sidebar-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.sidebar-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111;
+    margin: 0;
+}
+
+.link-btn {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.8rem;
+    color: #10B981;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+}
+
+.sites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.site-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: #F9FAFB;
+    border-radius: 10px;
+}
+
+.site-item.error {
+    background: #FEF2F2;
+}
+
+.site-platform {
+    font-size: 1.25rem;
+}
+
+.site-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.site-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #111;
+}
+
+.site-platform-name {
+    font-size: 0.7rem;
+    color: #9CA3AF;
+    text-transform: capitalize;
+}
+
+.site-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.site-status.connected {
+    color: #10B981;
+}
+
+.site-status.error {
+    color: #EF4444;
+}
+
+.btn-add-site {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: #F9FAFB;
+    border: 1px dashed #D1D5DB;
+    border-radius: 10px;
+    color: #6B7280;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-site:hover {
+    background: #ECFDF5;
+    border-color: #10B981;
+    color: #059669;
+}
+
+/* Tips Card */
+.tips-card {
+    background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+    border-color: #34D399;
+}
+
+.tips-card h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #065F46;
+    margin: 0 0 12px 0;
+}
+
+.tips-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tips-card li {
+    font-size: 0.8rem;
+    color: #047857;
+    padding-left: 16px;
+    position: relative;
+}
+
+.tips-card li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1000px) {
+    .publish-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .publish-sidebar {
+        order: -1;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .publish-stats {
+        flex-wrap: wrap;
+    }
+    
+    .stat-item {
+        flex: 1 1 calc(50% - 8px);
+    }
+    
+    .publish-filters {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .filter-buttons {
+        flex-wrap: wrap;
+    }
+    
+    .publication-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .pub-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .publish-sidebar {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .publish-page {
+        padding: 16px;
+    }
+    
+    .stat-item {
+        flex: 1 1 100%;
+    }
+}
+
