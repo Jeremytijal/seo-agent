@@ -32,6 +32,7 @@ const allowedOrigins = [
     'https://app.agentiaseo.com',
     'https://agentiaseo.com',
     'https://www.agentiaseo.com',
+    'https://agent-seo.netlify.app',
     process.env.FRONTEND_URL,
     // Allow localhost for development
     ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:5173', 'http://localhost:3000'] : [])
