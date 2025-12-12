@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
-    CheckCircle, ArrowRight, Loader2, Gift,
+    CheckCircle, ArrowRight, Loader2,
     Clock, CreditCard, Star
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -119,21 +119,11 @@ const Subscription = () => {
             <div className="subscription-container">
                 {/* Header */}
                 <div className="subscription-header">
-                    {fromOnboarding && (
-                        <div className="success-badge">
-                            <CheckCircle size={18} />
-                            <span>Bienvenue sur SEO Agent !</span>
-                        </div>
-                    )}
                     <h1>Choisissez votre plan</h1>
-                    <p>Générez du contenu SEO optimisé automatiquement avec l'IA</p>
                 </div>
 
                 {/* Early Bird Banner */}
                 <div className="early-bird-banner">
-                    <div className="early-bird-icon">
-                        <Gift size={24} />
-                    </div>
                     <div className="early-bird-content">
                         <div className="early-bird-title">
                             🎉 Offre de lancement : -50% appliqué automatiquement !
