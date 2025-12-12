@@ -1,38 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { 
     Calendar, ChevronLeft, ChevronRight, Plus, Sparkles, 
     FileText, Target, GripVertical, X, Clock, CheckCircle,
-    MoreHorizontal, Edit3, Trash2, ExternalLink, Eye
+    MoreHorizontal, Edit3, Trash2, ExternalLink, Eye,
+    Globe, Loader2, PartyPopper, ArrowRight
 } from 'lucide-react';
 import './ContentPlanner.css';
 
 const ContentPlanner = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [scheduledArticles, setScheduledArticles] = useState({
-        '2025-01-13': [
-            { id: 1, title: 'Guide SEO pour débutants', keyword: 'seo débutant', volume: 1200, difficulty: 25, type: 'Guide', status: 'scheduled' }
-        ],
-        '2025-01-15': [
-            { id: 2, title: '10 techniques de link building', keyword: 'link building', volume: 890, difficulty: 45, type: 'Liste', status: 'scheduled' }
-        ],
-        '2025-01-17': [
-            { id: 3, title: 'Optimiser ses images pour le SEO', keyword: 'optimisation images seo', volume: 720, difficulty: 18, type: 'How-to', status: 'draft' }
-        ],
-        '2025-01-20': [
-            { id: 4, title: 'Recherche de mots-clés avancée', keyword: 'recherche mots-clés', volume: 1500, difficulty: 52, type: 'Guide', status: 'published' }
-        ],
-        '2025-01-22': [
-            { id: 5, title: 'Audit SEO complet', keyword: 'audit seo', volume: 2100, difficulty: 38, type: 'Explainer', status: 'scheduled' }
-        ],
-    });
+    const [scheduledArticles, setScheduledArticles] = useState({});
 
     const [showAddModal, setShowAddModal] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [draggedArticle, setDraggedArticle] = useState(null);
     const [draggedFromDate, setDraggedFromDate] = useState(null);
     const [initialKeywordData, setInitialKeywordData] = useState(null);
+    
+    // Banners
+    const [showConnectBanner, setShowConnectBanner] = useState(false);
+    const [showActivatedBanner, setShowActivatedBanner] = useState(false);
+    const [showGeneratingBanner, setShowGeneratingBanner] = useState(false);
+
+    // Check for banners and URL params on mount
+    useEffect(() => {
+        // Check if coming from subscription activation
+        const activated = searchParams.get('activated');
+        if (activated === 'true') {
+            setShowActivatedBanner(true);
+            setSearchParams({});
+            // Hide after 5 seconds
+            setTimeout(() => setShowActivatedBanner(false), 5000);
+        }
+
+        // Check localStorage for connect banner
+        const showConnect = localStorage.getItem('seoagent_show_connect_banner');
+        if (showConnect === 'true') {
+            setShowConnectBanner(true);
+        }
+
+        // Check if first article is generating
+        const generating = localStorage.getItem('seoagent_first_article_generating');
+        if (generating === 'true') {
+            setShowGeneratingBanner(true);
+            // Clear after showing
+            localStorage.removeItem('seoagent_first_article_generating');
+            // Hide after 8 seconds
+            setTimeout(() => setShowGeneratingBanner(false), 8000);
+        }
+    }, []);
 
     // Récupérer le mot-clé depuis l'URL (venant de la page Keywords)
     useEffect(() => {
@@ -52,6 +70,11 @@ const ContentPlanner = () => {
             setSearchParams({});
         }
     }, [searchParams]);
+
+    const dismissConnectBanner = () => {
+        setShowConnectBanner(false);
+        localStorage.removeItem('seoagent_show_connect_banner');
+    };
 
     const monthNames = [
         'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -216,6 +239,40 @@ const ContentPlanner = () => {
 
     return (
         <div className="planner-page">
+            {/* Success Banner - Account Activated */}
+            {showActivatedBanner && (
+                <div className="banner success-banner">
+                    <PartyPopper size={20} />
+                    <span>🎉 Votre compte est activé ! Bienvenue sur SEO Agent.</span>
+                    <button onClick={() => setShowActivatedBanner(false)}>
+                        <X size={16} />
+                    </button>
+                </div>
+            )}
+
+            {/* Generating Banner */}
+            {showGeneratingBanner && (
+                <div className="banner generating-banner">
+                    <Loader2 size={18} className="spin" />
+                    <span>Votre premier article est en cours de génération... Il apparaîtra bientôt ici !</span>
+                </div>
+            )}
+
+            {/* Connect Site Banner */}
+            {showConnectBanner && (
+                <div className="banner connect-banner">
+                    <Globe size={18} />
+                    <span>Connectez votre site WordPress pour publier automatiquement vos articles.</span>
+                    <Link to="/integrations" className="banner-btn">
+                        Connecter
+                        <ArrowRight size={14} />
+                    </Link>
+                    <button className="banner-close" onClick={dismissConnectBanner}>
+                        <X size={16} />
+                    </button>
+                </div>
+            )}
+
             {/* Header */}
             <header className="planner-header">
                 <div className="header-left">

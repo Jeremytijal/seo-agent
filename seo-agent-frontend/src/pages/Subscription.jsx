@@ -96,7 +96,7 @@ const Subscription = () => {
                     priceId: stripePriceId,
                     trialDays: 7,
                     promoCode: 'EARLYBIRD50', // Toujours appliquer le code promo
-                    successUrl: `${window.location.origin}/?activated=true`,
+                    successUrl: `${window.location.origin}/planner?activated=true`,
                     cancelUrl: `${window.location.origin}/subscription`
                 })
             });

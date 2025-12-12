@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ArrowRight, ArrowLeft, Check, Globe, Target, 
     Sparkles, Loader2, Search, Plus, X,
     CheckCircle2, Send, HelpCircle, Copy,
-    Rocket, PartyPopper, TrendingUp, Users
+    Rocket, PartyPopper, TrendingUp, Users, Calendar, FileText
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -33,6 +33,8 @@ const Onboarding = () => {
     // Keyword suggestions from analysis
     const [suggestedKeywords, setSuggestedKeywords] = useState([]);
     const [selectedKeywords, setSelectedKeywords] = useState([]);
+    const [generatingArticle, setGeneratingArticle] = useState(false);
+    const [articleGenerated, setArticleGenerated] = useState(false);
 
     const steps = [
         { id: 'welcome', title: 'Bienvenue', icon: Rocket },
@@ -115,6 +117,77 @@ const Onboarding = () => {
         );
     };
 
+    // Start article generation when reaching the ready step
+    useEffect(() => {
+        if (step === 4 && selectedKeywords.length > 0 && !generatingArticle && !articleGenerated) {
+            generateFirstArticle();
+        }
+    }, [step]);
+
+    const generateFirstArticle = async () => {
+        if (!user || selectedKeywords.length === 0) return;
+        
+        setGeneratingArticle(true);
+        
+        try {
+            // Get the first keyword for article generation
+            const firstKeyword = selectedKeywords[0];
+            const keywordData = suggestedKeywords.find(k => k.keyword === firstKeyword);
+            
+            // Save keywords to calendar (scheduled articles)
+            const today = new Date();
+            for (let i = 0; i < selectedKeywords.length; i++) {
+                const kw = selectedKeywords[i];
+                const kwData = suggestedKeywords.find(k => k.keyword === kw);
+                const scheduledDate = new Date(today);
+                scheduledDate.setDate(today.getDate() + (i * 3)); // Every 3 days
+                
+                try {
+                    await supabase.from('scheduled_articles').insert({
+                        user_id: user.id,
+                        keyword: kw,
+                        volume: kwData?.volume || 0,
+                        difficulty: kwData?.difficulty || 0,
+                        scheduled_date: scheduledDate.toISOString().split('T')[0],
+                        status: i === 0 ? 'generating' : 'scheduled',
+                        title: `Article sur "${kw}"`,
+                        type: 'Guide'
+                    });
+                } catch (e) {
+                    console.error('Error scheduling article:', e);
+                }
+            }
+            
+            // Generate first article in background
+            fetch(`${API_URL}/api/content/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.id,
+                    keyword: firstKeyword,
+                    volume: keywordData?.volume || 0,
+                    difficulty: keywordData?.difficulty || 0,
+                    language: 'fr',
+                    tone: 'professional',
+                    length: 'long'
+                })
+            }).then(() => {
+                console.log('First article generation started');
+            }).catch(e => {
+                console.error('Article generation error:', e);
+            });
+            
+            // Simulate generation time for UX
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            setArticleGenerated(true);
+            
+        } catch (error) {
+            console.error('Generation error:', error);
+        } finally {
+            setGeneratingArticle(false);
+        }
+    };
+
     const handleFinish = async () => {
         if (!user) return;
         
@@ -190,6 +263,10 @@ const Onboarding = () => {
                     console.error('Expert request error:', expertError);
                 }
             }
+
+            // Store flag to show banner on calendar page
+            localStorage.setItem('seoagent_show_connect_banner', 'true');
+            localStorage.setItem('seoagent_first_article_generating', 'true');
 
             navigate('/subscription?from=onboarding');
         } catch (error) {
@@ -483,39 +560,57 @@ const Onboarding = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <div className="ready-icon">
-                            <PartyPopper size={64} />
-                        </div>
-                        <h2>C'est prêt ! 🎉</h2>
-                        <p>Votre SEO Agent est configuré et prêt à créer du contenu.</p>
-                        
-                        <div className="summary-card">
-                            <div className="summary-item">
-                                <Globe size={18} />
-                                <span>{formData.websiteUrl}</span>
-                            </div>
-                            {selectedKeywords.length > 0 && (
-                                <div className="summary-item">
-                                    <Target size={18} />
-                                    <span>{selectedKeywords.length} mot(s)-clé(s) sélectionné(s)</span>
+                        {generatingArticle ? (
+                            <>
+                                <div className="generating-icon">
+                                    <Loader2 size={48} className="spin" />
                                 </div>
-                            )}
-                            <div className="summary-item">
-                                <Send size={18} />
-                                <span>
-                                    {formData.hasWordPress 
-                                        ? 'Publication WordPress' 
-                                        : formData.needsExpertHelp 
-                                            ? 'Un expert vous contactera'
-                                            : 'Publication manuelle'}
-                                </span>
-                            </div>
-                        </div>
+                                <h2>Préparation en cours... ✨</h2>
+                                <p>Nous planifions vos articles et générons votre premier contenu SEO.</p>
+                                
+                                <div className="generating-status">
+                                    <div className="status-item done">
+                                        <CheckCircle2 size={18} />
+                                        <span>Mots-clés ajoutés au calendrier</span>
+                                    </div>
+                                    <div className="status-item active">
+                                        <Loader2 size={18} className="spin" />
+                                        <span>Génération du 1er article...</span>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="ready-icon">
+                                    <PartyPopper size={64} />
+                                </div>
+                                <h2>C'est prêt ! 🎉</h2>
+                                <p>Vos articles sont planifiés et le premier est en cours de génération.</p>
+                                
+                                <div className="summary-card">
+                                    <div className="summary-item success">
+                                        <Calendar size={18} />
+                                        <span>{selectedKeywords.length} article(s) planifié(s) dans votre calendrier</span>
+                                    </div>
+                                    <div className="summary-item success">
+                                        <FileText size={18} />
+                                        <span>1er article en cours de génération sur "{selectedKeywords[0]}"</span>
+                                    </div>
+                                    <div className="summary-item">
+                                        <Globe size={18} />
+                                        <span>{formData.websiteUrl}</span>
+                                    </div>
+                                </div>
 
-                        <div className="next-steps">
-                            <h4>Prochaine étape</h4>
-                            <p>Choisissez votre plan pour commencer à générer du contenu SEO optimisé !</p>
-                        </div>
+                                <div className="activation-cta">
+                                    <Sparkles size={20} />
+                                    <div>
+                                        <strong>Activez votre agent pour continuer</strong>
+                                        <p>Débloquez la génération illimitée et la publication automatique</p>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </motion.div>
                 );
 
@@ -601,3 +696,4 @@ const Onboarding = () => {
 };
 
 export default Onboarding;
+
