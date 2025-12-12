@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
-    CheckCircle, Zap, Users, MessageSquare, Globe, 
+    CheckCircle, Zap, Users, FileText, Globe, 
     Headphones, Shield, ArrowRight, Loader2, Gift,
-    Clock, CreditCard, Star
+    Clock, CreditCard, Star, Sparkles, Target, Image
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
-import { endpoints, CALENDLY_URL, STRIPE_PUBLIC_KEY } from '../config';
+import { API_URL } from '../config';
 import './Subscription.css';
 
 const Subscription = () => {
@@ -16,11 +16,12 @@ const Subscription = () => {
     const [searchParams] = useSearchParams();
     const fromOnboarding = searchParams.get('from') === 'onboarding';
     
-    const [selectedPlan, setSelectedPlan] = useState('growth');
-    const [billingCycle, setBillingCycle] = useState('monthly');
+    const [selectedPlan, setSelectedPlan] = useState('pro');
     const [loading, setLoading] = useState(false);
     const [currentSubscription, setCurrentSubscription] = useState(null);
-    const [spotsLeft, setSpotsLeft] = useState(7); // Simulated early bird spots
+    const [promoCode, setPromoCode] = useState('');
+    const [promoApplied, setPromoApplied] = useState(false);
+    const [spotsLeft] = useState(12);
 
     useEffect(() => {
         if (user) {
@@ -47,63 +48,55 @@ const Subscription = () => {
         {
             id: 'starter',
             name: 'Starter',
-            description: 'Pour petites boîtes / peu de leads',
-            price: 290,
-            priceDiscounted: 145,
+            description: 'Idéal pour démarrer votre stratégie SEO',
+            price: 59,
+            priceWithPromo: 29.50,
             features: [
-                'Jusqu\'à 150 leads/mois',
-                '1 formulaire connecté',
-                'Qualification IA automatique',
-                'Dashboard temps réel',
+                '10 articles SEO / mois',
+                'Recherche de mots-clés illimitée',
+                '1 site WordPress connecté',
+                'Génération d\'images IA',
+                'Planificateur de contenu',
                 'Support email'
             ],
             popular: false,
-            stripePriceId: 'price_1SajxUG7TquWCqOJa4tzeJAV' // À remplacer par votre Price ID Stripe
+            stripePriceId: 'price_1SdY1tG7TquWCqOJA8uMm6RS'
         },
         {
-            id: 'growth',
-            name: 'Growth',
-            description: 'Pour boîtes avec volume plus sérieux',
-            price: 590,
-            priceDiscounted: 295,
+            id: 'pro',
+            name: 'Pro',
+            description: 'Pour les créateurs de contenu sérieux',
+            price: 99,
+            priceWithPromo: 49.50,
             features: [
-                'Jusqu\'à 500 leads/mois',
-                '2 formulaires connectés',
-                'Tout Starter +',
-                'Campagnes de réactivation',
-                'Intégrations CRM',
-                'Support prioritaire'
+                '50 articles SEO / mois',
+                'Recherche de mots-clés illimitée',
+                '5 sites WordPress connectés',
+                'Génération d\'images IA illimitée',
+                'Planificateur de contenu avancé',
+                'Audit SEO de vos pages',
+                'Support prioritaire',
+                'API access'
             ],
             popular: true,
-            stripePriceId: 'price_1SajxyG7TquWCqOJvzhiE9tL' // À remplacer par votre Price ID Stripe
-        },
-        {
-            id: 'scale',
-            name: 'Scale',
-            description: 'Volume > 500 leads/mois',
-            price: null,
-            priceDiscounted: null,
-            features: [
-                'Leads illimités',
-                'Formulaires illimités',
-                'Tout Growth +',
-                'Multi-pays / langues',
-                'Intégrations CRM profondes',
-                'SLA garanti',
-                'Account manager dédié'
-            ],
-            popular: false,
-            stripePriceId: null
+            stripePriceId: 'price_1SdY29G7TquWCqOJ77Tya1j1'
         }
     ];
+
+    const applyPromoCode = () => {
+        if (promoCode.toUpperCase() === 'EARLYBIRD50') {
+            setPromoApplied(true);
+        } else {
+            alert('Code promo invalide');
+        }
+    };
 
     const handleStartTrial = async (planId, stripePriceId) => {
         setLoading(true);
         setSelectedPlan(planId);
         
         try {
-            // Call backend to create Stripe Checkout session
-            const response = await fetch(endpoints.createCheckoutSession, {
+            const response = await fetch(`${API_URL}/api/stripe/create-checkout-session`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -112,6 +105,7 @@ const Subscription = () => {
                     planId: planId,
                     priceId: stripePriceId,
                     trialDays: 7,
+                    promoCode: promoApplied ? 'EARLYBIRD50' : null,
                     successUrl: `${window.location.origin}/?activated=true`,
                     cancelUrl: `${window.location.origin}/subscription`
                 })
@@ -120,20 +114,15 @@ const Subscription = () => {
             const data = await response.json();
             
             if (data.url) {
-                // Redirect to Stripe Checkout
                 window.location.href = data.url;
             } else {
-                throw new Error(data.error || 'Erreur lors de la création de la session de paiement');
+                throw new Error(data.error || 'Erreur lors de la création de la session');
             }
         } catch (error) {
             console.error('Error starting trial:', error);
             alert('Erreur lors de la redirection vers le paiement. Veuillez réessayer.');
             setLoading(false);
         }
-    };
-
-    const handleContactSales = () => {
-        window.open(CALENDLY_URL, '_blank');
     };
 
     return (
@@ -144,11 +133,11 @@ const Subscription = () => {
                     {fromOnboarding && (
                         <div className="success-badge">
                             <CheckCircle size={18} />
-                            <span>Votre agent est configuré !</span>
+                            <span>Bienvenue sur SEO Agent !</span>
                         </div>
                     )}
-                    <h1>Activez votre agent IA</h1>
-                    <p>Choisissez votre plan pour commencer à qualifier vos leads automatiquement</p>
+                    <h1>Choisissez votre plan</h1>
+                    <p>Générez du contenu SEO optimisé automatiquement avec l'IA</p>
                 </div>
 
                 {/* Early Bird Banner */}
@@ -158,11 +147,39 @@ const Subscription = () => {
                     </div>
                     <div className="early-bird-content">
                         <div className="early-bird-title">
-                            🎉 Offre Early Bird : -50% pendant 6 mois
+                            🎉 Offre Early Bird : -50% avec le code EARLYBIRD50
                         </div>
                         <div className="early-bird-text">
-                            Plus que <strong>{spotsLeft} places</strong> disponibles à ce tarif
+                            Plus que <strong>{spotsLeft} places</strong> à ce tarif exclusif
                         </div>
+                    </div>
+                </div>
+
+                {/* Promo Code Input */}
+                <div className="promo-section">
+                    <div className="promo-input-wrapper">
+                        <input
+                            type="text"
+                            placeholder="Code promo"
+                            value={promoCode}
+                            onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                            disabled={promoApplied}
+                            className={promoApplied ? 'applied' : ''}
+                        />
+                        <button 
+                            onClick={applyPromoCode} 
+                            disabled={promoApplied || !promoCode}
+                            className={promoApplied ? 'applied' : ''}
+                        >
+                            {promoApplied ? (
+                                <>
+                                    <CheckCircle size={16} />
+                                    -50% appliqué !
+                                </>
+                            ) : (
+                                'Appliquer'
+                            )}
+                        </button>
                     </div>
                 </div>
 
@@ -170,26 +187,26 @@ const Subscription = () => {
                 <div className="trial-info">
                     <div className="trial-info-item">
                         <Clock size={18} />
-                        <span><strong>7 jours d'essai gratuit</strong> • 10 leads offerts</span>
+                        <span><strong>7 jours d'essai gratuit</strong> • 5 articles offerts</span>
                     </div>
                     <div className="trial-info-item">
                         <CreditCard size={18} />
-                        <span>Carte requise pour activer • Annulez à tout moment</span>
+                        <span>Carte requise • Annulez à tout moment</span>
                     </div>
                 </div>
 
                 {/* Plans Grid */}
-                <div className="plans-grid">
+                <div className="plans-grid two-plans">
                     {plans.map((plan) => (
                         <div 
                             key={plan.id}
                             className={`plan-card ${plan.popular ? 'popular' : ''} ${selectedPlan === plan.id ? 'selected' : ''}`}
-                            onClick={() => plan.price !== null && setSelectedPlan(plan.id)}
+                            onClick={() => setSelectedPlan(plan.id)}
                         >
                             {plan.popular && (
                                 <div className="popular-badge">
                                     <Star size={14} />
-                                    Populaire
+                                    Recommandé
                                 </div>
                             )}
                             
@@ -199,19 +216,22 @@ const Subscription = () => {
                             </div>
 
                             <div className="plan-price">
-                                {plan.price !== null ? (
+                                {promoApplied ? (
                                     <>
                                         <div className="price-row">
                                             <span className="price-old">{plan.price}€</span>
-                                            <span className="price-current">{plan.priceDiscounted}€</span>
+                                            <span className="price-current">{plan.priceWithPromo}€</span>
                                             <span className="price-period">/mois</span>
                                         </div>
-                                        <span className="price-note">pendant 6 mois, puis {plan.price}€/mois</span>
+                                        <span className="price-note promo">-50% avec EARLYBIRD50</span>
                                     </>
                                 ) : (
                                     <>
-                                        <span className="price-current">Sur mesure</span>
-                                        <span className="price-note">Tarif adapté à vos besoins</span>
+                                        <div className="price-row">
+                                            <span className="price-current">{plan.price}€</span>
+                                            <span className="price-period">/mois</span>
+                                        </div>
+                                        <span className="price-note">Utilisez EARLYBIRD50 pour -50%</span>
                                     </>
                                 )}
                             </div>
@@ -225,38 +245,48 @@ const Subscription = () => {
                                 ))}
                             </ul>
 
-                            {plan.price !== null ? (
-                                <button 
-                                    className={`btn-plan ${plan.popular ? 'primary' : 'secondary'}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleStartTrial(plan.id, plan.stripePriceId);
-                                    }}
-                                    disabled={loading && selectedPlan === plan.id}
-                                >
-                                    {loading && selectedPlan === plan.id ? (
-                                        <Loader2 size={18} className="animate-spin" />
-                                    ) : (
-                                        <>
-                                            Essayer 7 jours gratuit
-                                            <ArrowRight size={16} />
-                                        </>
-                                    )}
-                                </button>
-                            ) : (
-                                <button 
-                                    className="btn-plan secondary"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleContactSales();
-                                    }}
-                                >
-                                    Nous contacter
-                                    <ArrowRight size={16} />
-                                </button>
-                            )}
+                            <button 
+                                className={`btn-plan ${plan.popular ? 'primary' : 'secondary'}`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStartTrial(plan.id, plan.stripePriceId);
+                                }}
+                                disabled={loading && selectedPlan === plan.id}
+                            >
+                                {loading && selectedPlan === plan.id ? (
+                                    <Loader2 size={18} className="animate-spin" />
+                                ) : (
+                                    <>
+                                        Essayer 7 jours gratuit
+                                        <ArrowRight size={16} />
+                                    </>
+                                )}
+                            </button>
                         </div>
                     ))}
+                </div>
+
+                {/* What you get */}
+                <div className="features-summary">
+                    <h4>Ce que vous obtenez</h4>
+                    <div className="features-grid">
+                        <div className="feature-item">
+                            <FileText size={24} />
+                            <span>Articles SEO optimisés</span>
+                        </div>
+                        <div className="feature-item">
+                            <Target size={24} />
+                            <span>Recherche de mots-clés</span>
+                        </div>
+                        <div className="feature-item">
+                            <Globe size={24} />
+                            <span>Publication WordPress</span>
+                        </div>
+                        <div className="feature-item">
+                            <Image size={24} />
+                            <span>Images IA générées</span>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Guarantees */}
@@ -284,8 +314,8 @@ const Subscription = () => {
                             <p>Votre carte sera débitée du premier mois. Vous pouvez annuler à tout moment avant la fin de l'essai.</p>
                         </div>
                         <div className="faq-item">
-                            <strong>Les 10 leads offerts sont-ils décomptés de mon quota ?</strong>
-                            <p>Non, les 10 leads d'essai sont un bonus. Votre quota mensuel commence après l'activation.</p>
+                            <strong>Les articles générés sont-ils vraiment SEO-optimisés ?</strong>
+                            <p>Oui ! Notre IA génère des articles avec structure H1/H2/H3, meta descriptions, FAQ, et optimisation des mots-clés.</p>
                         </div>
                         <div className="faq-item">
                             <strong>Puis-je changer de plan plus tard ?</strong>
@@ -299,4 +329,3 @@ const Subscription = () => {
 };
 
 export default Subscription;
-

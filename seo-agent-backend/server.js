@@ -896,9 +896,9 @@ app.get('/api/agents/:userId', async (req, res) => {
 // Create Stripe Checkout Session
 app.post('/api/stripe/create-checkout-session', async (req, res) => {
     try {
-        const { userId, userEmail, planId, priceId, trialDays, successUrl, cancelUrl } = req.body;
+        const { userId, userEmail, planId, priceId, trialDays, promoCode, successUrl, cancelUrl } = req.body;
 
-        console.log('Stripe checkout request:', { userId, userEmail, planId, priceId, trialDays });
+        console.log('Stripe checkout request:', { userId, userEmail, planId, priceId, trialDays, promoCode });
 
         if (!userId || !planId || !priceId) {
             console.error('Missing required fields:', { userId, planId, priceId });
@@ -911,9 +911,10 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
             return res.status(500).json({ error: 'Stripe is not configured on the server' });
         }
 
-        // Coupon ID for -50% during 6 months (create in Stripe Dashboard)
+        // Coupon ID for -50% (EARLYBIRD50) - create in Stripe Dashboard
         const earlyBirdCouponId = process.env.STRIPE_EARLYBIRD_COUPON_ID || null;
-        console.log('Using coupon:', earlyBirdCouponId || 'none');
+        const shouldApplyCoupon = promoCode === 'EARLYBIRD50' && earlyBirdCouponId;
+        console.log('Promo code:', promoCode, '| Applying coupon:', shouldApplyCoupon ? earlyBirdCouponId : 'none');
 
         const sessionConfig = {
             customer_email: userEmail,
@@ -934,12 +935,13 @@ app.post('/api/stripe/create-checkout-session', async (req, res) => {
             cancel_url: cancelUrl,
             metadata: {
                 userId: userId,
-                planId: planId
+                planId: planId,
+                promoCode: promoCode || ''
             }
         };
 
-        // Apply early bird coupon if available and valid
-        if (earlyBirdCouponId) {
+        // Apply early bird coupon if promo code is valid
+        if (shouldApplyCoupon) {
             try {
                 // Verify coupon exists before adding it
                 await stripe.coupons.retrieve(earlyBirdCouponId);

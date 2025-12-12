@@ -347,6 +347,123 @@
     line-height: 1.6;
 }
 
+/* Promo Code Section */
+.promo-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.promo-input-wrapper {
+    display: flex;
+    gap: 10px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.promo-input-wrapper input {
+    flex: 1;
+    padding: 14px 18px;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+}
+
+.promo-input-wrapper input:focus {
+    outline: none;
+    border-color: #10B981;
+}
+
+.promo-input-wrapper input.applied {
+    border-color: #10B981;
+    background: #F0FDF4;
+    color: #10B981;
+}
+
+.promo-input-wrapper button {
+    padding: 14px 24px;
+    background: #111;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.promo-input-wrapper button:hover:not(:disabled) {
+    background: #333;
+}
+
+.promo-input-wrapper button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.promo-input-wrapper button.applied {
+    background: #10B981;
+}
+
+/* Two Plans Grid */
+.plans-grid.two-plans {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+    margin: 0 auto 40px;
+}
+
+.price-note.promo {
+    color: #10B981;
+    font-weight: 600;
+}
+
+/* Features Summary */
+.features-summary {
+    background: #F9FAFB;
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.features-summary h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 24px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #4B5563;
+}
+
+.feature-item svg {
+    color: #10B981;
+}
+
+.feature-item span {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .plans-grid {
@@ -356,8 +473,17 @@
         margin-right: auto;
     }
     
+    .plans-grid.two-plans {
+        grid-template-columns: 1fr;
+        max-width: 450px;
+    }
+    
     .plan-card.popular {
         order: -1;
+    }
+    
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -392,6 +518,15 @@
     .guarantees {
         flex-direction: column;
         align-items: center;
+        gap: 16px;
+    }
+    
+    .promo-input-wrapper {
+        flex-direction: column;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr 1fr;
         gap: 16px;
     }
 }
