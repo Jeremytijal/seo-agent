@@ -1,390 +1,308 @@
 /**
  * Keyword Research Service
- * Provides keyword data from multiple sources (DataForSEO, SerpAPI, or mock data for testing)
+ * Provides keyword data, volume, difficulty, and suggestions
+ * 
+ * For MVP: Uses OpenAI to generate realistic keyword data
+ * For Production: Integrate DataForSEO, SEMrush, or Ahrefs API
  */
 
 const { OpenAI } = require('openai');
 
-// Initialize OpenAI for keyword suggestions
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 /**
- * Search keywords using DataForSEO API
- * @param {string} keyword - Seed keyword to search
- * @param {string} country - Country code (fr, us, uk, etc.)
+ * Get keyword data with metrics
+ * @param {string} keyword - Search query/seed keyword
+ * @param {string} country - Country code (fr, us, etc.)
  * @param {string} language - Language code (fr, en, etc.)
+ * @returns {Array} Keyword data with metrics
  */
-async function searchKeywordsDataForSEO(keyword, country = 'fr', language = 'fr') {
-    const username = process.env.DATAFORSEO_LOGIN;
-    const password = process.env.DATAFORSEO_PASSWORD;
-
-    if (!username || !password) {
-        console.log('DataForSEO credentials not configured, using AI suggestions');
-        return await generateKeywordSuggestionsAI(keyword, country);
-    }
-
-    try {
-        const credentials = Buffer.from(`${username}:${password}`).toString('base64');
-        
-        // Keywords for Site endpoint - gives related keywords
-        const response = await fetch('https://api.dataforseo.com/v3/dataforseo_labs/google/related_keywords/live', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Basic ${credentials}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify([{
-                keyword: keyword,
-                location_code: getLocationCode(country),
-                language_code: language,
-                limit: 50,
-                include_seed_keyword: true,
-                include_serp_info: true
-            }])
-        });
-
-        const data = await response.json();
-
-        if (data.status_code !== 20000 || !data.tasks?.[0]?.result?.[0]?.items) {
-            console.error('DataForSEO error:', data);
-            return await generateKeywordSuggestionsAI(keyword, country);
-        }
-
-        const items = data.tasks[0].result[0].items;
-        
-        return items.map(item => ({
-            keyword: item.keyword_data?.keyword || item.keyword,
-            volume: item.keyword_data?.keyword_info?.search_volume || 0,
-            difficulty: item.keyword_data?.keyword_info?.competition_level === 'HIGH' ? 80 : 
-                       item.keyword_data?.keyword_info?.competition_level === 'MEDIUM' ? 50 : 20,
-            cpc: item.keyword_data?.keyword_info?.cpc || 0,
-            competition: item.keyword_data?.keyword_info?.competition || 0,
-            trend: item.keyword_data?.keyword_info?.monthly_searches?.slice(-6).map(m => m.search_volume) || [],
-            intent: detectSearchIntent(item.keyword_data?.keyword || item.keyword)
-        }));
-    } catch (error) {
-        console.error('DataForSEO API error:', error);
-        return await generateKeywordSuggestionsAI(keyword, country);
-    }
-}
-
-/**
- * Search keywords using SerpAPI
- */
-async function searchKeywordsSerpAPI(keyword, country = 'fr') {
-    const apiKey = process.env.SERPAPI_KEY;
-
-    if (!apiKey) {
-        console.log('SerpAPI key not configured, using AI suggestions');
-        return await generateKeywordSuggestionsAI(keyword, country);
-    }
-
-    try {
-        // Get Google autocomplete suggestions
-        const response = await fetch(
-            `https://serpapi.com/search.json?engine=google_autocomplete&q=${encodeURIComponent(keyword)}&gl=${country}&api_key=${apiKey}`
-        );
-        
-        const data = await response.json();
-
-        if (!data.suggestions) {
-            return await generateKeywordSuggestionsAI(keyword, country);
-        }
-
-        // SerpAPI autocomplete doesn't give volume, so we estimate
-        return data.suggestions.map((suggestion, index) => ({
-            keyword: suggestion.value,
-            volume: estimateVolume(index),
-            difficulty: Math.floor(Math.random() * 60) + 20,
-            cpc: (Math.random() * 2).toFixed(2),
-            competition: Math.random().toFixed(2),
-            trend: generateMockTrend(),
-            intent: detectSearchIntent(suggestion.value)
-        }));
-    } catch (error) {
-        console.error('SerpAPI error:', error);
-        return await generateKeywordSuggestionsAI(keyword, country);
-    }
-}
-
-/**
- * Generate keyword suggestions using AI when APIs are not available
- */
-async function generateKeywordSuggestionsAI(seedKeyword, country = 'fr') {
+async function getKeywordData(keyword, country = 'fr', language = 'fr') {
     try {
         const completion = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
-            messages: [{
-                role: 'system',
-                content: `Tu es un expert SEO. Génère des suggestions de mots-clés pertinents pour le SEO.
-                
-Pour chaque mot-clé, estime:
-- volume: volume de recherche mensuel estimé (nombre)
-- difficulty: difficulté SEO de 0 à 100
-- cpc: coût par clic estimé en euros
-- intent: "informational", "transactional", "navigational" ou "commercial"
+            messages: [
+                {
+                    role: 'system',
+                    content: `Tu es un expert SEO. Génère des données de mots-clés réalistes pour la recherche "${keyword}".
 
-Réponds UNIQUEMENT en JSON valide, sans markdown.`
-            }, {
-                role: 'user',
-                content: `Génère 20 mots-clés SEO pertinents pour "${seedKeyword}" en ${country === 'fr' ? 'français' : 'anglais'}.
-                
-Inclus:
-- Variantes longue traîne
-- Questions (comment, pourquoi, quel)
-- Comparaisons
-- Mots-clés transactionnels
+Pour chaque mot-clé, fournis:
+- keyword: le mot-clé
+- volume: volume de recherche mensuel estimé (100-50000)
+- difficulty: difficulté SEO (0-100)
+- cpc: coût par clic moyen en euros (0.10-15.00)
+- trend: tendance ("up", "down", "stable")
+- intent: intention de recherche ("informational", "transactional", "navigational", "commercial")
+- competition: niveau de compétition ("low", "medium", "high")
 
-Format JSON attendu:
-{
-    "keywords": [
-        {
-            "keyword": "mot clé exemple",
-            "volume": 1500,
-            "difficulty": 45,
-            "cpc": 0.85,
-            "intent": "informational"
-        }
-    ]
-}`
-            }],
-            temperature: 0.7,
-            max_tokens: 2000
+Retourne UNIQUEMENT un JSON valide avec un tableau "keywords" de 10-15 mots-clés pertinents.
+Inclus le mot-clé principal et des variations longue traîne.
+Les données doivent être réalistes pour le marché ${country.toUpperCase()} en ${language === 'fr' ? 'français' : 'anglais'}.`
+                },
+                {
+                    role: 'user',
+                    content: `Génère les données pour: "${keyword}"`
+                }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.7
         });
 
-        const content = completion.choices[0].message.content;
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        const result = JSON.parse(completion.choices[0].message.content);
         
-        if (!jsonMatch) {
-            throw new Error('No JSON found in response');
-        }
-
-        const result = JSON.parse(jsonMatch[0]);
-        
-        return result.keywords.map(kw => ({
+        // Add IDs to each keyword
+        return (result.keywords || []).map((kw, index) => ({
+            id: `kw_${Date.now()}_${index}`,
             ...kw,
-            trend: generateMockTrend(),
-            competition: (kw.difficulty / 100).toFixed(2),
-            source: 'ai'
+            searchedAt: new Date().toISOString()
         }));
     } catch (error) {
-        console.error('AI keyword generation error:', error);
-        // Return basic mock data as last resort
-        return generateMockKeywords(seedKeyword);
+        console.error('Keyword data error:', error);
+        throw error;
     }
 }
 
 /**
- * Get keyword data for a specific keyword
+ * Log keyword search to history
  */
-async function getKeywordData(keyword, country = 'fr') {
-    // Try DataForSEO first, then SerpAPI, then AI
-    if (process.env.DATAFORSEO_LOGIN) {
-        return await searchKeywordsDataForSEO(keyword, country);
-    } else if (process.env.SERPAPI_KEY) {
-        return await searchKeywordsSerpAPI(keyword, country);
-    } else {
-        return await generateKeywordSuggestionsAI(keyword, country);
+async function logKeywordSearch(supabase, userId, keyword, resultCount) {
+    try {
+        await supabase
+            .from('keyword_searches')
+            .insert({
+                user_id: userId,
+                keyword,
+                result_count: resultCount,
+                created_at: new Date().toISOString()
+            });
+    } catch (error) {
+        console.error('Error logging keyword search:', error);
+        // Don't throw - this is non-critical
     }
 }
 
 /**
- * Save favorite keyword to database
+ * Get search history
+ */
+async function getSearchHistory(supabase, userId, limit = 10) {
+    try {
+        const { data, error } = await supabase
+            .from('keyword_searches')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('Error fetching search history:', error);
+        return [];
+    }
+}
+
+/**
+ * Get favorite keywords for a user
+ */
+async function getFavoriteKeywords(supabase, userId) {
+    try {
+        const { data, error } = await supabase
+            .from('keywords')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('is_favorite', true)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('Error fetching favorites:', error);
+        return [];
+    }
+}
+
+/**
+ * Save a keyword to favorites
  */
 async function saveFavoriteKeyword(supabase, userId, keywordData) {
+    try {
     const { data, error } = await supabase
-        .from('favorite_keywords')
+            .from('keywords')
         .upsert({
             user_id: userId,
             keyword: keywordData.keyword,
             volume: keywordData.volume,
             difficulty: keywordData.difficulty,
             cpc: keywordData.cpc,
+                trend: keywordData.trend,
             intent: keywordData.intent,
-            trend: keywordData.trend,
-            created_at: new Date().toISOString()
+                competition: keywordData.competition,
+                is_favorite: true,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
         }, {
             onConflict: 'user_id,keyword'
         })
         .select()
         .single();
 
-    if (error) {
-        console.error('Error saving favorite keyword:', error);
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error('Error saving favorite:', error);
         throw error;
     }
-
-    return data;
 }
 
 /**
- * Get user's favorite keywords
- */
-async function getFavoriteKeywords(supabase, userId) {
-    const { data, error } = await supabase
-        .from('favorite_keywords')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        console.error('Error fetching favorite keywords:', error);
-        return [];
-    }
-
-    return data || [];
-}
-
-/**
- * Delete favorite keyword
+ * Delete a favorite keyword
  */
 async function deleteFavoriteKeyword(supabase, userId, keywordId) {
+    try {
     const { error } = await supabase
-        .from('favorite_keywords')
+            .from('keywords')
         .delete()
         .eq('id', keywordId)
         .eq('user_id', userId);
 
-    if (error) {
-        console.error('Error deleting favorite keyword:', error);
+        if (error) throw error;
+    } catch (error) {
+        console.error('Error deleting favorite:', error);
         throw error;
     }
-
-    return { success: true };
 }
 
 /**
- * Get keyword search history
+ * Get keyword suggestions (related, questions, longtail)
  */
-async function getSearchHistory(supabase, userId, limit = 10) {
-    const { data, error } = await supabase
-        .from('keyword_searches')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(limit);
+async function getKeywordSuggestions(seedKeyword, type = 'related') {
+    try {
+        let prompt = '';
+        
+        switch (type) {
+            case 'questions':
+                prompt = `Génère 10 questions fréquemment posées autour du sujet "${seedKeyword}". 
+                Format: questions naturelles que les utilisateurs tapent dans Google.
+                Inclus des questions "comment", "pourquoi", "quand", "où", "quel".`;
+                break;
+            case 'longtail':
+                prompt = `Génère 10 mots-clés longue traîne (3-6 mots) autour de "${seedKeyword}".
+                Ces mots-clés doivent être spécifiques et avoir moins de concurrence.`;
+                break;
+            default:
+                prompt = `Génère 10 mots-clés sémantiquement liés à "${seedKeyword}".
+                Inclus des synonymes, termes associés et variantes.`;
+        }
 
-    if (error) {
-        console.error('Error fetching search history:', error);
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Tu es un expert SEO français. ${prompt}
+                    
+Pour chaque suggestion, fournis:
+- keyword: le mot-clé/question
+- volume: volume estimé (50-10000)
+- difficulty: difficulté (0-100)
+- relevance: pertinence par rapport au mot-clé source (0-100)
+
+Retourne UNIQUEMENT un JSON valide avec un tableau "suggestions".`
+                },
+                { role: 'user', content: seedKeyword }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.8
+        });
+
+        const result = JSON.parse(completion.choices[0].message.content);
+        return result.suggestions || [];
+    } catch (error) {
+        console.error('Keyword suggestions error:', error);
         return [];
     }
-
-    return data || [];
 }
 
 /**
- * Log keyword search
+ * Analyze a keyword for SERP and competition
  */
-async function logKeywordSearch(supabase, userId, keyword, resultsCount) {
-    await supabase
-        .from('keyword_searches')
-        .insert({
-            user_id: userId,
-            keyword: keyword,
-            results_count: resultsCount,
-            created_at: new Date().toISOString()
+async function analyzeKeyword(keyword) {
+    try {
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Tu es un expert SEO. Analyse le mot-clé "${keyword}" et fournis:
+
+1. serp_features: features SERP probables (featured_snippet, people_also_ask, images, videos, local_pack, etc.)
+2. competition_level: niveau de compétition (low, medium, high)
+3. content_type: type de contenu qui rank (blog, product, category, tool, etc.)
+4. word_count_recommendation: nombre de mots recommandé pour ranker
+5. top_competitors: 3-5 types de sites qui rankent
+6. optimization_tips: 3-5 conseils SEO spécifiques
+7. related_entities: entités liées à inclure dans le contenu
+8. user_intent_analysis: analyse détaillée de l'intention
+
+Retourne UNIQUEMENT un JSON valide.`
+                },
+                { role: 'user', content: keyword }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.6
         });
-}
 
-// Helper functions
-
-function getLocationCode(country) {
-    const codes = {
-        'fr': 2250,  // France
-        'us': 2840,  // United States
-        'uk': 2826,  // United Kingdom
-        'de': 2276,  // Germany
-        'es': 2724,  // Spain
-        'it': 2380,  // Italy
-        'ca': 2124,  // Canada
-        'be': 2056,  // Belgium
-        'ch': 2756   // Switzerland
-    };
-    return codes[country.toLowerCase()] || 2250;
-}
-
-function detectSearchIntent(keyword) {
-    const kw = keyword.toLowerCase();
-    
-    // Transactional
-    if (/acheter|prix|tarif|devis|commander|achat|pas cher|promo|solde|buy|price|order|discount/.test(kw)) {
-        return 'transactional';
+        return JSON.parse(completion.choices[0].message.content);
+    } catch (error) {
+        console.error('Keyword analysis error:', error);
+        throw error;
     }
-    
-    // Commercial investigation
-    if (/meilleur|comparatif|avis|test|vs|versus|alternative|best|review|compare/.test(kw)) {
-        return 'commercial';
-    }
-    
-    // Navigational
-    if (/login|connexion|site|officiel|contact/.test(kw)) {
-        return 'navigational';
-    }
-    
-    // Default to informational
-    return 'informational';
 }
 
-function estimateVolume(index) {
-    // Higher ranked suggestions typically have more volume
-    const baseVolumes = [5000, 3500, 2800, 2200, 1800, 1400, 1100, 900, 700, 500];
-    return baseVolumes[index] || Math.floor(Math.random() * 400) + 100;
-}
+/**
+ * Cluster keywords into topic groups
+ */
+async function clusterKeywords(keywords) {
+    try {
+        const keywordList = keywords.map(k => typeof k === 'string' ? k : k.keyword).join('\n');
+        
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Tu es un expert SEO. Groupe ces mots-clés en clusters thématiques.
 
-function generateMockTrend() {
-    // Generate 6 months of trend data
-    const base = Math.floor(Math.random() * 1000) + 500;
-    return Array.from({ length: 6 }, () => 
-        Math.floor(base * (0.8 + Math.random() * 0.4))
-    );
-}
+Pour chaque cluster, fournis:
+- name: nom du cluster (thème principal)
+- keywords: liste des mots-clés du cluster
+- main_keyword: le mot-clé principal du cluster
+- content_suggestion: suggestion de type de contenu
 
-function generateMockKeywords(seedKeyword) {
-    const prefixes = ['comment', 'pourquoi', 'quel', 'meilleur', 'prix', 'avis', 'guide', 'tutoriel'];
-    const suffixes = ['2024', 'pas cher', 'en ligne', 'gratuit', 'professionnel', 'débutant', 'comparatif'];
-    
-    const keywords = [
-        { keyword: seedKeyword, volume: 5000, difficulty: 50, cpc: 1.20, intent: 'informational' }
-    ];
-    
-    prefixes.forEach((prefix, i) => {
-        keywords.push({
-            keyword: `${prefix} ${seedKeyword}`,
-            volume: Math.floor(Math.random() * 3000) + 500,
-            difficulty: Math.floor(Math.random() * 60) + 20,
-            cpc: (Math.random() * 2).toFixed(2),
-            intent: detectSearchIntent(`${prefix} ${seedKeyword}`)
+Retourne UNIQUEMENT un JSON valide avec un tableau "clusters".`
+                },
+                { role: 'user', content: keywordList }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.5
         });
-    });
-    
-    suffixes.forEach((suffix, i) => {
-        keywords.push({
-            keyword: `${seedKeyword} ${suffix}`,
-            volume: Math.floor(Math.random() * 2000) + 200,
-            difficulty: Math.floor(Math.random() * 50) + 15,
-            cpc: (Math.random() * 1.5).toFixed(2),
-            intent: detectSearchIntent(`${seedKeyword} ${suffix}`)
-        });
-    });
-    
-    return keywords.map(kw => ({
-        ...kw,
-        trend: generateMockTrend(),
-        competition: (kw.difficulty / 100).toFixed(2),
-        source: 'mock'
-    }));
+
+        const result = JSON.parse(completion.choices[0].message.content);
+        return result.clusters || [];
+    } catch (error) {
+        console.error('Cluster keywords error:', error);
+        return [];
+    }
 }
 
 module.exports = {
     getKeywordData,
-    searchKeywordsDataForSEO,
-    searchKeywordsSerpAPI,
-    generateKeywordSuggestionsAI,
-    saveFavoriteKeyword,
-    getFavoriteKeywords,
-    deleteFavoriteKeyword,
-    getSearchHistory,
     logKeywordSearch,
-    detectSearchIntent
+    getSearchHistory,
+    getFavoriteKeywords,
+    saveFavoriteKeyword,
+    deleteFavoriteKeyword,
+    getKeywordSuggestions,
+    analyzeKeyword,
+    clusterKeywords
 };
-
