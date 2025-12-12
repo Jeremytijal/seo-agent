@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-    Zap, Search, FileText, Image, Target, BarChart3, 
+    Sparkles, Search, FileText, Image, Target, BarChart3, 
     CheckCircle, ArrowRight, Globe, RefreshCw, Calendar,
     Shield, TrendingUp, Play, Star, ChevronRight, Menu, X,
-    ChevronDown, ExternalLink, Bot, Sparkles, PenTool,
-    Send, Layout, Rocket, Mail, Linkedin, Settings
+    ChevronDown, ExternalLink, Bot, PenTool, Zap,
+    Send, Layout, Rocket, Mail, Linkedin, Twitter, Users,
+    Clock, Award, Layers, MousePointer
 } from 'lucide-react';
 import { CALENDLY_URL } from '../config';
 import './LandingPage.css';
@@ -13,100 +14,161 @@ import './LandingPage.css';
 const LandingPage = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [openFaq, setOpenFaq] = useState(null);
+    const [scrolled, setScrolled] = useState(false);
 
-    const successCases = [
-        { company: "TechStartup", metric: "+340%", label: "Trafic organique", color: "#10B981" },
-        { company: "E-commerce Pro", metric: "50+", label: "Articles/mois", color: "#3B82F6" },
-        { company: "Agence Digital", metric: "x5", label: "Clients servis", color: "#8B5CF6" }
-    ];
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const features = [
         {
-            icon: <Search size={24} />,
-            title: "Audit SEO Complet",
-            description: "Analysez votre site en profondeur : technique, contenu, backlinks. Identifiez les problèmes et opportunités d'amélioration."
+            icon: <Search size={28} />,
+            title: "Audit SEO Intelligent",
+            description: "Analysez n'importe quel site en profondeur. Obtenez un score détaillé et des recommandations actionnables.",
+            color: "#10B981"
         },
         {
-            icon: <Target size={24} />,
+            icon: <Target size={28} />,
             title: "Recherche de Mots-clés",
-            description: "Découvrez les mots-clés les plus pertinents pour votre niche avec analyse de la concurrence et volume de recherche."
+            description: "Découvrez des opportunités cachées avec notre analyse de mots-clés alimentée par l'IA.",
+            color: "#3B82F6"
         },
         {
-            icon: <PenTool size={24} />,
-            title: "Création de Contenu SEO",
-            description: "Générez des articles de blog optimisés, avec la bonne structure, les bons mots-clés et un ton adapté à votre marque."
+            icon: <PenTool size={28} />,
+            title: "Contenu SEO Automatisé",
+            description: "Générez des articles optimisés de 2000+ mots en quelques secondes, prêts à être publiés.",
+            color: "#8B5CF6"
         },
         {
-            icon: <Image size={24} />,
-            title: "Génération d'Images",
-            description: "Créez automatiquement des visuels uniques et optimisés pour illustrer vos articles et améliorer l'engagement."
+            icon: <Image size={28} />,
+            title: "Images IA Uniques",
+            description: "Créez des visuels originaux pour chaque article. Fini les photos stock génériques.",
+            color: "#F59E0B"
+        },
+        {
+            icon: <Send size={28} />,
+            title: "Publication Automatique",
+            description: "Publiez directement sur WordPress, Webflow ou Framer. Zéro copier-coller.",
+            color: "#EC4899"
+        },
+        {
+            icon: <BarChart3 size={28} />,
+            title: "Analytics & Suivi",
+            description: "Suivez vos positions et mesurez l'impact de chaque article sur votre trafic.",
+            color: "#14B8A6"
         }
     ];
 
-    const integrations = [
-        { name: "WordPress", icon: "🔌", description: "Publication directe sur votre site WordPress" },
-        { name: "Framer", icon: "🎨", description: "Intégration native avec Framer Sites" },
-        { name: "Webflow", icon: "🌐", description: "Publiez directement sur Webflow CMS" }
+    const steps = [
+        { 
+            number: "01", 
+            title: "Auditez", 
+            desc: "Analysez votre site ou celui de vos concurrents",
+            visual: "🔍"
+        },
+        { 
+            number: "02", 
+            title: "Planifiez", 
+            desc: "Identifiez les mots-clés à fort potentiel",
+            visual: "🎯"
+        },
+        { 
+            number: "03", 
+            title: "Créez", 
+            desc: "Générez des articles SEO optimisés avec l'IA",
+            visual: "✨"
+        },
+        { 
+            number: "04", 
+            title: "Publiez", 
+            desc: "Publiez automatiquement sur votre CMS",
+            visual: "🚀"
+        }
+    ];
+
+    const testimonials = [
+        {
+            quote: "J'ai multiplié mon trafic organique par 5 en 3 mois. L'IA génère du contenu que Google adore.",
+            author: "Marie Dupont",
+            role: "Fondatrice, TechStartup.io",
+            avatar: "MD"
+        },
+        {
+            quote: "On publie 50 articles/mois au lieu de 5. La qualité est bluffante, mes clients sont ravis.",
+            author: "Thomas Martin",
+            role: "CEO, Agence Digitale",
+            avatar: "TM"
+        },
+        {
+            quote: "L'intégration WordPress est parfaite. Je génère, je valide, c'est en ligne. Simple et efficace.",
+            author: "Sophie Bernard",
+            role: "Blogueuse Pro",
+            avatar: "SB"
+        }
     ];
 
     const faqs = [
         {
             question: "Comment l'IA génère-t-elle du contenu SEO de qualité ?",
-            answer: "Notre IA analyse votre niche, vos concurrents et les meilleures pratiques SEO pour créer du contenu unique, bien structuré et optimisé pour les moteurs de recherche. Chaque article est personnalisé selon votre ton et votre audience."
+            answer: "Notre IA analyse votre niche, vos concurrents et les meilleures pratiques SEO pour créer du contenu unique, bien structuré et optimisé. Chaque article inclut les balises, la structure de titres et la densité de mots-clés optimales."
         },
         {
-            question: "L'audit SEO détecte-t-il tous les problèmes techniques ?",
-            answer: "Oui, notre audit couvre les aspects techniques (vitesse, mobile, crawlabilité), le contenu (balises, structure, mots-clés) et les backlinks. Vous recevez un rapport détaillé avec des recommandations priorisées."
+            question: "Le contenu généré est-il détectable par Google ?",
+            answer: "Notre IA produit du contenu naturel et original, indétectable par les outils de détection. Nous utilisons des techniques avancées pour garantir un style humain et authentique."
         },
         {
-            question: "Puis-je réviser le contenu avant publication ?",
-            answer: "Absolument ! Vous pouvez prévisualiser, modifier et approuver chaque article avant publication. L'IA apprend de vos corrections pour s'améliorer continuellement."
+            question: "Puis-je modifier le contenu avant publication ?",
+            answer: "Absolument ! Vous avez un contrôle total. Prévisualisez, modifiez et approuvez chaque article. L'IA apprend de vos corrections pour s'améliorer continuellement."
         },
         {
-            question: "Comment fonctionne l'intégration WordPress/Webflow/Framer ?",
-            answer: "Connectez votre site en quelques clics via API. L'agent publie directement vos articles avec les images, les balises méta et la mise en forme optimale."
+            question: "Quels CMS sont supportés ?",
+            answer: "WordPress, Webflow et Framer sont entièrement intégrés. Connectez votre site en quelques clics et publiez automatiquement avec les images et les méta-données."
         },
         {
-            question: "Les images générées sont-elles libres de droits ?",
-            answer: "Oui, toutes les images sont générées par IA et vous appartiennent entièrement. Vous pouvez les utiliser sans restriction sur votre site et vos réseaux sociaux."
+            question: "Combien d'articles puis-je générer ?",
+            answer: "Cela dépend de votre plan : Starter (10/mois), Growth (50/mois) ou Scale (illimité). Tous les plans incluent les images IA et l'accès aux audits SEO."
         },
         {
-            question: "Combien d'articles puis-je générer par mois ?",
-            answer: "Cela dépend de votre plan. Le plan Starter permet 10 articles/mois, Growth 50 articles/mois, et Scale offre une génération illimitée."
+            question: "Y a-t-il une période d'essai ?",
+            answer: "Oui ! Testez gratuitement pendant 7 jours avec toutes les fonctionnalités. Aucune carte bancaire requise pour commencer."
         }
     ];
 
-    const workflowSteps = [
-        { icon: <Search size={20} />, title: "Audit & Analyse", desc: "Analysez votre site et identifiez les opportunités" },
-        { icon: <Target size={20} />, title: "Stratégie Mots-clés", desc: "Trouvez les mots-clés à fort potentiel" },
-        { icon: <PenTool size={20} />, title: "Création Contenu", desc: "Générez des articles SEO optimisés" },
-        { icon: <Image size={20} />, title: "Visuels IA", desc: "Créez des images uniques pour chaque article" },
-        { icon: <Send size={20} />, title: "Publication Auto", desc: "Publiez directement sur votre CMS" }
+    const logos = [
+        { name: "WordPress", icon: "🔵" },
+        { name: "Webflow", icon: "🟣" },
+        { name: "Framer", icon: "⚫" },
+        { name: "Shopify", icon: "🟢" },
     ];
 
     return (
-        <div className="landing-page patagon-style">
+        <div className="landing-outrank">
             {/* Navigation */}
-            <nav className="landing-nav">
+            <nav className={`nav-outrank ${scrolled ? 'scrolled' : ''}`}>
                 <div className="nav-container">
                     <Link to="/" className="nav-logo">
-                        <div className="logo-icon seo-green">
-                            <Sparkles size={18} />
+                        <div className="logo-icon-new">
+                            <Layers size={20} />
                         </div>
-                        <span>Agent IA SEO</span>
+                        <span>Agent SEO</span>
                     </Link>
 
                     <div className="nav-links desktop-only">
                         <a href="#features">Fonctionnalités</a>
                         <a href="#how-it-works">Comment ça marche</a>
-                        <a href="#faq">FAQ</a>
                         <a href="#pricing">Tarifs</a>
+                        <a href="#faq">FAQ</a>
                     </div>
 
                     <div className="nav-actions desktop-only">
-                        <Link to="/login" className="btn-nav-text">Connexion</Link>
-                        <Link to="/signup" className="btn-nav-primary">
-                            Commencer gratuitement
+                        <Link to="/login" className="btn-nav-ghost">Connexion</Link>
+                        <Link to="/signup" className="btn-nav-cta">
+                            Démarrer gratuitement
+                            <ArrowRight size={16} />
                         </Link>
                     </div>
 
@@ -116,84 +178,145 @@ const LandingPage = () => {
                 </div>
 
                 {mobileMenuOpen && (
-                    <div className="mobile-menu">
+                    <div className="mobile-menu-outrank">
                         <a href="#features" onClick={() => setMobileMenuOpen(false)}>Fonctionnalités</a>
                         <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>Comment ça marche</a>
-                        <a href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
                         <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Tarifs</a>
-                        <div className="mobile-menu-actions">
+                        <a href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
+                        <div className="mobile-menu-cta">
                             <Link to="/login">Connexion</Link>
-                            <Link to="/signup" className="btn-nav-primary">Commencer</Link>
+                            <Link to="/signup" className="btn-nav-cta">Démarrer</Link>
                         </div>
                     </div>
                 )}
             </nav>
 
             {/* Hero Section */}
-            <section className="hero-section">
-                <div className="hero-content">
-                    <span className="hero-eyebrow">🚀 Automatisez votre SEO avec l'IA</span>
-                    <h1>Créez du contenu SEO<br />qui se classe vraiment</h1>
-                    <p className="hero-description">
-                        Agent IA SEO audite votre site, trouve les meilleurs mots-clés, 
-                        crée des articles optimisés avec images et les publie automatiquement sur votre CMS.
-                    </p>
-                    
-                    <div className="hero-badges">
-                        <div className="hero-badge">
-                            <Search size={16} />
-                            <span>Audit SEO</span>
-                        </div>
-                        <div className="hero-badge">
-                            <Target size={16} />
-                            <span>Mots-clés</span>
-                        </div>
-                        <div className="hero-badge">
-                            <PenTool size={16} />
-                            <span>Contenu IA</span>
-                        </div>
-                        <div className="hero-badge">
-                            <Send size={16} />
-                            <span>Publication auto</span>
-                        </div>
+            <section className="hero-outrank">
+                <div className="hero-bg-effects">
+                    <div className="hero-glow"></div>
+                    <div className="hero-grid"></div>
+                </div>
+                
+                <div className="hero-content-outrank">
+                    <div className="hero-badge-new">
+                        <Sparkles size={14} />
+                        <span>Propulsé par l'IA</span>
                     </div>
 
-                    <div className="hero-actions">
-                        <Link to="/signup" className="btn-primary-large">
+                    <h1>
+                        Créez du contenu SEO<br />
+                        <span className="gradient-text">qui se classe vraiment</span>
+                    </h1>
+                    
+                    <p className="hero-desc">
+                        Audit, mots-clés, rédaction, images, publication. 
+                        Un seul outil IA pour dominer Google et multiplier votre trafic organique.
+                    </p>
+
+                    <div className="hero-cta-group">
+                        <Link to="/signup" className="btn-hero-primary">
                             Essayer gratuitement
+                            <ArrowRight size={18} />
                         </Link>
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-secondary-large">
-                            Réserver une démo
+                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-secondary">
+                            <Play size={18} />
+                            Voir la démo
                         </a>
                     </div>
+
+                    <div className="hero-proof">
+                        <div className="hero-avatars">
+                            <div className="avatar">M</div>
+                            <div className="avatar">T</div>
+                            <div className="avatar">S</div>
+                            <div className="avatar">+</div>
+                        </div>
+                        <div className="hero-proof-text">
+                            <div className="stars">
+                                {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="#FBBF24" color="#FBBF24" />)}
+                            </div>
+                            <span>Utilisé par <strong>500+</strong> créateurs de contenu</span>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Hero Visual */}
+                <div className="hero-visual">
+                    <div className="hero-dashboard">
+                        <div className="dash-header-preview">
+                            <div className="dash-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <span className="dash-title">Agent SEO — Tableau de bord</span>
+                        </div>
+                        <div className="dash-content-preview">
+                            <div className="dash-sidebar-mini">
+                                <div className="sidebar-item active"><Search size={14} /></div>
+                                <div className="sidebar-item"><Target size={14} /></div>
+                                <div className="sidebar-item"><PenTool size={14} /></div>
+                                <div className="sidebar-item"><Image size={14} /></div>
+                                <div className="sidebar-item"><Send size={14} /></div>
+                            </div>
+                            <div className="dash-main-preview">
+                                <div className="dash-card-mini score">
+                                    <span className="card-label">Score SEO</span>
+                                    <span className="card-value green">87</span>
+                        </div>
+                                <div className="dash-card-mini">
+                                    <span className="card-label">Articles ce mois</span>
+                                    <span className="card-value">24</span>
+                                </div>
+                                <div className="dash-card-mini">
+                                    <span className="card-label">Mots-clés suivis</span>
+                                    <span className="card-value">156</span>
+                                </div>
+                                <div className="dash-article-preview">
+                                    <div className="article-row">
+                                        <FileText size={14} />
+                                        <span>10 Techniques SEO pour 2025</span>
+                                        <span className="status published">Publié</span>
+                                    </div>
+                                    <div className="article-row">
+                                        <FileText size={14} />
+                                        <span>Guide du référencement local</span>
+                                        <span className="status scheduled">Programmé</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        </div>
             </section>
 
-            {/* Success Cases */}
-            <section className="success-section">
-                <div className="success-container">
-                    {successCases.map((item, index) => (
-                        <div key={index} className="success-card">
-                            <span className="success-company">{item.company}</span>
-                            <span className="success-metric" style={{ color: item.color }}>{item.metric}</span>
-                            <span className="success-label">{item.label}</span>
+            {/* Logos Section */}
+            <section className="logos-section">
+                <p>Publiez automatiquement sur vos plateformes favorites</p>
+                <div className="logos-row">
+                    {logos.map((logo, i) => (
+                        <div key={i} className="logo-item">
+                            <span className="logo-emoji">{logo.icon}</span>
+                            <span>{logo.name}</span>
                         </div>
                     ))}
                 </div>
             </section>
 
-            {/* Main Value Prop */}
-            <section id="features" className="value-section">
-                <div className="value-container">
-                    <div className="value-header">
-                        <span className="section-eyebrow">Fonctionnalités</span>
-                        <h2>Tout ce qu'il faut pour<br />dominer Google</h2>
+            {/* Features Section */}
+            <section id="features" className="features-outrank">
+                <div className="section-container">
+                    <div className="section-header-outrank">
+                        <span className="section-tag">Fonctionnalités</span>
+                        <h2>Tout ce dont vous avez besoin<br />pour dominer le SEO</h2>
+                        <p>Un agent IA complet qui gère votre stratégie de contenu de A à Z.</p>
                     </div>
 
-                    <div className="features-grid-4">
+                    <div className="features-grid-outrank">
                         {features.map((feature, index) => (
-                            <div key={index} className="feature-card-new">
-                                <div className="feature-icon-new">{feature.icon}</div>
+                            <div key={index} className="feature-card-outrank">
+                                <div className="feature-icon-outrank" style={{ background: `${feature.color}20`, color: feature.color }}>
+                                    {feature.icon}
+                                </div>
                                 <h3>{feature.title}</h3>
                                 <p>{feature.description}</p>
                             </div>
@@ -202,233 +325,209 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* Integrations Section */}
-            <section className="integrations-section">
-                <div className="integrations-container">
-                    <div className="integrations-header">
-                        <span className="section-eyebrow">Intégrations</span>
-                        <h2>Publiez sur votre CMS en un clic</h2>
-                        <p>Connectez votre site et laissez l'IA publier automatiquement vos articles optimisés.</p>
+            {/* How it Works */}
+            <section id="how-it-works" className="hiw-outrank">
+                <div className="section-container">
+                    <div className="section-header-outrank">
+                        <span className="section-tag">Comment ça marche</span>
+                        <h2>4 étapes vers le succès SEO</h2>
                     </div>
 
-                    <div className="integrations-grid">
-                        {integrations.map((integration, index) => (
-                            <div key={index} className="integration-card-new">
-                                <span className="integration-icon-large">{integration.icon}</span>
-                                <h3>{integration.name}</h3>
-                                <p>{integration.description}</p>
-                                <span className="integration-status">
-                                    <CheckCircle size={14} /> Disponible
-                                </span>
+                    <div className="steps-outrank">
+                        {steps.map((step, index) => (
+                            <div key={index} className="step-outrank">
+                                <div className="step-visual">{step.visual}</div>
+                                <div className="step-number">{step.number}</div>
+                                <h3>{step.title}</h3>
+                                <p>{step.desc}</p>
                             </div>
                         ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* How it Works - Workflow */}
-            <section id="how-it-works" className="howitworks-section">
-                <div className="howitworks-container">
-                    <span className="section-eyebrow">Comment ça marche</span>
-                    <h2>De l'audit à la publication en 5 étapes</h2>
-
-                    <div className="workflow-steps">
-                        {workflowSteps.map((step, index) => (
-                            <div key={index} className="workflow-step">
-                                <div className="step-icon">{step.icon}</div>
-                                <div className="step-content">
-                                    <span className="step-number">0{index + 1}</span>
-                                    <h3>{step.title}</h3>
-                                    <p>{step.desc}</p>
-                                </div>
-                                {index < workflowSteps.length - 1 && (
-                                    <div className="step-arrow">
-                                        <ArrowRight size={20} />
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="howitworks-cta">
-                        <Link to="/signup" className="btn-primary-large">Commencer maintenant</Link>
                     </div>
                 </div>
             </section>
 
             {/* Stats Section */}
-            <section className="stats-section">
-                <div className="stats-container">
-                    <div className="stat-box">
-                        <span className="stat-number">+500%</span>
-                        <span className="stat-desc">Gain de temps vs rédaction manuelle</span>
-                    </div>
-                    <div className="stat-box">
-                        <span className="stat-number">100%</span>
-                        <span className="stat-desc">Contenu unique et optimisé SEO</span>
-                    </div>
-                    <div className="stat-box">
-                        <span className="stat-number">3</span>
-                        <span className="stat-desc">CMS supportés (WordPress, Framer, Webflow)</span>
-                    </div>
-                    <div className="stat-box">
-                        <span className="stat-number">24/7</span>
-                        <span className="stat-desc">Création et publication automatique</span>
+            <section className="stats-outrank">
+                <div className="section-container">
+                    <div className="stats-grid-outrank">
+                        <div className="stat-outrank">
+                            <span className="stat-value-big">500%</span>
+                            <span className="stat-label">Gain de temps</span>
+                        </div>
+                        <div className="stat-outrank">
+                            <span className="stat-value-big">50+</span>
+                            <span className="stat-label">Articles/mois</span>
+                        </div>
+                        <div className="stat-outrank">
+                            <span className="stat-value-big">3</span>
+                            <span className="stat-label">CMS intégrés</span>
+                        </div>
+                        <div className="stat-outrank">
+                            <span className="stat-value-big">24/7</span>
+                            <span className="stat-label">Automatisation</span>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* FAQ Section */}
-            <section id="faq" className="faq-section">
-                <div className="faq-container">
-                    <span className="section-eyebrow">FAQ</span>
-                    <h2>Questions fréquentes</h2>
-                    <p className="faq-subtitle">Tout ce que vous devez savoir sur Agent IA SEO</p>
+            {/* Testimonials */}
+            <section className="testimonials-outrank">
+                <div className="section-container">
+                    <div className="section-header-outrank">
+                        <span className="section-tag">Témoignages</span>
+                        <h2>Ils nous font confiance</h2>
+                    </div>
 
-                    <div className="faq-list">
+                    <div className="testimonials-grid">
+                        {testimonials.map((t, index) => (
+                            <div key={index} className="testimonial-card">
+                                <div className="testimonial-stars">
+                                    {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="#FBBF24" color="#FBBF24" />)}
+                                </div>
+                                <p className="testimonial-quote">"{t.quote}"</p>
+                                <div className="testimonial-author">
+                                    <div className="author-avatar">{t.avatar}</div>
+                                    <div className="author-info">
+                                        <span className="author-name">{t.author}</span>
+                                        <span className="author-role">{t.role}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Pricing Section */}
+            <section id="pricing" className="pricing-outrank">
+                <div className="section-container">
+                    <div className="section-header-outrank">
+                        <span className="section-tag">Tarifs</span>
+                        <h2>Simple, transparent, sans surprise</h2>
+                        <p>Commencez gratuitement, évoluez selon vos besoins.</p>
+                    </div>
+
+                    <div className="pricing-banner-outrank">
+                        <Zap size={20} />
+                        <span><strong>Offre de lancement :</strong> -50% pendant 3 mois pour les 100 premiers inscrits</span>
+                    </div>
+
+                    <div className="pricing-grid-outrank">
+                        {/* Starter */}
+                        <div className="pricing-card-outrank">
+                            <div className="pricing-tier">Starter</div>
+                            <div className="pricing-price-outrank">
+                                <span className="price-old">58€</span>
+                                <span className="price-new">29€</span>
+                                    <span className="price-period">/mois</span>
+                            </div>
+                            <p className="pricing-desc-outrank">Pour démarrer votre stratégie SEO</p>
+                            <ul className="pricing-list-outrank">
+                                <li><CheckCircle size={18} /> 10 articles/mois</li>
+                                <li><CheckCircle size={18} /> Audit SEO basique</li>
+                                <li><CheckCircle size={18} /> Recherche mots-clés</li>
+                                <li><CheckCircle size={18} /> Images IA incluses</li>
+                                <li><CheckCircle size={18} /> 1 site connecté</li>
+                            </ul>
+                            <Link to="/signup" className="btn-pricing-outrank">
+                                Commencer gratuitement
+                            </Link>
+                        </div>
+
+                        {/* Growth - Featured */}
+                        <div className="pricing-card-outrank featured">
+                            <div className="pricing-popular">Le plus populaire</div>
+                            <div className="pricing-tier">Growth</div>
+                            <div className="pricing-price-outrank">
+                                <span className="price-old">118€</span>
+                                <span className="price-new">59€</span>
+                                    <span className="price-period">/mois</span>
+                            </div>
+                            <p className="pricing-desc-outrank">Pour scaler votre contenu</p>
+                            <ul className="pricing-list-outrank">
+                                <li><CheckCircle size={18} /> 50 articles/mois</li>
+                                <li><CheckCircle size={18} /> Audit SEO complet</li>
+                                <li><CheckCircle size={18} /> Analyse concurrence</li>
+                                <li><CheckCircle size={18} /> Images IA illimitées</li>
+                                <li><CheckCircle size={18} /> 3 sites connectés</li>
+                                <li><CheckCircle size={18} /> Support prioritaire</li>
+                            </ul>
+                            <Link to="/signup" className="btn-pricing-outrank featured">
+                                Commencer gratuitement
+                            </Link>
+                        </div>
+
+                        {/* Scale */}
+                        <div className="pricing-card-outrank">
+                            <div className="pricing-tier">Scale</div>
+                            <div className="pricing-price-outrank">
+                                <span className="price-new">Sur mesure</span>
+                            </div>
+                            <p className="pricing-desc-outrank">Pour les agences & gros volumes</p>
+                            <ul className="pricing-list-outrank">
+                                <li><CheckCircle size={18} /> Articles illimités</li>
+                                <li><CheckCircle size={18} /> Tout Growth +</li>
+                                <li><CheckCircle size={18} /> Sites illimités</li>
+                                <li><CheckCircle size={18} /> API access</li>
+                                <li><CheckCircle size={18} /> White-label</li>
+                                <li><CheckCircle size={18} /> Account manager</li>
+                            </ul>
+                            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-pricing-outrank">
+                                Nous contacter
+                            </a>
+                        </div>
+                    </div>
+
+                    <p className="pricing-note-outrank">
+                        ✨ Essai gratuit 7 jours • Sans engagement • Satisfait ou remboursé
+                    </p>
+                </div>
+            </section>
+
+            {/* FAQ Section */}
+            <section id="faq" className="faq-outrank">
+                <div className="section-container">
+                    <div className="section-header-outrank">
+                        <span className="section-tag">FAQ</span>
+                        <h2>Questions fréquentes</h2>
+                    </div>
+
+                    <div className="faq-list-outrank">
                         {faqs.map((faq, index) => (
                             <div 
                                 key={index} 
-                                className={`faq-item ${openFaq === index ? 'open' : ''}`}
-                                onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                                className={`faq-item-outrank ${openFaq === index ? 'open' : ''}`}
                             >
-                                <div className="faq-question">
+                                <button 
+                                    className="faq-question-outrank"
+                                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                                >
                                     <span>{faq.question}</span>
-                                    <ChevronDown size={20} className="faq-icon" />
-                                </div>
+                                    <ChevronDown size={20} className="faq-chevron" />
+                                </button>
                                 {openFaq === index && (
-                                    <div className="faq-answer">
+                                    <div className="faq-answer-outrank">
                                         {faq.answer}
                                     </div>
                                 )}
                             </div>
                         ))}
                     </div>
-
-                    <div className="faq-contact">
-                        <p>Encore des questions ?</p>
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-text-link">Contactez-nous →</a>
-                    </div>
-                </div>
-            </section>
-
-            {/* Pricing Section */}
-            <section id="pricing" className="pricing-section">
-                <div className="pricing-container">
-                    <span className="section-eyebrow">Tarifs</span>
-                    <h2>Choisissez votre plan SEO</h2>
-                    <p className="pricing-subtitle">Commencez gratuitement, évoluez selon vos besoins</p>
-
-                    {/* Early Bird Banner */}
-                    <div className="early-bird-banner">
-                        <div className="early-bird-icon">🎁</div>
-                        <div className="early-bird-content">
-                            <span className="early-bird-title">Offre de lancement</span>
-                            <span className="early-bird-text">-50% pendant 3 mois pour les premiers utilisateurs</span>
-                        </div>
-                        <div className="early-bird-badge">Limité</div>
-                    </div>
-
-                    <div className="pricing-grid">
-                        {/* Starter */}
-                        <div className="pricing-card">
-                            <div className="pricing-header">
-                                <h3>Starter</h3>
-                                <p className="pricing-desc">Pour démarrer votre stratégie SEO</p>
-                            </div>
-                            <div className="pricing-price">
-                                <div className="price-wrapper">
-                                    <span className="price-old">58€</span>
-                                    <span className="price">29€</span>
-                                    <span className="price-period">/mois</span>
-                                </div>
-                                <span className="price-note">pendant 3 mois, puis 58€/mois</span>
-                            </div>
-                            <ul className="pricing-features">
-                                <li><CheckCircle size={18} /> 10 articles/mois</li>
-                                <li><CheckCircle size={18} /> Audit SEO basique</li>
-                                <li><CheckCircle size={18} /> Recherche mots-clés</li>
-                                <li><CheckCircle size={18} /> Images IA incluses</li>
-                                <li><CheckCircle size={18} /> 1 site connecté</li>
-                                <li><CheckCircle size={18} /> Support email</li>
-                            </ul>
-                            <Link to="/signup" className="btn-pricing">
-                                Commencer gratuitement
-                            </Link>
-                        </div>
-
-                        {/* Growth - Featured */}
-                        <div className="pricing-card featured">
-                            <div className="pricing-badge">Populaire</div>
-                            <div className="pricing-header">
-                                <h3>Growth</h3>
-                                <p className="pricing-desc">Pour scaler votre contenu</p>
-                            </div>
-                            <div className="pricing-price">
-                                <div className="price-wrapper">
-                                    <span className="price-old">118€</span>
-                                    <span className="price">59€</span>
-                                    <span className="price-period">/mois</span>
-                                </div>
-                                <span className="price-note">pendant 3 mois, puis 118€/mois</span>
-                            </div>
-                            <ul className="pricing-features">
-                                <li><CheckCircle size={18} /> 50 articles/mois</li>
-                                <li><CheckCircle size={18} /> Audit SEO complet</li>
-                                <li><CheckCircle size={18} /> Analyse concurrence</li>
-                                <li><CheckCircle size={18} /> Images IA illimitées</li>
-                                <li><CheckCircle size={18} /> 3 sites connectés</li>
-                                <li><CheckCircle size={18} /> Publication automatique</li>
-                                <li><CheckCircle size={18} /> Support prioritaire</li>
-                            </ul>
-                            <Link to="/signup" className="btn-pricing featured">
-                                Commencer gratuitement
-                            </Link>
-                        </div>
-
-                        {/* Scale */}
-                        <div className="pricing-card">
-                            <div className="pricing-header">
-                                <h3>Scale</h3>
-                                <p className="pricing-desc">Pour les agences & gros volumes</p>
-                            </div>
-                            <div className="pricing-price">
-                                <div className="price-wrapper">
-                                    <span className="price">Sur mesure</span>
-                                </div>
-                                <span className="price-note">Contactez-nous</span>
-                            </div>
-                            <ul className="pricing-features">
-                                <li><CheckCircle size={18} /> Articles illimités</li>
-                                <li><CheckCircle size={18} /> Tout Growth +</li>
-                                <li><CheckCircle size={18} /> Sites illimités</li>
-                                <li><CheckCircle size={18} /> API access</li>
-                                <li><CheckCircle size={18} /> White-label option</li>
-                                <li><CheckCircle size={18} /> Account manager dédié</li>
-                                <li><CheckCircle size={18} /> SLA garanti</li>
-                            </ul>
-                            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-pricing">
-                                Nous contacter
-                            </a>
-                        </div>
-                    </div>
-
-                    <p className="pricing-guarantee">
-                        ✨ Essai gratuit 7 jours • Sans engagement • Satisfait ou remboursé
-                    </p>
                 </div>
             </section>
 
             {/* CTA Section */}
-            <section className="cta-section">
-                <div className="cta-container">
-                    <h2>Prêt à booster votre SEO avec l'IA ?</h2>
-                    <p>Rejoignez les entreprises qui automatisent leur stratégie de contenu</p>
-                    <div className="cta-actions">
-                        <Link to="/signup" className="btn-cta-primary">
+            <section className="cta-outrank">
+                <div className="cta-container-outrank">
+                    <div className="cta-glow"></div>
+                    <h2>Prêt à dominer Google ?</h2>
+                    <p>Rejoignez les créateurs qui automatisent leur SEO avec l'IA.</p>
+                    <div className="cta-buttons">
+                        <Link to="/signup" className="btn-cta-main">
                             Commencer gratuitement
+                            <ArrowRight size={18} />
                         </Link>
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-cta-secondary">
+                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-cta-alt">
                             Réserver une démo
                         </a>
                     </div>
@@ -436,52 +535,48 @@ const LandingPage = () => {
             </section>
 
             {/* Footer */}
-            <footer className="landing-footer">
-                <div className="footer-container">
-                    <div className="footer-main">
-                        <div className="footer-brand">
-                            <div className="footer-logo">
-                                <div className="logo-icon seo-green">
-                                    <Sparkles size={18} />
+            <footer className="footer-outrank">
+                <div className="footer-container-outrank">
+                    <div className="footer-top">
+                        <div className="footer-brand-outrank">
+                            <div className="footer-logo-outrank">
+                                <div className="logo-icon-new">
+                                    <Layers size={18} />
                                 </div>
-                                <span>Agent IA SEO</span>
+                                <span>Agent SEO</span>
                             </div>
                             <p>L'agent IA qui automatise votre stratégie SEO de A à Z.</p>
-                            <div className="footer-social">
-                                <a href="#" aria-label="LinkedIn"><Linkedin size={20} /></a>
-                                <a href="#" aria-label="Website"><Globe size={20} /></a>
-                                <a href="#" aria-label="Email"><Mail size={20} /></a>
+                            <div className="footer-social-outrank">
+                                <a href="#"><Twitter size={18} /></a>
+                                <a href="#"><Linkedin size={18} /></a>
+                                <a href="#"><Mail size={18} /></a>
                             </div>
                         </div>
 
-                        <div className="footer-links">
-                            <div className="footer-column">
+                        <div className="footer-links-outrank">
+                            <div className="footer-col">
                                 <h4>Produit</h4>
                                 <a href="#features">Fonctionnalités</a>
                                 <a href="#pricing">Tarifs</a>
                                 <a href="#how-it-works">Comment ça marche</a>
                             </div>
-                            <div className="footer-column">
+                            <div className="footer-col">
                                 <h4>Ressources</h4>
                                 <a href="#">Blog</a>
                                 <a href="#">Documentation</a>
                                 <a href="#">Guides SEO</a>
                             </div>
-                            <div className="footer-column">
-                                <h4>Entreprise</h4>
-                                <a href="#">À propos</a>
-                                <a href="#">Contact</a>
-                                <a href="#">Partenaires</a>
+                            <div className="footer-col">
+                                <h4>Légal</h4>
+                                <Link to="/privacy">Confidentialité</Link>
+                                <Link to="/terms">CGU</Link>
+                                <a href="#">Mentions légales</a>
                             </div>
                         </div>
                     </div>
 
-                    <div className="footer-bottom">
-                        <p>© 2025 Agent IA SEO. Tous droits réservés.</p>
-                        <div className="footer-legal">
-                            <Link to="/privacy">Politique de confidentialité</Link>
-                            <Link to="/terms">CGU</Link>
-                        </div>
+                    <div className="footer-bottom-outrank">
+                        <p>© 2025 Agent SEO. Tous droits réservés.</p>
                     </div>
                 </div>
             </footer>
