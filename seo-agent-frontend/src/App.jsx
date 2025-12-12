@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
+import ContentPlanner from './pages/ContentPlanner';
 import AuditSEO from './pages/AuditSEO';
 import Keywords from './pages/Keywords';
 import Contents from './pages/Contents';
@@ -42,6 +43,7 @@ function App() {
 
             <Route path="/" element={<Layout />}>
               <Route index element={<Dashboard />} />
+              <Route path="planner" element={<ContentPlanner />} />
               <Route path="audit" element={<AuditSEO />} />
               <Route path="keywords" element={<Keywords />} />
               <Route path="contents" element={<Contents />} />

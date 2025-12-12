@@ -13,6 +13,7 @@ import {
   X,
   Mail,
   Calendar,
+  CalendarDays,
   Zap,
   TrendingUp,
   HelpCircle,
@@ -103,6 +104,7 @@ const Sidebar = () => {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Tableau de bord', path: '/' },
+    { icon: CalendarDays, label: 'Planificateur', path: '/planner' },
     { icon: Search, label: 'Audit SEO', path: '/audit' },
     { icon: Target, label: 'Mots-clés', path: '/keywords' },
     { icon: PenTool, label: 'Contenus', path: '/contents' },
