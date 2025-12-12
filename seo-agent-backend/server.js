@@ -35,8 +35,6 @@ const wordpressService = require('./services/wordpressService');
 const expertRequestService = require('./services/expertRequestService');
 const keywordService = require('./services/keywordService');
 const contentService = require('./services/contentService');
-const keywordService = require('./services/keywordService');
-const contentService = require('./services/contentService');
 
 console.log('✅ Services loaded');
 
