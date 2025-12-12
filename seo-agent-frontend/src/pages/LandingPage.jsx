@@ -6,7 +6,7 @@ import {
     Shield, TrendingUp, Play, Star, ChevronRight, Menu, X,
     ChevronDown, ExternalLink, Bot, PenTool, Zap,
     Send, Layout, Rocket, Mail, Linkedin, Twitter, Users,
-    Clock, Award, Layers, MousePointer
+    Clock, Award, Layers, MousePointer, Plus, Eye, Loader2
 } from 'lucide-react';
 import { CALENDLY_URL } from '../config';
 import './LandingPage.css';
@@ -326,20 +326,87 @@ const LandingPage = () => {
                             </ul>
                         </div>
                         <div className="screenshot-wrapper">
-                            <div className="screenshot-placeholder dashboard">
-                                <div className="screenshot-header">
-                                    <div className="screenshot-dots">
+                            <div className="dashboard-preview">
+                                <div className="preview-header">
+                                    <div className="preview-dots">
                                         <span></span><span></span><span></span>
                                     </div>
-                                    <span>Dashboard SEO Agent</span>
+                                    <span>Tableau de bord - SEO Agent</span>
                                 </div>
-                                <div className="screenshot-content">
-                                    <div className="screenshot-kpis">
-                                        <div className="kpi-item">24 Articles</div>
-                                        <div className="kpi-item">156 Mots-clés</div>
-                                        <div className="kpi-item">8 Audits</div>
+                                <div className="preview-content dashboard-preview-content">
+                                    {/* Quick Actions */}
+                                    <div className="preview-quick-actions">
+                                        <div className="preview-action">
+                                            <div className="preview-action-icon" style={{ background: '#10B98115', color: '#10B981' }}>
+                                                <Search size={16} />
+                                            </div>
+                                            <span>Nouvel audit SEO</span>
+                                        </div>
+                                        <div className="preview-action">
+                                            <div className="preview-action-icon" style={{ background: '#3B82F615', color: '#3B82F6' }}>
+                                                <Target size={16} />
+                                            </div>
+                                            <span>Recherche mots-clés</span>
+                                        </div>
+                                        <div className="preview-action">
+                                            <div className="preview-action-icon" style={{ background: '#8B5CF615', color: '#8B5CF6' }}>
+                                                <PenTool size={16} />
+                                            </div>
+                                            <span>Créer un article</span>
+                                        </div>
                                     </div>
-                                    <div className="screenshot-chart">📊 Graphique activité</div>
+                                    
+                                    {/* KPIs */}
+                                    <div className="preview-kpis">
+                                        <div className="preview-kpi-card">
+                                            <div className="preview-kpi-icon green">
+                                                <FileText size={18} />
+                                            </div>
+                                            <div className="preview-kpi-content">
+                                                <span className="preview-kpi-value">24</span>
+                                                <span className="preview-kpi-label">Articles créés</span>
+                                            </div>
+                                            <div className="preview-kpi-badge">
+                                                <TrendingUp size={10} />
+                                                <span>+5</span>
+                                            </div>
+                                        </div>
+                                        <div className="preview-kpi-card">
+                                            <div className="preview-kpi-icon blue">
+                                                <Send size={18} />
+                                            </div>
+                                            <div className="preview-kpi-content">
+                                                <span className="preview-kpi-value">18</span>
+                                                <span className="preview-kpi-label">Publiés</span>
+                                            </div>
+                                        </div>
+                                        <div className="preview-kpi-card">
+                                            <div className="preview-kpi-icon purple">
+                                                <Target size={18} />
+                                            </div>
+                                            <div className="preview-kpi-content">
+                                                <span className="preview-kpi-value">156</span>
+                                                <span className="preview-kpi-label">Mots-clés suivis</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Recent Content */}
+                                    <div className="preview-recent">
+                                        <h4>Contenu récent</h4>
+                                        <div className="preview-articles">
+                                            <div className="preview-article-item">
+                                                <FileText size={14} />
+                                                <span>10 Techniques SEO pour 2025</span>
+                                                <span className="preview-status published">Publié</span>
+                                            </div>
+                                            <div className="preview-article-item">
+                                                <FileText size={14} />
+                                                <span>Guide du référencement local</span>
+                                                <span className="preview-status scheduled">Programmé</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -360,18 +427,63 @@ const LandingPage = () => {
                             </ul>
                         </div>
                         <div className="screenshot-wrapper">
-                            <div className="screenshot-placeholder planner">
-                                <div className="screenshot-header">
-                                    <div className="screenshot-dots">
+                            <div className="planner-preview">
+                                <div className="preview-header">
+                                    <div className="preview-dots">
                                         <span></span><span></span><span></span>
                                     </div>
                                     <span>Planificateur de contenu</span>
                                 </div>
-                                <div className="screenshot-content">
-                                    <div className="calendar-preview">
-                                        <div className="calendar-day">13</div>
-                                        <div className="calendar-day">16</div>
-                                        <div className="calendar-day">19</div>
+                                <div className="preview-content planner-preview-content">
+                                    {/* Stats */}
+                                    <div className="preview-planner-stats">
+                                        <div className="preview-stat">
+                                            <span className="preview-stat-value">4</span>
+                                            <span className="preview-stat-label">Ce mois</span>
+                                        </div>
+                                        <div className="preview-stat">
+                                            <span className="preview-stat-value">0</span>
+                                            <span className="preview-stat-label">Publiés</span>
+                                        </div>
+                                        <div className="preview-stat">
+                                            <span className="preview-stat-value">3</span>
+                                            <span className="preview-stat-label">Planifiés</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Calendar Grid */}
+                                    <div className="preview-calendar-grid">
+                                        {['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'].map(day => (
+                                            <div key={day} className="preview-cal-day-header">{day}</div>
+                                        ))}
+                                        {Array.from({ length: 35 }, (_, i) => {
+                                            const day = i + 1;
+                                            const hasArticle = [13, 16, 19].includes(day);
+                                            return (
+                                                <div key={i} className={`preview-cal-day ${hasArticle ? 'has-article' : ''}`}>
+                                                    <span className="preview-cal-day-number">{day <= 31 ? day : ''}</span>
+                                                    {hasArticle && (
+                                                        <div className="preview-cal-article">
+                                                            <div className="preview-cal-article-type">Guide</div>
+                                                            <div className="preview-cal-article-title">
+                                                                {day === 13 && 'Article sur "SFR avis"'}
+                                                                {day === 16 && 'Article sur "mot-clé 2"'}
+                                                                {day === 19 && 'Article sur "mot-clé 3"'}
+                                                            </div>
+                                                            <div className="preview-cal-article-meta">
+                                                                <span>Vol: 1381</span>
+                                                                <span>KD: 34</span>
+                                                            </div>
+                                                            {day === 13 && (
+                                                                <div className="preview-cal-article-status generating">
+                                                                    <Loader2 size={10} className="spin" /> En génération
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
@@ -393,18 +505,69 @@ const LandingPage = () => {
                             </ul>
                         </div>
                         <div className="screenshot-wrapper">
-                            <div className="screenshot-placeholder content">
-                                <div className="screenshot-header">
-                                    <div className="screenshot-dots">
+                            <div className="content-preview">
+                                <div className="preview-header">
+                                    <div className="preview-dots">
                                         <span></span><span></span><span></span>
                                     </div>
                                     <span>Création d'article</span>
                                 </div>
-                                <div className="screenshot-content">
-                                    <div className="article-preview">
-                                        <div className="article-title">📝 Titre de l'article</div>
-                                        <div className="article-meta">2000 mots • SEO optimisé</div>
-                                        <div className="article-content">Contenu généré par IA...</div>
+                                <div className="preview-content content-preview-content">
+                                    {/* Form */}
+                                    <div className="preview-form">
+                                        <div className="preview-form-group">
+                                            <label>Mot-clé principal</label>
+                                            <input type="text" value="techniques SEO 2025" readOnly />
+                                        </div>
+                                        <div className="preview-form-row">
+                                            <div className="preview-form-group">
+                                                <label>Tone</label>
+                                                <select value="professional" readOnly>
+                                                    <option>Professionnel</option>
+                                                </select>
+                                            </div>
+                                            <div className="preview-form-group">
+                                                <label>Longueur</label>
+                                                <select value="2000" readOnly>
+                                                    <option>2000 mots</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <button className="preview-generate-btn">
+                                            <Sparkles size={16} />
+                                            Générer l'article
+                                        </button>
+                                    </div>
+
+                                    {/* Article Preview */}
+                                    <div className="preview-article-result">
+                                        <div className="preview-article-header">
+                                            <h3>10 Techniques SEO pour 2025 : Guide Complet</h3>
+                                            <div className="preview-article-meta">
+                                                <span>2000 mots</span>
+                                                <span>•</span>
+                                                <span>SEO optimisé</span>
+                                                <span>•</span>
+                                                <span>FAQ inclus</span>
+                                            </div>
+                                        </div>
+                                        <div className="preview-article-content">
+                                            <p>Le référencement naturel évolue constamment. En 2025, de nouvelles techniques SEO permettent d'améliorer significativement votre visibilité sur Google...</p>
+                                            <h4>1. Optimisation Core Web Vitals</h4>
+                                            <p>Les Core Web Vitals sont devenus un facteur de classement majeur. Optimisez votre temps de chargement, votre stabilité visuelle...</p>
+                                            <h4>2. Contenu optimisé pour E-E-A-T</h4>
+                                            <p>Google privilégie le contenu démontrant Expertise, Expérience, Autorité et Fiabilité...</p>
+                                        </div>
+                                        <div className="preview-article-actions">
+                                            <button className="preview-action-btn">
+                                                <Eye size={14} />
+                                                Prévisualiser
+                                            </button>
+                                            <button className="preview-action-btn primary">
+                                                <Send size={14} />
+                                                Publier
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
