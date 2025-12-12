@@ -2037,6 +2037,29 @@ app.post('/api/keywords/search', async (req, res) => {
     }
 });
 
+// Analyze website and competitors to generate keyword suggestions
+app.post('/api/keywords/analyze-competitors', async (req, res) => {
+    try {
+        const { websiteUrl, competitors = [] } = req.body;
+
+        if (!websiteUrl) {
+            return res.status(400).json({ error: 'Website URL is required' });
+        }
+
+        console.log(`Analyzing competitors for: ${websiteUrl} with ${competitors.length} competitors`);
+
+        const result = await keywordService.analyzeCompetitors(websiteUrl, competitors);
+
+        res.json(result);
+    } catch (error) {
+        console.error('Analyze competitors error:', error);
+        res.status(500).json({ 
+            error: 'Failed to analyze competitors',
+            message: error.message 
+        });
+    }
+});
+
 // Get favorite keywords
 app.get('/api/keywords/favorites/:userId', async (req, res) => {
     try {

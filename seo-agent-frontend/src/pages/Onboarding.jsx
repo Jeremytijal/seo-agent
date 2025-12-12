@@ -348,12 +348,12 @@ const Onboarding = () => {
                             {analyzing ? (
                                 <>
                                     <Loader2 size={20} className="spin" />
-                                    Analyse en cours...
+                                    Analyse des sites en cours... (30-60s)
                                 </>
                             ) : (
                                 <>
                                     <Search size={20} />
-                                    Analyser et trouver des mots-clés
+                                    Analyser les sites et trouver des mots-clés
                                 </>
                             )}
                         </button>
@@ -368,14 +368,15 @@ const Onboarding = () => {
                         animate={{ opacity: 1, y: 0 }}
                     >
                         <h2>Mots-clés suggérés 🎯</h2>
-                        <p>Sélectionnez ceux qui vous intéressent. On les ajoutera à votre liste pour créer du contenu.</p>
+                        <p>Basés sur l'analyse de votre site et de vos concurrents. Sélectionnez ceux qui vous intéressent pour créer du contenu optimisé.</p>
                         
                         <div className="keywords-grid">
                             {suggestedKeywords.map((kw, index) => (
                                 <button
                                     key={index}
-                                    className={`keyword-card ${selectedKeywords.includes(kw.keyword) ? 'selected' : ''}`}
+                                    className={`keyword-card ${selectedKeywords.includes(kw.keyword) ? 'selected' : ''} ${kw.opportunity ? `opportunity-${kw.opportunity}` : ''}`}
                                     onClick={() => toggleKeyword(kw.keyword)}
+                                    title={kw.reason || ''}
                                 >
                                     <div className="keyword-main">
                                         <span className="keyword-text">{kw.keyword}</span>
@@ -383,6 +384,20 @@ const Onboarding = () => {
                                             <CheckCircle2 size={18} className="check" />
                                         )}
                                     </div>
+                                    {kw.opportunity && (
+                                        <div className="keyword-opportunity">
+                                            <span className={`opportunity-badge ${kw.opportunity}`}>
+                                                {kw.opportunity === 'high' ? '🔥 Haute opportunité' : 
+                                                 kw.opportunity === 'medium' ? '⭐ Opportunité' : 
+                                                 '💡 Potentiel'}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {kw.reason && (
+                                        <div className="keyword-reason" title={kw.reason}>
+                                            {kw.reason}
+                                        </div>
+                                    )}
                                     <div className="keyword-stats">
                                         <span className="stat">
                                             <TrendingUp size={14} />

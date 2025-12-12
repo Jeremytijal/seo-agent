@@ -347,6 +347,56 @@
     color: #10B981;
 }
 
+.keyword-opportunity {
+    margin: 8px 0 4px;
+}
+
+.opportunity-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.opportunity-badge.high {
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    color: #92400E;
+}
+
+.opportunity-badge.medium {
+    background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+    color: #1E40AF;
+}
+
+.opportunity-badge.low {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.keyword-card.opportunity-high {
+    border-left: 4px solid #F59E0B;
+}
+
+.keyword-card.opportunity-medium {
+    border-left: 4px solid #3B82F6;
+}
+
+.keyword-reason {
+    font-size: 0.8rem;
+    color: #6B7280;
+    margin-top: 6px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .keyword-stats .difficulty {
     padding: 2px 8px;
     border-radius: 10px;
