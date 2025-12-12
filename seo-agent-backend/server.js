@@ -31,6 +31,8 @@ const templateService = require('./services/templateService');
 const tagService = require('./services/tagService');
 const blacklistService = require('./services/blacklistService');
 const emailService = require('./services/emailService');
+const wordpressService = require('./services/wordpressService');
+const expertRequestService = require('./services/expertRequestService');
 
 console.log('✅ Services loaded');
 
@@ -1782,6 +1784,217 @@ app.post('/api/notify/new-user', async (req, res) => {
     } catch (error) {
         console.error('Error sending new user notifications:', error);
         res.status(500).json({ error: 'Failed to send notifications' });
+    }
+});
+
+// =============================================================================
+// WORDPRESS INTEGRATION API
+// =============================================================================
+
+// Test WordPress connection
+app.post('/api/wordpress/test-connection', async (req, res) => {
+    try {
+        const { siteUrl, username, appPassword } = req.body;
+
+        if (!siteUrl || !username || !appPassword) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'URL, nom d\'utilisateur et mot de passe requis' 
+            });
+        }
+
+        console.log(`Testing WordPress connection to: ${siteUrl}`);
+        const result = await wordpressService.testConnection(siteUrl, username, appPassword);
+        
+        res.json(result);
+    } catch (error) {
+        console.error('WordPress test connection error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Save WordPress site connection
+app.post('/api/wordpress/connect', async (req, res) => {
+    try {
+        const { userId, siteUrl, siteName, username, appPassword } = req.body;
+
+        if (!userId || !siteUrl || !username || !appPassword) {
+            return res.status(400).json({ error: 'Données de connexion manquantes' });
+        }
+
+        // First test the connection
+        const testResult = await wordpressService.testConnection(siteUrl, username, appPassword);
+        
+        if (!testResult.success) {
+            return res.status(400).json({ 
+                success: false, 
+                error: testResult.error 
+            });
+        }
+
+        // Save to database
+        const site = await wordpressService.saveSiteConnection(supabase, userId, {
+            url: siteUrl,
+            siteName: siteName || testResult.siteInfo?.url,
+            username,
+            appPassword
+        });
+
+        console.log(`WordPress site connected for user ${userId}: ${siteUrl}`);
+
+        res.json({
+            success: true,
+            site: {
+                id: site.id,
+                url: site.site_url,
+                name: site.site_name,
+                platform: site.platform,
+                status: site.status
+            },
+            user: testResult.user,
+            capabilities: testResult.capabilities
+        });
+    } catch (error) {
+        console.error('WordPress connect error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get connected sites for a user
+app.get('/api/sites/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const sites = await wordpressService.getConnectedSites(supabase, userId);
+        res.json({ sites });
+    } catch (error) {
+        console.error('Error fetching sites:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Delete a connected site
+app.delete('/api/sites/:userId/:siteId', async (req, res) => {
+    try {
+        const { userId, siteId } = req.params;
+        await wordpressService.deleteSiteConnection(supabase, userId, siteId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting site:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Publish article to WordPress
+app.post('/api/wordpress/publish', async (req, res) => {
+    try {
+        const { userId, siteId, article } = req.body;
+
+        if (!userId || !siteId || !article) {
+            return res.status(400).json({ error: 'Données manquantes' });
+        }
+
+        // Get site from database
+        const { data: site } = await supabase
+            .from('connected_sites')
+            .select('*')
+            .eq('id', siteId)
+            .eq('user_id', userId)
+            .single();
+
+        if (!site) {
+            return res.status(404).json({ error: 'Site non trouvé' });
+        }
+
+        const result = await wordpressService.publishArticle({
+            url: site.site_url,
+            username: site.username,
+            password_encrypted: site.password_encrypted
+        }, article);
+
+        if (result.success) {
+            // Update last sync
+            await supabase
+                .from('connected_sites')
+                .update({ last_sync: new Date().toISOString() })
+                .eq('id', siteId);
+        }
+
+        res.json(result);
+    } catch (error) {
+        console.error('WordPress publish error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get WordPress categories
+app.get('/api/wordpress/:siteId/categories', async (req, res) => {
+    try {
+        const { siteId } = req.params;
+        const { userId } = req.query;
+
+        const { data: site } = await supabase
+            .from('connected_sites')
+            .select('*')
+            .eq('id', siteId)
+            .eq('user_id', userId)
+            .single();
+
+        if (!site) {
+            return res.status(404).json({ error: 'Site non trouvé' });
+        }
+
+        const categories = await wordpressService.getCategories({
+            url: site.site_url,
+            username: site.username,
+            password_encrypted: site.password_encrypted
+        });
+
+        res.json({ categories });
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================================
+// EXPERT REQUEST API - Free help for site connections
+// =============================================================================
+
+// Create expert request
+app.post('/api/expert-request', async (req, res) => {
+    try {
+        const { userId, platform, siteUrl, message, phone, name, email } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ error: 'User ID requis' });
+        }
+
+        const result = await expertRequestService.createExpertRequest(supabase, userId, {
+            type: 'site_connection',
+            platform: platform || 'wordpress',
+            siteUrl,
+            message,
+            phone,
+            name,
+            email
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error('Expert request error:', error);
+        res.status(500).json({ error: 'Erreur lors de la création de la demande' });
+    }
+});
+
+// Get user's expert requests
+app.get('/api/expert-requests/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const requests = await expertRequestService.getUserRequests(supabase, userId);
+        res.json({ requests });
+    } catch (error) {
+        console.error('Error fetching expert requests:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
