@@ -5,7 +5,7 @@
 .subscription-page {
     min-height: 100vh;
     background: linear-gradient(180deg, #F5F3EF 0%, #ffffff 100%);
-    padding: 40px 24px;
+    padding: 24px 24px 40px;
 }
 
 .subscription-container {
@@ -16,7 +16,7 @@
 /* Header */
 .subscription-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 
 .success-badge {
@@ -33,10 +33,10 @@
 }
 
 .subscription-header h1 {
-    font-size: 2.25rem;
+    font-size: 2rem;
     font-weight: 800;
     color: #0a0a0a;
-    margin: 0 0 12px 0;
+    margin: 0 0 8px 0;
     letter-spacing: -0.02em;
 }
 
@@ -52,10 +52,10 @@
     align-items: center;
     justify-content: center;
     gap: 16px;
-    padding: 20px 32px;
+    padding: 16px 24px;
     background: linear-gradient(135deg, #10B981 0%, #059669 100%);
     border-radius: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     color: white;
 }
 
@@ -93,7 +93,8 @@
     background: #fff;
     border: 1px solid #e5e5e5;
     border-radius: 12px;
-    margin-bottom: 40px;
+    margin: 0 auto 32px;
+    max-width: 800px;
 }
 
 .trial-info-item {
@@ -417,7 +418,7 @@
 .plans-grid.two-plans {
     grid-template-columns: repeat(2, 1fr);
     max-width: 800px;
-    margin: 0 auto 40px;
+    margin: 0 auto 24px;
 }
 
 .price-note.promo {

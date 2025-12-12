@@ -145,18 +145,6 @@ const Subscription = () => {
                     </div>
                 </div>
 
-                {/* Trial Info */}
-                <div className="trial-info">
-                    <div className="trial-info-item">
-                        <Clock size={18} />
-                        <span><strong>7 jours d'essai gratuit</strong> • 5 articles offerts</span>
-                    </div>
-                    <div className="trial-info-item">
-                        <CreditCard size={18} />
-                        <span>Carte requise • Annulez à tout moment</span>
-                    </div>
-                </div>
-
                 {/* Plans Grid */}
                 <div className="plans-grid two-plans">
                     {plans.map((plan) => (
@@ -216,6 +204,18 @@ const Subscription = () => {
                             </button>
                         </div>
                     ))}
+                </div>
+
+                {/* Trial Info */}
+                <div className="trial-info">
+                    <div className="trial-info-item">
+                        <Clock size={18} />
+                        <span><strong>7 jours d'essai gratuit</strong> • 5 articles offerts</span>
+                    </div>
+                    <div className="trial-info-item">
+                        <CreditCard size={18} />
+                        <span>Carte requise • Annulez à tout moment</span>
+                    </div>
                 </div>
 
                 {/* What you get */}
