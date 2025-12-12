@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
-    CheckCircle, Zap, Users, FileText, Globe, 
-    Headphones, Shield, ArrowRight, Loader2, Gift,
-    Clock, CreditCard, Star, Sparkles, Target, Image
+    CheckCircle, ArrowRight, Loader2, Gift,
+    Clock, CreditCard, Star
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
@@ -176,15 +175,6 @@ const Subscription = () => {
                                 </span>
                             </div>
 
-                            <ul className="plan-features">
-                                {plan.features.map((feature, index) => (
-                                    <li key={index}>
-                                        <CheckCircle size={16} />
-                                        <span>{feature}</span>
-                                    </li>
-                                ))}
-                            </ul>
-
                             <button 
                                 className={`btn-plan ${plan.popular ? 'primary' : 'secondary'}`}
                                 onClick={(e) => {
@@ -202,6 +192,15 @@ const Subscription = () => {
                                     </>
                                 )}
                             </button>
+
+                            <ul className="plan-features">
+                                {plan.features.map((feature, index) => (
+                                    <li key={index}>
+                                        <CheckCircle size={16} />
+                                        <span>{feature}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     ))}
                 </div>
@@ -215,64 +214,6 @@ const Subscription = () => {
                     <div className="trial-info-item">
                         <CreditCard size={18} />
                         <span>Carte requise • Annulez à tout moment</span>
-                    </div>
-                </div>
-
-                {/* What you get */}
-                <div className="features-summary">
-                    <h4>Ce que vous obtenez</h4>
-                    <div className="features-grid">
-                        <div className="feature-item">
-                            <FileText size={24} />
-                            <span>Articles SEO optimisés</span>
-                        </div>
-                        <div className="feature-item">
-                            <Target size={24} />
-                            <span>Recherche de mots-clés</span>
-                        </div>
-                        <div className="feature-item">
-                            <Globe size={24} />
-                            <span>Publication WordPress</span>
-                        </div>
-                        <div className="feature-item">
-                            <Image size={24} />
-                            <span>Images IA générées</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Guarantees */}
-                <div className="guarantees">
-                    <div className="guarantee-item">
-                        <Shield size={20} />
-                        <span>Satisfait ou remboursé 14 jours</span>
-                    </div>
-                    <div className="guarantee-item">
-                        <Zap size={20} />
-                        <span>Activation instantanée</span>
-                    </div>
-                    <div className="guarantee-item">
-                        <Headphones size={20} />
-                        <span>Support réactif</span>
-                    </div>
-                </div>
-
-                {/* FAQ Mini */}
-                <div className="subscription-faq">
-                    <h4>Questions fréquentes</h4>
-                    <div className="faq-items">
-                        <div className="faq-item">
-                            <strong>Que se passe-t-il après les 7 jours d'essai ?</strong>
-                            <p>Votre carte sera débitée du premier mois. Vous pouvez annuler à tout moment avant la fin de l'essai.</p>
-                        </div>
-                        <div className="faq-item">
-                            <strong>Les articles générés sont-ils vraiment SEO-optimisés ?</strong>
-                            <p>Oui ! Notre IA génère des articles avec structure H1/H2/H3, meta descriptions, FAQ, et optimisation des mots-clés.</p>
-                        </div>
-                        <div className="faq-item">
-                            <strong>Puis-je changer de plan plus tard ?</strong>
-                            <p>Oui, vous pouvez upgrader ou downgrader à tout moment depuis les paramètres.</p>
-                        </div>
                     </div>
                 </div>
             </div>
