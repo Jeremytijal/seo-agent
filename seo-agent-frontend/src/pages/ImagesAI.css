@@ -503,17 +503,17 @@
     border-radius: 4px;
 }
 
-.size-preview.1024-1024 {
+.size-preview.square {
     width: 40px;
     height: 40px;
 }
 
-.size-preview.1792-1024 {
+.size-preview.landscape {
     width: 56px;
     height: 32px;
 }
 
-.size-preview.1024-1792 {
+.size-preview.portrait {
     width: 28px;
     height: 48px;
 }

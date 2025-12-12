@@ -289,7 +289,7 @@ const ImagesAI = () => {
                                                     checked={newImage.size === size.value}
                                                     onChange={(e) => setNewImage(prev => ({ ...prev, size: e.target.value }))}
                                                 />
-                                                <div className={`size-preview ${size.value.replace('x', '-')}`}></div>
+                                                <div className={`size-preview ${size.value === '1024x1024' ? 'square' : size.value === '1792x1024' ? 'landscape' : 'portrait'}`}></div>
                                                 <div className="size-info">
                                                     <span className="size-label">{size.label}</span>
                                                     <span className="size-desc">{size.desc}</span>
