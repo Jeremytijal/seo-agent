@@ -7,8 +7,9 @@
  */
 
 const { OpenAI } = require('openai');
-const axios = require('axios');
 const cheerio = require('cheerio');
+// Use node-fetch instead of axios for Node.js 18 compatibility
+const fetch = require('node-fetch');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -308,17 +309,25 @@ async function scrapeWebsite(url) {
             normalizedUrl = 'https://' + normalizedUrl;
         }
 
-        const response = await axios.get(normalizedUrl, {
-            timeout: 10000,
+        // Use node-fetch with AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        const response = await fetch(normalizedUrl, {
+            signal: controller.signal,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (compatible; SeoAgentBot/1.0; +https://agentiaseo.com)',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8'
             },
+            redirect: 'follow',
             maxRedirects: 5
         });
+        
+        clearTimeout(timeoutId);
 
-        const $ = cheerio.load(response.data);
+        const html = await response.text();
+        const $ = cheerio.load(html);
         
         // Remove scripts, styles, and other non-content elements
         $('script, style, nav, footer, header, aside, .ad, .ads, .advertisement').remove();

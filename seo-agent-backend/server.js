@@ -1,3 +1,23 @@
+// Polyfill for File API (Node.js 18 compatibility with undici/axios)
+// This is a workaround until Railway uses Node.js 20
+if (typeof global.File === 'undefined') {
+    // Minimal File polyfill for undici compatibility
+    try {
+        const { File: NodeFile } = require('undici');
+        global.File = NodeFile;
+    } catch (e) {
+        // Fallback polyfill if undici File is not available
+        global.File = class File {
+            constructor(bits, name, options = {}) {
+                this.name = name;
+                this.lastModified = options.lastModified || Date.now();
+                this.size = Array.isArray(bits) ? bits.length : (bits?.length || 0);
+                this.type = options.type || '';
+            }
+        };
+    }
+}
+
 console.log('🚀 Starting SEO Agent Backend...');
 console.log('📦 Loading dependencies...');
 

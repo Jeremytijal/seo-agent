@@ -2,6 +2,9 @@
   "name": "seo-agent-backend",
   "version": "1.0.0",
   "main": "index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,7 +15,7 @@
   "description": "",
   "dependencies": {
     "@supabase/supabase-js": "^2.86.0",
-    "axios": "^1.7.2",
+    "axios": "^1.5.1",
     "body-parser": "^2.2.1",
     "cheerio": "^1.0.0",
     "cors": "^2.8.5",
