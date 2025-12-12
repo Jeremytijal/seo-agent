@@ -1209,9 +1209,9 @@
 
 .screenshot-wrapper {
     position: relative;
-    padding: 20px;
+    padding: 12px;
     background: white;
-    border-radius: 20px;
+    border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
@@ -1227,10 +1227,10 @@
 
 .preview-header {
     background: #F3F4F6;
-    padding: 12px 16px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     border-bottom: 1px solid #E5E7EB;
 }
 
@@ -1259,13 +1259,13 @@
 }
 
 .preview-header span {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #6B7280;
     font-weight: 500;
 }
 
 .preview-content {
-    padding: 20px;
+    padding: 12px;
     background: white;
 }
 
@@ -1382,58 +1382,58 @@
 .planner-preview-content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 12px;
 }
 
 .preview-planner-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 8px;
 }
 
 .preview-stat {
     text-align: center;
-    padding: 16px;
+    padding: 10px 8px;
     background: #FAFAFA;
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px solid #E5E7EB;
 }
 
 .preview-stat-value {
     display: block;
-    font-size: 1.75rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: #111;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .preview-stat-label {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: #6B7280;
 }
 
 .preview-calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    gap: 3px;
 }
 
 .preview-cal-day-header {
     text-align: center;
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     font-weight: 600;
     color: #6B7280;
-    padding: 8px 4px;
+    padding: 4px 2px;
 }
 
 .preview-cal-day {
     aspect-ratio: 1;
     background: white;
     border: 1px solid #E5E7EB;
-    border-radius: 6px;
-    padding: 3px;
+    border-radius: 4px;
+    padding: 2px;
     position: relative;
-    min-height: 55px;
+    min-height: 35px;
     display: flex;
     flex-direction: column;
 }
@@ -1445,47 +1445,52 @@
 }
 
 .preview-cal-day-number {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     font-weight: 600;
     color: #111;
     display: block;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
     line-height: 1;
 }
 
 .preview-cal-article {
     background: white;
     border: 1px solid #10B981;
-    border-radius: 4px;
-    padding: 3px 4px;
-    font-size: 0.6rem;
-    margin-top: 2px;
+    border-radius: 3px;
+    padding: 2px 3px;
+    font-size: 0.5rem;
+    margin-top: 1px;
 }
 
 .preview-cal-article-type {
     font-weight: 700;
     color: #10B981;
-    font-size: 0.55rem;
+    font-size: 0.5rem;
     margin-bottom: 1px;
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .preview-cal-article-title {
     font-weight: 600;
     color: #111;
-    font-size: 0.6rem;
+    font-size: 0.5rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .preview-cal-article-status {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 2px;
+    margin-top: 1px;
     color: #F59E0B;
+}
+
+.preview-cal-article-status svg {
+    width: 6px;
+    height: 6px;
 }
 
 .preview-cal-article-status.generating svg {
@@ -1877,7 +1882,7 @@
     }
     
     .mobile-menu-outrank {
-        display: flex;
+    display: flex;
     }
     
     .hero-outrank {
@@ -1935,7 +1940,7 @@
         grid-template-columns: 1fr;
         gap: 40px;
     }
-
+    
     .benefit-item-screenshot.reverse {
         direction: ltr;
     }
@@ -2000,16 +2005,20 @@
     }
 
     .preview-cal-day {
-        min-height: 45px;
-        font-size: 0.65rem;
+        min-height: 30px;
+        font-size: 0.55rem;
     }
 
     .preview-cal-article {
-        padding: 2px 3px;
+        padding: 1px 2px;
     }
 
     .preview-cal-article-title {
-        font-size: 0.55rem;
+        font-size: 0.45rem;
+    }
+
+    .preview-cal-article-type {
+        font-size: 0.45rem;
     }
 }
 
