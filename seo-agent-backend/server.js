@@ -33,6 +33,8 @@ const blacklistService = require('./services/blacklistService');
 const emailService = require('./services/emailService');
 const wordpressService = require('./services/wordpressService');
 const expertRequestService = require('./services/expertRequestService');
+const keywordService = require('./services/keywordService');
+const contentService = require('./services/contentService');
 
 console.log('✅ Services loaded');
 
@@ -1994,6 +1996,292 @@ app.get('/api/expert-requests/:userId', async (req, res) => {
         res.json({ requests });
     } catch (error) {
         console.error('Error fetching expert requests:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================================
+// KEYWORD RESEARCH API
+// =============================================================================
+
+// Search keywords
+app.post('/api/keywords/search', async (req, res) => {
+    try {
+        const { userId, keyword, country = 'fr', language = 'fr' } = req.body;
+
+        if (!keyword) {
+            return res.status(400).json({ error: 'Keyword is required' });
+        }
+
+        console.log(`Keyword search: "${keyword}" for user ${userId}`);
+
+        const results = await keywordService.getKeywordData(keyword, country, language);
+
+        // Log search if userId provided
+        if (userId) {
+            await keywordService.logKeywordSearch(supabase, userId, keyword, results.length);
+        }
+
+        res.json({
+            success: true,
+            keyword,
+            count: results.length,
+            results
+        });
+    } catch (error) {
+        console.error('Keyword search error:', error);
+        res.status(500).json({ error: 'Failed to search keywords' });
+    }
+});
+
+// Get favorite keywords
+app.get('/api/keywords/favorites/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const favorites = await keywordService.getFavoriteKeywords(supabase, userId);
+        res.json({ favorites });
+    } catch (error) {
+        console.error('Error fetching favorite keywords:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Save favorite keyword
+app.post('/api/keywords/favorites/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const keywordData = req.body;
+
+        const saved = await keywordService.saveFavoriteKeyword(supabase, userId, keywordData);
+        res.json({ success: true, keyword: saved });
+    } catch (error) {
+        console.error('Error saving favorite keyword:', error);
+        res.status(500).json({ error: 'Failed to save keyword' });
+    }
+});
+
+// Delete favorite keyword
+app.delete('/api/keywords/favorites/:userId/:keywordId', async (req, res) => {
+    try {
+        const { userId, keywordId } = req.params;
+        await keywordService.deleteFavoriteKeyword(supabase, userId, keywordId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting favorite keyword:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get keyword search history
+app.get('/api/keywords/history/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { limit = 10 } = req.query;
+        const history = await keywordService.getSearchHistory(supabase, userId, parseInt(limit));
+        res.json({ history });
+    } catch (error) {
+        console.error('Error fetching search history:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================================
+// CONTENT GENERATION API
+// =============================================================================
+
+// Generate article
+app.post('/api/content/generate', async (req, res) => {
+    try {
+        const { 
+            userId, 
+            keyword, 
+            tone = 'professional', 
+            length = 1500,
+            language = 'fr',
+            secondaryKeywords = [],
+            outline = null,
+            includeImages = true,
+            includeFAQ = true
+        } = req.body;
+
+        if (!keyword) {
+            return res.status(400).json({ error: 'Keyword is required' });
+        }
+
+        console.log(`Generating article for keyword: "${keyword}", user: ${userId}`);
+
+        const result = await contentService.generateArticle({
+            keyword,
+            tone,
+            length,
+            language,
+            secondaryKeywords,
+            outline,
+            includeImages,
+            includeFAQ
+        });
+
+        if (!result.success) {
+            return res.status(500).json({ error: result.error });
+        }
+
+        // Save to database if userId provided
+        let savedArticle = null;
+        if (userId) {
+            try {
+                savedArticle = await contentService.saveArticle(supabase, userId, result.article);
+            } catch (saveError) {
+                console.error('Error saving article:', saveError);
+                // Still return the article even if save fails
+            }
+        }
+
+        res.json({
+            success: true,
+            article: result.article,
+            savedId: savedArticle?.id
+        });
+    } catch (error) {
+        console.error('Content generation error:', error);
+        res.status(500).json({ error: 'Failed to generate article' });
+    }
+});
+
+// Generate article outline only
+app.post('/api/content/outline', async (req, res) => {
+    try {
+        const { keyword, secondaryKeywords = [], language = 'fr' } = req.body;
+
+        if (!keyword) {
+            return res.status(400).json({ error: 'Keyword is required' });
+        }
+
+        const outline = await contentService.generateOutline(keyword, secondaryKeywords, language);
+        res.json({ success: true, outline });
+    } catch (error) {
+        console.error('Outline generation error:', error);
+        res.status(500).json({ error: 'Failed to generate outline' });
+    }
+});
+
+// Generate FAQ
+app.post('/api/content/faq', async (req, res) => {
+    try {
+        const { keyword, existingContent = '', count = 5, language = 'fr' } = req.body;
+
+        if (!keyword) {
+            return res.status(400).json({ error: 'Keyword is required' });
+        }
+
+        const faq = await contentService.generateFAQ(keyword, existingContent, count, language);
+        res.json({ success: true, ...faq });
+    } catch (error) {
+        console.error('FAQ generation error:', error);
+        res.status(500).json({ error: 'Failed to generate FAQ' });
+    }
+});
+
+// Generate meta tags
+app.post('/api/content/meta-tags', async (req, res) => {
+    try {
+        const { content, keyword, language = 'fr' } = req.body;
+
+        if (!content || !keyword) {
+            return res.status(400).json({ error: 'Content and keyword are required' });
+        }
+
+        const metaTags = await contentService.generateMetaTags(content, keyword, language);
+        res.json({ success: true, ...metaTags });
+    } catch (error) {
+        console.error('Meta tags generation error:', error);
+        res.status(500).json({ error: 'Failed to generate meta tags' });
+    }
+});
+
+// Improve existing content
+app.post('/api/content/improve', async (req, res) => {
+    try {
+        const { content, improvements = [], language = 'fr' } = req.body;
+
+        if (!content) {
+            return res.status(400).json({ error: 'Content is required' });
+        }
+
+        const improved = await contentService.improveContent(content, improvements, language);
+        res.json({ success: true, ...improved });
+    } catch (error) {
+        console.error('Content improvement error:', error);
+        res.status(500).json({ error: 'Failed to improve content' });
+    }
+});
+
+// Get user's articles
+app.get('/api/articles/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { status, limit = 50 } = req.query;
+
+        const articles = await contentService.getArticles(supabase, userId, status, parseInt(limit));
+        res.json({ articles, count: articles.length });
+    } catch (error) {
+        console.error('Error fetching articles:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get single article
+app.get('/api/articles/:userId/:articleId', async (req, res) => {
+    try {
+        const { userId, articleId } = req.params;
+        const article = await contentService.getArticleById(supabase, userId, articleId);
+
+        if (!article) {
+            return res.status(404).json({ error: 'Article not found' });
+        }
+
+        res.json({ article });
+    } catch (error) {
+        console.error('Error fetching article:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Update article
+app.put('/api/articles/:userId/:articleId', async (req, res) => {
+    try {
+        const { userId, articleId } = req.params;
+        const updates = req.body;
+
+        const article = await contentService.updateArticle(supabase, userId, articleId, updates);
+        res.json({ success: true, article });
+    } catch (error) {
+        console.error('Error updating article:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Delete article
+app.delete('/api/articles/:userId/:articleId', async (req, res) => {
+    try {
+        const { userId, articleId } = req.params;
+        await contentService.deleteArticle(supabase, userId, articleId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting article:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Save article (for drafts or manual saves)
+app.post('/api/articles/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const articleData = req.body;
+
+        const article = await contentService.saveArticle(supabase, userId, articleData);
+        res.json({ success: true, article });
+    } catch (error) {
+        console.error('Error saving article:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
