@@ -6,10 +6,8 @@ import ContentPlanner from './pages/ContentPlanner';
 import AuditSEO from './pages/AuditSEO';
 import Keywords from './pages/Keywords';
 import Contents from './pages/Contents';
-import ImagesAI from './pages/ImagesAI';
 import Publish from './pages/Publish';
 import Integrations from './pages/Integrations';
-import AgentSettings from './pages/AgentSettings';
 import Onboarding from './pages/Onboarding';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
@@ -47,10 +45,8 @@ function App() {
               <Route path="audit" element={<AuditSEO />} />
               <Route path="keywords" element={<Keywords />} />
               <Route path="contents" element={<Contents />} />
-              <Route path="images" element={<ImagesAI />} />
               <Route path="publish" element={<Publish />} />
               <Route path="integrations" element={<Integrations />} />
-              <Route path="settings" element={<AgentSettings />} />
             </Route>
           </Route>
         </Routes>

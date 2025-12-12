@@ -4,10 +4,8 @@ import {
   LayoutDashboard,
   Search,
   FileText,
-  Image,
   Send,
   Globe,
-  Settings,
   LogOut,
   User,
   X,
@@ -20,8 +18,7 @@ import {
   CreditCard,
   Clock,
   Target,
-  PenTool,
-  Layers
+  PenTool
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../supabaseClient';
@@ -108,10 +105,8 @@ const Sidebar = () => {
     { icon: Search, label: 'Audit SEO', path: '/audit' },
     { icon: Target, label: 'Mots-clés', path: '/keywords' },
     { icon: PenTool, label: 'Contenus', path: '/contents' },
-    { icon: Image, label: 'Images IA', path: '/images' },
     { icon: Send, label: 'Publications', path: '/publish' },
     { icon: Globe, label: 'Sites connectés', path: '/integrations' },
-    { icon: Settings, label: 'Configuration', path: '/settings' },
   ];
 
   const formatDate = (dateString) => {
@@ -127,10 +122,14 @@ const Sidebar = () => {
     <>
       <aside className="sidebar glass-panel">
         <div className="sidebar-header">
-          <div className="logo-container seo-gradient">
-            <Layers size={24} />
+          <div className="logo-container">
+            <img src="/seo-agent-icon.png" alt="SEO Agent" className="logo-img" />
+            <div className="logo-glow"></div>
           </div>
-          <h1 className="app-title text-green">Agent IA SEO</h1>
+          <div className="logo-text">
+            <h1 className="app-title">SEO Agent</h1>
+            <span className="app-subtitle">Agent IA</span>
+          </div>
         </div>
 
         <nav className="sidebar-nav">
