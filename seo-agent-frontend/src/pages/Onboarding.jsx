@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ArrowRight, ArrowLeft, Check, Globe, Target, 
-    Sparkles, Loader2, Search, Plus, X,
-    CheckCircle2, Send, HelpCircle, Copy,
-    Rocket, PartyPopper, TrendingUp, Users, Calendar, FileText
+    Sparkles, Loader2, Search,
+    CheckCircle2, Rocket, TrendingUp, Users, Calendar, FileText
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -22,12 +21,7 @@ const Onboarding = () => {
     // Form data
     const [formData, setFormData] = useState({
         websiteUrl: '',
-        competitors: ['', '', ''],
-        hasWordPress: null,
-        wordpressUrl: '',
-        wordpressUsername: '',
-        wordpressPassword: '',
-        needsExpertHelp: false
+        competitors: ['', '', '']
     });
 
     // Keyword suggestions from analysis
@@ -40,8 +34,7 @@ const Onboarding = () => {
         { id: 'welcome', title: 'Bienvenue', icon: Rocket },
         { id: 'sites', title: 'Vos sites', icon: Globe },
         { id: 'keywords', title: 'Mots-clés', icon: Target },
-        { id: 'publish', title: 'Publication', icon: Send },
-        { id: 'ready', title: 'Prêt !', icon: PartyPopper }
+        { id: 'calendar', title: 'Calendrier', icon: Calendar }
     ];
 
     const updateCompetitor = (index, value) => {
@@ -117,12 +110,34 @@ const Onboarding = () => {
         );
     };
 
-    // Start article generation when reaching the ready step
+    // Start article generation when reaching the calendar step
     useEffect(() => {
-        if (step === 4 && selectedKeywords.length > 0 && !generatingArticle && !articleGenerated) {
+        if (step === 3 && selectedKeywords.length > 0 && !generatingArticle && !articleGenerated) {
             generateFirstArticle();
         }
     }, [step]);
+
+    // Generate calendar preview data
+    const getCalendarPreview = () => {
+        const today = new Date();
+        const preview = [];
+        
+        selectedKeywords.forEach((kw, i) => {
+            const kwData = suggestedKeywords.find(k => k.keyword === kw);
+            const scheduledDate = new Date(today);
+            scheduledDate.setDate(today.getDate() + (i * 3)); // Every 3 days
+            
+            preview.push({
+                date: scheduledDate,
+                keyword: kw,
+                volume: kwData?.volume || 0,
+                difficulty: kwData?.difficulty || 0,
+                status: i === 0 ? 'generating' : 'scheduled'
+            });
+        });
+        
+        return preview;
+    };
 
     const generateFirstArticle = async () => {
         if (!user || selectedKeywords.length === 0) return;
@@ -134,31 +149,7 @@ const Onboarding = () => {
             const firstKeyword = selectedKeywords[0];
             const keywordData = suggestedKeywords.find(k => k.keyword === firstKeyword);
             
-            // Save keywords to calendar (scheduled articles)
-            const today = new Date();
-            for (let i = 0; i < selectedKeywords.length; i++) {
-                const kw = selectedKeywords[i];
-                const kwData = suggestedKeywords.find(k => k.keyword === kw);
-                const scheduledDate = new Date(today);
-                scheduledDate.setDate(today.getDate() + (i * 3)); // Every 3 days
-                
-                try {
-                    await supabase.from('scheduled_articles').insert({
-                        user_id: user.id,
-                        keyword: kw,
-                        volume: kwData?.volume || 0,
-                        difficulty: kwData?.difficulty || 0,
-                        scheduled_date: scheduledDate.toISOString().split('T')[0],
-                        status: i === 0 ? 'generating' : 'scheduled',
-                        title: `Article sur "${kw}"`,
-                        type: 'Guide'
-                    });
-                } catch (e) {
-                    console.error('Error scheduling article:', e);
-                }
-            }
-            
-            // Generate first article in background
+            // Generate first article in background (don't wait for it)
             fetch(`${API_URL}/api/content/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -177,12 +168,13 @@ const Onboarding = () => {
                 console.error('Article generation error:', e);
             });
             
-            // Simulate generation time for UX
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Brief delay for UX
+            await new Promise(resolve => setTimeout(resolve, 1500));
             setArticleGenerated(true);
             
         } catch (error) {
             console.error('Generation error:', error);
+            setArticleGenerated(true); // Continue anyway
         } finally {
             setGeneratingArticle(false);
         }
@@ -194,21 +186,7 @@ const Onboarding = () => {
         setLoading(true);
         
         try {
-            // Save onboarding data to profile
-            const { error } = await supabase
-                .from('profiles')
-                .update({
-                    website_url: formData.websiteUrl,
-                    competitors: formData.competitors.filter(c => c.trim() !== ''),
-                    selected_keywords: selectedKeywords,
-                    onboarding_completed: true,
-                    onboarding_completed_at: new Date().toISOString()
-                })
-                .eq('id', user.id);
-
-            if (error) throw error;
-
-            // Save selected keywords as favorites
+            // Save selected keywords as favorites via API (more reliable)
             if (selectedKeywords.length > 0) {
                 for (const kw of selectedKeywords) {
                     const keywordData = suggestedKeywords.find(k => k.keyword === kw);
@@ -226,52 +204,26 @@ const Onboarding = () => {
                 }
             }
 
-            // WordPress connection
-            if (formData.hasWordPress && formData.wordpressUrl) {
-                try {
-                    await fetch(`${API_URL}/api/sites/connect`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            userId: user.id,
-                            siteUrl: formData.wordpressUrl,
-                            username: formData.wordpressUsername,
-                            password: formData.wordpressPassword,
-                            platform: 'wordpress'
-                        })
-                    });
-                } catch (wpError) {
-                    console.error('WordPress connection error:', wpError);
-                }
-            }
-
-            // Expert help request
-            if (formData.needsExpertHelp) {
-                try {
-                    await fetch(`${API_URL}/api/expert-request`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            userId: user.id,
-                            userEmail: user.email,
-                            requestType: 'wordpress_setup',
-                            siteUrl: formData.websiteUrl,
-                            message: 'Demande d\'aide pour connecter mon site'
-                        })
-                    });
-                } catch (expertError) {
-                    console.error('Expert request error:', expertError);
-                }
-            }
-
-            // Store flag to show banner on calendar page
+            // Store data in localStorage for calendar page
             localStorage.setItem('seoagent_show_connect_banner', 'true');
             localStorage.setItem('seoagent_first_article_generating', 'true');
+            localStorage.setItem('seoagent_website_url', formData.websiteUrl);
+            localStorage.setItem('seoagent_selected_keywords', JSON.stringify(
+                selectedKeywords.map(kw => {
+                    const kwData = suggestedKeywords.find(k => k.keyword === kw);
+                    return {
+                        keyword: kw,
+                        volume: kwData?.volume || 0,
+                        difficulty: kwData?.difficulty || 0
+                    };
+                })
+            ));
 
             navigate('/subscription?from=onboarding');
         } catch (error) {
             console.error('Finish error:', error);
-            alert('Une erreur est survenue. Veuillez réessayer.');
+            // Continue anyway - don't block user
+            navigate('/subscription?from=onboarding');
         } finally {
             setLoading(false);
         }
@@ -281,9 +233,8 @@ const Onboarding = () => {
         switch (step) {
             case 0: return true;
             case 1: return formData.websiteUrl.length > 5;
-            case 2: return true; // Keywords are optional
-            case 3: return formData.hasWordPress !== null;
-            case 4: return true;
+            case 2: return selectedKeywords.length > 0; // At least 1 keyword selected
+            case 3: return articleGenerated; // Wait for generation to start
             default: return false;
         }
     };
@@ -454,109 +405,10 @@ const Onboarding = () => {
                     </motion.div>
                 );
 
-            case 3: // Publication method
+            case 3: // Calendar preview
                 return (
                     <motion.div 
-                        className="step-content publish-step"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        <h2>Comment publier vos articles ?</h2>
-                        <p>Connectez votre site pour publier automatiquement.</p>
-                        
-                        <div className="publish-options">
-                            <button
-                                className={`publish-option ${formData.hasWordPress === true ? 'selected' : ''}`}
-                                onClick={() => setFormData(prev => ({ ...prev, hasWordPress: true, needsExpertHelp: false }))}
-                            >
-                                <div className="option-icon wordpress">
-                                    <img src="https://s.w.org/style/images/about/WordPress-logotype-simplified.png" alt="WordPress" />
-                                </div>
-                                <div className="option-content">
-                                    <h4>WordPress</h4>
-                                    <p>Publication automatique</p>
-                                </div>
-                                {formData.hasWordPress === true && <CheckCircle2 size={24} className="check" />}
-                            </button>
-
-                            <button
-                                className={`publish-option ${formData.hasWordPress === false && !formData.needsExpertHelp ? 'selected' : ''}`}
-                                onClick={() => setFormData(prev => ({ ...prev, hasWordPress: false, needsExpertHelp: false }))}
-                            >
-                                <div className="option-icon manual">
-                                    <Copy size={28} />
-                                </div>
-                                <div className="option-content">
-                                    <h4>Manuel</h4>
-                                    <p>Je copie les articles</p>
-                                </div>
-                                {formData.hasWordPress === false && !formData.needsExpertHelp && <CheckCircle2 size={24} className="check" />}
-                            </button>
-
-                            <button
-                                className={`publish-option expert ${formData.needsExpertHelp ? 'selected' : ''}`}
-                                onClick={() => setFormData(prev => ({ ...prev, hasWordPress: false, needsExpertHelp: true }))}
-                            >
-                                <div className="option-icon">
-                                    <HelpCircle size={28} />
-                                </div>
-                                <div className="option-content">
-                                    <h4>Besoin d'aide</h4>
-                                    <p>Un expert vous aide</p>
-                                    <span className="free-badge">Gratuit</span>
-                                </div>
-                                {formData.needsExpertHelp && <CheckCircle2 size={24} className="check" />}
-                            </button>
-                        </div>
-
-                        {formData.hasWordPress === true && (
-                            <motion.div 
-                                className="wordpress-form"
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                            >
-                                <div className="input-group">
-                                    <input
-                                        type="url"
-                                        placeholder="URL WordPress (ex: https://monsite.com)"
-                                        value={formData.wordpressUrl}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, wordpressUrl: e.target.value }))}
-                                    />
-                                </div>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
-                                        placeholder="Nom d'utilisateur"
-                                        value={formData.wordpressUsername}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, wordpressUsername: e.target.value }))}
-                                    />
-                                </div>
-                                <div className="input-group">
-                                    <input
-                                        type="password"
-                                        placeholder="Mot de passe d'application"
-                                        value={formData.wordpressPassword}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, wordpressPassword: e.target.value }))}
-                                    />
-                                </div>
-                                <a 
-                                    href="https://wordpress.org/documentation/article/application-passwords/" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="help-link"
-                                >
-                                    <HelpCircle size={14} />
-                                    Comment créer un mot de passe d'application ?
-                                </a>
-                            </motion.div>
-                        )}
-                    </motion.div>
-                );
-
-            case 4: // Ready
-                return (
-                    <motion.div 
-                        className="step-content ready-step"
+                        className="step-content calendar-step"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
@@ -565,13 +417,13 @@ const Onboarding = () => {
                                 <div className="generating-icon">
                                     <Loader2 size={48} className="spin" />
                                 </div>
-                                <h2>Préparation en cours... ✨</h2>
-                                <p>Nous planifions vos articles et générons votre premier contenu SEO.</p>
+                                <h2>Création de votre planning... ✨</h2>
+                                <p>Nous préparons votre calendrier et générons votre premier article.</p>
                                 
                                 <div className="generating-status">
                                     <div className="status-item done">
                                         <CheckCircle2 size={18} />
-                                        <span>Mots-clés ajoutés au calendrier</span>
+                                        <span>{selectedKeywords.length} mots-clés sélectionnés</span>
                                     </div>
                                     <div className="status-item active">
                                         <Loader2 size={18} className="spin" />
@@ -581,32 +433,44 @@ const Onboarding = () => {
                             </>
                         ) : (
                             <>
-                                <div className="ready-icon">
-                                    <PartyPopper size={64} />
-                                </div>
-                                <h2>C'est prêt ! 🎉</h2>
-                                <p>Vos articles sont planifiés et le premier est en cours de génération.</p>
+                                <h2>Votre calendrier de contenu 📅</h2>
+                                <p>Voici vos articles planifiés. Le premier est en cours de génération !</p>
                                 
-                                <div className="summary-card">
-                                    <div className="summary-item success">
-                                        <Calendar size={18} />
-                                        <span>{selectedKeywords.length} article(s) planifié(s) dans votre calendrier</span>
-                                    </div>
-                                    <div className="summary-item success">
-                                        <FileText size={18} />
-                                        <span>1er article en cours de génération sur "{selectedKeywords[0]}"</span>
-                                    </div>
-                                    <div className="summary-item">
-                                        <Globe size={18} />
-                                        <span>{formData.websiteUrl}</span>
-                                    </div>
+                                <div className="calendar-preview">
+                                    {getCalendarPreview().map((item, index) => (
+                                        <div key={index} className={`calendar-item ${item.status}`}>
+                                            <div className="calendar-date">
+                                                <span className="day">{item.date.getDate()}</span>
+                                                <span className="month">{['jan', 'fév', 'mar', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'][item.date.getMonth()]}</span>
+                                            </div>
+                                            <div className="calendar-content">
+                                                <div className="keyword-name">
+                                                    {index === 0 && <Loader2 size={14} className="spin" />}
+                                                    {item.keyword}
+                                                </div>
+                                                <div className="keyword-meta">
+                                                    <span>{item.volume}/mois</span>
+                                                    <span className={`difficulty ${item.difficulty < 30 ? 'easy' : item.difficulty < 50 ? 'medium' : 'hard'}`}>
+                                                        KD: {item.difficulty}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="calendar-status">
+                                                {index === 0 ? (
+                                                    <span className="badge generating">En génération</span>
+                                                ) : (
+                                                    <span className="badge scheduled">Planifié</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <div className="activation-cta">
                                     <Sparkles size={20} />
                                     <div>
                                         <strong>Activez votre agent pour continuer</strong>
-                                        <p>Débloquez la génération illimitée et la publication automatique</p>
+                                        <p>Votre 1er article sera prêt après l'activation !</p>
                                     </div>
                                 </div>
                             </>
