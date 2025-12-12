@@ -1,0 +1,468 @@
+/**
+ * Email Service - Send notifications for qualified leads and new users
+ * Uses Resend API (more reliable than SMTP on Railway)
+ */
+
+const axios = require('axios');
+
+// Resend API configuration
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const FROM_EMAIL = process.env.FROM_EMAIL || 'Agent IA SEO <noreply@agentiaseo.com>';
+
+/**
+ * Send email using Resend API
+ */
+const sendEmail = async (to, subject, html) => {
+    if (!RESEND_API_KEY) {
+        console.log('Resend API key not configured - skipping email');
+        return { success: false, reason: 'Email not configured' };
+    }
+
+    try {
+        const response = await axios.post('https://api.resend.com/emails', {
+            from: FROM_EMAIL,
+            to: to,
+            subject: subject,
+            html: html
+        }, {
+            headers: {
+                'Authorization': `Bearer ${RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log(`Email sent to ${to}: ${subject}`);
+        return { success: true, id: response.data.id };
+    } catch (error) {
+        console.error('Error sending email via Resend:', error.response?.data || error.message);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Send email notification when a lead is qualified
+ */
+const sendQualifiedLeadNotification = async (userEmail, lead, score, details) => {
+    const scoreColor = score >= 80 ? '#10B981' : score >= 60 ? '#F59E0B' : '#EF4444';
+    const scoreLabel = score >= 80 ? '🔥 Lead Chaud' : score >= 60 ? '⚡ Lead Tiède' : '❄️ Lead Froid';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #FF470F, #FF6B35); padding: 24px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 1.5rem; }
+        .content { padding: 32px; }
+        .score-badge { display: inline-block; padding: 8px 16px; background: ${scoreColor}; color: white; border-radius: 20px; font-weight: 600; font-size: 0.9rem; margin-bottom: 20px; }
+        .lead-card { background: #f9fafb; border-radius: 12px; padding: 20px; margin: 20px 0; }
+        .lead-name { font-size: 1.25rem; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0; }
+        .lead-phone { color: #6b7280; font-size: 0.95rem; }
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e5e5e5; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #6b7280; font-size: 0.9rem; }
+        .info-value { font-weight: 600; color: #1a1a1a; }
+        .score-display { text-align: center; margin: 24px 0; }
+        .score-number { font-size: 3rem; font-weight: 800; color: ${scoreColor}; }
+        .score-label { color: #6b7280; font-size: 0.9rem; }
+        .cta-btn { display: block; width: 100%; padding: 16px; background: #1a1a1a; color: white; text-align: center; text-decoration: none; border-radius: 10px; font-weight: 600; margin-top: 24px; }
+        .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Nouveau Lead Qualifié !</h1>
+        </div>
+        <div class="content">
+            <span class="score-badge">${scoreLabel}</span>
+            
+            <div class="lead-card">
+                <h2 class="lead-name">${lead.name || 'Contact'}</h2>
+                <p class="lead-phone">${lead.phone || ''}</p>
+            </div>
+            
+            <div class="score-display">
+                <div class="score-number">${score}</div>
+                <div class="score-label">Score de qualification</div>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Entreprise</span>
+                <span class="info-value">${lead.company_name || '—'}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Source</span>
+                <span class="info-value">${lead.source || 'Direct'}</span>
+            </div>
+            ${details?.budget ? `
+            <div class="info-row">
+                <span class="info-label">Budget</span>
+                <span class="info-value">${details.budget}</span>
+            </div>
+            ` : ''}
+            ${details?.reason ? `
+            <div class="info-row">
+                <span class="info-label">Raison</span>
+                <span class="info-value">${details.reason}</span>
+            </div>
+            ` : ''}
+            
+            <a href="https://app.agentiaseo.com/contacts" class="cta-btn">Voir dans Agent IA SEO →</a>
+        </div>
+        <div class="footer">
+            Agent IA SEO - Votre assistant SEO intelligent
+        </div>
+    </div>
+</body>
+</html>
+    `;
+
+    const result = await sendEmail(
+        userEmail,
+        `🎯 Lead qualifié : ${lead.name || 'Nouveau contact'} (Score: ${score})`,
+        htmlContent
+    );
+
+    if (result.success) {
+        console.log(`Email notification sent to ${userEmail} for lead ${lead.name}`);
+    }
+
+    return result;
+};
+
+/**
+ * Send weekly report email
+ */
+const sendWeeklyReport = async (userEmail, stats) => {
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #FF470F, #FF6B35); padding: 24px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 1.5rem; }
+        .content { padding: 32px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+        .stat-card { background: #f9fafb; border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: #1a1a1a; }
+        .stat-label { color: #6b7280; font-size: 0.85rem; margin-top: 4px; }
+        .highlight { background: linear-gradient(135deg, #FF470F, #FF6B35); color: white; }
+        .highlight .stat-value { color: white; }
+        .highlight .stat-label { color: rgba(255,255,255,0.9); }
+        .cta-btn { display: block; width: 100%; padding: 16px; background: #1a1a1a; color: white; text-align: center; text-decoration: none; border-radius: 10px; font-weight: 600; margin-top: 24px; }
+        .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Votre rapport hebdomadaire</h1>
+        </div>
+        <div class="content">
+            <p>Voici le résumé de votre activité Agent IA SEO cette semaine :</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card highlight">
+                    <div class="stat-value">${stats.newLeads || 0}</div>
+                    <div class="stat-label">Nouveaux leads</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.qualified || 0}</div>
+                    <div class="stat-label">Qualifiés</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.responseRate || 0}%</div>
+                    <div class="stat-label">Taux de réponse</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.meetings || 0}</div>
+                    <div class="stat-label">RDV réservés</div>
+                </div>
+            </div>
+            
+            <a href="https://app.agentiaseo.com/" class="cta-btn">Voir le dashboard complet →</a>
+        </div>
+        <div class="footer">
+            Agent IA SEO - Votre assistant SEO intelligent
+        </div>
+    </div>
+</body>
+</html>
+    `;
+
+    return sendEmail(
+        userEmail,
+        `📊 Rapport Agent IA SEO : ${stats.newLeads || 0} contenus cette semaine`,
+        htmlContent
+    );
+};
+
+/**
+ * Send welcome email to new user
+ */
+const sendWelcomeEmail = async (user) => {
+    const firstName = user.name?.split(' ')[0] || 'là';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; margin: 0; padding: 40px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden;">
+        <!-- Header -->
+        <tr>
+            <td style="background: #FF470F; padding: 32px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 700;">Bienvenue sur Agent IA SEO 🚀</h1>
+            </td>
+        </tr>
+        
+        <!-- Content -->
+        <tr>
+            <td style="padding: 32px;">
+                <p style="font-size: 16px; color: #1a1a1a; line-height: 1.6; margin: 0 0 24px 0;">
+                    Salut ${firstName} ! 👋<br><br>
+                    Merci de nous faire confiance. Vous êtes prêt à automatiser votre stratégie SEO.
+                </p>
+                
+                <p style="font-size: 14px; color: #6b7280; margin: 0 0 8px 0; font-weight: 600;">🎯 Prochaines étapes :</p>
+                
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+                    <tr>
+                        <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+                            <span style="display: inline-block; width: 24px; height: 24px; background: #FF470F; color: white; border-radius: 6px; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 12px;">1</span>
+                            <span style="color: #374151; font-size: 14px;">Configurez votre agent</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+                            <span style="display: inline-block; width: 24px; height: 24px; background: #FF470F; color: white; border-radius: 6px; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 12px;">2</span>
+                            <span style="color: #374151; font-size: 14px;">Connectez vos formulaires ou importez vos leads</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px 0;">
+                            <span style="display: inline-block; width: 24px; height: 24px; background: #FF470F; color: white; border-radius: 6px; text-align: center; line-height: 24px; font-size: 12px; font-weight: 700; margin-right: 12px;">3</span>
+                            <span style="color: #374151; font-size: 14px;">Laissez Agent IA SEO créer votre contenu 24/7</span>
+                        </td>
+                    </tr>
+                </table>
+                
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td style="text-align: center;">
+                            <a href="https://app.agentiaseo.com/" style="display: inline-block; padding: 14px 32px; background: #10B981; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">Accéder à mon dashboard →</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Footer -->
+        <tr>
+            <td style="padding: 20px 32px; background: #f9fafb; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                    © 2025 Agent IA SEO · <a href="https://agentiaseo.com" style="color: #9ca3af;">Site web</a>
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    `;
+
+    const result = await sendEmail(
+        user.email,
+        `🚀 Bienvenue sur Agent IA SEO, ${firstName} !`,
+        htmlContent
+    );
+
+    if (result.success) {
+        console.log(`Welcome email sent to ${user.email}`);
+    }
+
+    return result;
+};
+
+/**
+ * Send Slack notification for new user signup
+ */
+const sendSlackNewUserNotification = async (user) => {
+    const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
+    
+    if (!slackWebhookUrl) {
+        console.log('Slack webhook not configured - skipping notification');
+        return { success: false, reason: 'Slack not configured' };
+    }
+
+    try {
+        const message = {
+            blocks: [
+                {
+                    type: "header",
+                    text: {
+                        type: "plain_text",
+                        text: "🎉 Nouvel utilisateur inscrit !",
+                        emoji: true
+                    }
+                },
+                {
+                    type: "section",
+                    fields: [
+                        {
+                            type: "mrkdwn",
+                            text: `*Email:*\n${user.email || 'N/A'}`
+                        },
+                        {
+                            type: "mrkdwn",
+                            text: `*Nom:*\n${user.name || 'N/A'}`
+                        }
+                    ]
+                },
+                {
+                    type: "section",
+                    fields: [
+                        {
+                            type: "mrkdwn",
+                            text: `*Date:*\n${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`
+                        },
+                        {
+                            type: "mrkdwn",
+                            text: `*ID:*\n\`${user.id?.slice(0, 8) || 'N/A'}...\``
+                        }
+                    ]
+                },
+                {
+                    type: "divider"
+                },
+                {
+                    type: "context",
+                    elements: [
+                        {
+                            type: "mrkdwn",
+                            text: "📊 <https://app.agentiaseo.com/|Voir le dashboard Agent IA SEO>"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        await axios.post(slackWebhookUrl, message);
+        console.log(`Slack notification sent for new user: ${user.email}`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error sending Slack notification:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Send email notification for new user signup (to admin)
+ */
+const sendNewUserEmailNotification = async (user) => {
+    const adminEmail = process.env.ADMIN_EMAIL;
+    
+    if (!adminEmail) {
+        console.log('Admin email not configured - skipping new user notification');
+        return { success: false, reason: 'Admin email not configured' };
+    }
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #10B981, #059669); padding: 24px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 1.5rem; }
+        .content { padding: 32px; }
+        .user-card { background: #f9fafb; border-radius: 12px; padding: 20px; margin: 20px 0; }
+        .user-email { font-size: 1.25rem; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0; }
+        .user-name { color: #6b7280; font-size: 0.95rem; }
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e5e5e5; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #6b7280; font-size: 0.9rem; }
+        .info-value { font-weight: 600; color: #1a1a1a; }
+        .cta-btn { display: block; width: 100%; padding: 16px; background: #1a1a1a; color: white; text-align: center; text-decoration: none; border-radius: 10px; font-weight: 600; margin-top: 24px; box-sizing: border-box; }
+        .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Nouvel utilisateur inscrit !</h1>
+        </div>
+        <div class="content">
+            <div class="user-card">
+                <h2 class="user-email">${user.email || 'N/A'}</h2>
+                <p class="user-name">${user.name || 'Nom non renseigné'}</p>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Date d'inscription</span>
+                <span class="info-value">${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">ID Utilisateur</span>
+                <span class="info-value">${user.id?.slice(0, 8) || 'N/A'}...</span>
+            </div>
+            
+            <a href="https://app.agentiaseo.com/" class="cta-btn">Voir le dashboard →</a>
+        </div>
+        <div class="footer">
+            Agent IA SEO - Notification Admin
+        </div>
+    </div>
+</body>
+</html>
+    `;
+
+    const result = await sendEmail(
+        adminEmail,
+        `🎉 Nouvel utilisateur : ${user.email}`,
+        htmlContent
+    );
+
+    if (result.success) {
+        console.log(`New user email notification sent to admin for: ${user.email}`);
+    }
+
+    return result;
+};
+
+/**
+ * Notify about new user signup (Slack, Admin Email, and Welcome Email to user)
+ */
+const notifyNewUserSignup = async (user) => {
+    const results = await Promise.allSettled([
+        sendSlackNewUserNotification(user),
+        sendNewUserEmailNotification(user),
+        sendWelcomeEmail(user)
+    ]);
+    
+    return {
+        slack: results[0].status === 'fulfilled' ? results[0].value : { success: false, error: results[0].reason },
+        adminEmail: results[1].status === 'fulfilled' ? results[1].value : { success: false, error: results[1].reason },
+        welcomeEmail: results[2].status === 'fulfilled' ? results[2].value : { success: false, error: results[2].reason }
+    };
+};
+
+module.exports = {
+    sendQualifiedLeadNotification,
+    sendWeeklyReport,
+    sendSlackNewUserNotification,
+    sendNewUserEmailNotification,
+    sendWelcomeEmail,
+    notifyNewUserSignup
+};

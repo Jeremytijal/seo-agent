@@ -1,0 +1,1761 @@
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const twilio = require('twilio');
+const { OpenAI } = require('openai');
+const { createClient } = require('@supabase/supabase-js');
+const agentService = require('./services/agentService');
+const openaiService = require('./services/openaiService');
+const historyService = require('./services/historyService');
+const webhookService = require('./services/webhookService');
+const outboundService = require('./services/outboundService');
+const scheduleService = require('./services/scheduleService');
+const intelligenceService = require('./services/intelligenceService');
+const followUpService = require('./services/followUpService');
+const templateService = require('./services/templateService');
+const tagService = require('./services/tagService');
+const blacklistService = require('./services/blacklistService');
+const emailService = require('./services/emailService');
+
+// Initialize OpenAI for playground
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Initialize Supabase client
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Allowed origins for CORS
+const allowedOrigins = [
+    'https://app.agentiaseo.com',
+    'https://agentiaseo.com',
+    'https://www.agentiaseo.com',
+    process.env.FRONTEND_URL,
+    // Allow localhost for development
+    ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:5173', 'http://localhost:3000'] : [])
+].filter(Boolean);
+
+// Middleware
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.warn(`CORS blocked request from: ${origin}`);
+            callback(null, true); // Still allow but log (for transition period)
+            // In strict mode: callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
+// ==========================================================================
+// STRIPE WEBHOOK - MUST be before bodyParser to get raw body
+// ==========================================================================
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim(); // Trim whitespace
+
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch (err) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    console.log(`Stripe webhook received: ${event.type}`);
+
+    // Handle the event
+    switch (event.type) {
+        case 'checkout.session.completed': {
+            const session = event.data.object;
+            const userId = session.metadata?.userId;
+            const planId = session.metadata?.planId;
+
+            if (userId && planId) {
+                await supabase
+                    .from('profiles')
+                    .update({
+                        subscription_plan: planId,
+                        subscription_status: 'trial',
+                        stripe_customer_id: session.customer,
+                        stripe_subscription_id: session.subscription,
+                        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', userId);
+
+                console.log(`Subscription started for user ${userId} on plan ${planId}`);
+            }
+            break;
+        }
+
+        case 'customer.subscription.updated': {
+            const subscription = event.data.object;
+            const customerId = subscription.customer;
+            
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('stripe_customer_id', customerId)
+                .single();
+
+            if (profile) {
+                let status = 'active';
+                if (subscription.status === 'trialing') status = 'trial';
+                else if (subscription.status === 'past_due') status = 'past_due';
+                else if (subscription.status === 'canceled') status = 'canceled';
+                else if (subscription.status === 'unpaid') status = 'unpaid';
+
+                await supabase
+                    .from('profiles')
+                    .update({
+                        subscription_status: status,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', profile.id);
+                
+                console.log(`Subscription updated for user ${profile.id}: ${status}`);
+            }
+            break;
+        }
+
+        case 'customer.subscription.deleted': {
+            const subscription = event.data.object;
+            const customerId = subscription.customer;
+            
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('stripe_customer_id', customerId)
+                .single();
+
+            if (profile) {
+                await supabase
+                    .from('profiles')
+                    .update({
+                        subscription_status: 'canceled',
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', profile.id);
+
+                console.log(`Subscription canceled for user ${profile.id}`);
+            }
+            break;
+        }
+
+        case 'invoice.payment_failed': {
+            const invoice = event.data.object;
+            const customerId = invoice.customer;
+            
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('stripe_customer_id', customerId)
+                .single();
+
+            if (profile) {
+                await supabase
+                    .from('profiles')
+                    .update({
+                        subscription_status: 'past_due',
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', profile.id);
+
+                console.log(`Payment failed for user ${profile.id}`);
+            }
+            break;
+        }
+
+        case 'invoice.paid': {
+            const invoice = event.data.object;
+            const customerId = invoice.customer;
+            
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('id, subscription_status')
+                .eq('stripe_customer_id', customerId)
+                .single();
+
+            if (profile && profile.subscription_status !== 'active') {
+                await supabase
+                    .from('profiles')
+                    .update({
+                        subscription_status: 'active',
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', profile.id);
+
+                console.log(`Subscription activated for user ${profile.id} after successful payment`);
+            }
+            break;
+        }
+
+        default:
+            console.log(`Unhandled Stripe event type: ${event.type}`);
+    }
+
+    res.json({ received: true });
+});
+
+// Body parsing middleware (after Stripe webhook)
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// Health Check
+app.get('/', (req, res) => {
+    res.send('Agent IA SEO Backend is running 🚀');
+});
+
+// Incoming SMS Webhook
+app.post('/incoming-sms', async (req, res) => {
+    try {
+        const { Body, From, To } = req.body;
+        console.log(`Received SMS from ${From}: ${Body}`);
+
+        // 0. Check for STOP keywords (RGPD opt-out)
+        const optOutCheck = await blacklistService.processMessageForOptOut(supabase, From, Body, null);
+        if (optOutCheck.isOptOut) {
+            console.log(`Opt-out detected from ${From}: "${optOutCheck.keyword}"`);
+            const twiml = new twilio.twiml.MessagingResponse();
+            twiml.message(optOutCheck.response);
+            return res.type('text/xml').send(twiml.toString());
+        }
+
+        // 1. Fetch Agent Config
+        const agentConfig = await agentService.getAgentConfig(To);
+
+        if (!agentConfig) {
+            console.warn('No agent config found. Sending default response.');
+            const twiml = new twilio.twiml.MessagingResponse();
+            twiml.message("Le service n'est pas configuré pour le moment.");
+            return res.type('text/xml').send(twiml.toString());
+        }
+
+        // 2. Get full agent config from profile for schedule and behavior settings
+        // Using global supabase client
+        
+        // 2b. Fetch Contact to get agent_id
+        const { data: contact } = await supabase
+            .from('contacts')
+            .select('*')
+            .eq('phone', From)
+            .single();
+
+        // Get agent_id from contact (to separate conversations by user/company)
+        const agentId = contact?.agent_id || null;
+
+        // Check if number is blacklisted for this agent
+        if (agentId) {
+            const blacklistCheck = await blacklistService.isBlacklisted(supabase, From, agentId);
+            if (blacklistCheck.blacklisted) {
+                console.log(`Blacklisted number ${From} tried to message. Ignoring.`);
+                const twiml = new twilio.twiml.MessagingResponse();
+                // Don't respond to blacklisted numbers (silent ignore)
+                return res.type('text/xml').send(twiml.toString());
+            }
+        }
+
+        // Fetch full agent settings including schedule
+        let fullAgentConfig = agentConfig;
+        if (agentId) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('agent_config')
+                .eq('id', agentId)
+                .single();
+            
+            if (profile?.agent_config) {
+                fullAgentConfig = { ...agentConfig, ...profile.agent_config };
+            }
+        }
+
+        // 3. Check if within operating hours
+        const schedule = fullAgentConfig.schedule;
+        const isWithinSchedule = scheduleService.isWithinSchedule(schedule);
+        
+        if (!isWithinSchedule) {
+            console.log(`Outside schedule hours. Message from ${From} will be queued.`);
+            // Save message but send auto-reply
+            await historyService.saveMessage(From, 'user', Body, agentId);
+            
+            const twiml = new twilio.twiml.MessagingResponse();
+            const outOfHoursMessage = fullAgentConfig.outOfHoursMessage || 
+                `Merci pour votre message ! Notre équipe est disponible du lundi au vendredi de ${schedule?.startTime || '09:00'} à ${schedule?.endTime || '18:00'}. Nous vous répondrons dès que possible.`;
+            twiml.message(outOfHoursMessage);
+            return res.type('text/xml').send(twiml.toString());
+        }
+
+        // 4. Save User Message (with agent_id)
+        await historyService.saveMessage(From, 'user', Body, agentId);
+
+        // 5. Fetch History (filtered by agent_id)
+        const history = await historyService.getHistory(From, agentId);
+
+        // 6. Generate AI Response
+        const { content: aiResponse } = await openaiService.generateResponse(fullAgentConfig, Body, history, contact);
+        console.log(`AI Response: ${aiResponse}`);
+
+        // 7. Check behavior mode and apply delay if needed
+        const behaviorMode = fullAgentConfig.behaviorMode || 'assistant';
+        const responseDelay = fullAgentConfig.responseDelay || 2;
+        const delayMs = scheduleService.calculateResponseDelay(behaviorMode, responseDelay);
+
+        if (delayMs > 0) {
+            // For human mode, we need to respond to Twilio immediately (empty response)
+            // Then send the actual SMS after the delay
+            console.log(`Human mode: Scheduling response in ${Math.round(delayMs/1000)}s`);
+            
+            // Schedule delayed response
+            setTimeout(async () => {
+                try {
+                    // Save AI Response
+                    await historyService.saveMessage(From, 'assistant', aiResponse, agentId);
+                    
+                    // Send SMS via Twilio API (not TwiML since we already responded)
+                    const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+                    await twilioClient.messages.create({
+                        body: aiResponse,
+                        from: To, // Use the same number that received the message
+                        to: From
+                    });
+                    console.log(`Delayed response sent to ${From}`);
+                    
+                    // Run async tasks (scoring, qualification, intelligence)
+                    runAsyncTasks(From, agentId, fullAgentConfig, history, Body);
+                } catch (err) {
+                    console.error('Error sending delayed response:', err);
+                }
+            }, delayMs);
+
+            // Send empty TwiML response immediately
+        const twiml = new twilio.twiml.MessagingResponse();
+            res.type('text/xml').send(twiml.toString());
+        } else {
+            // Assistant mode: Respond immediately
+            await historyService.saveMessage(From, 'assistant', aiResponse, agentId);
+            
+            // Run async tasks with intelligence
+            runAsyncTasks(From, agentId, fullAgentConfig, history, Body);
+
+            // Send Response via Twilio XML (TwiML)
+            const twiml = new twilio.twiml.MessagingResponse();
+            twiml.message(aiResponse);
+        res.type('text/xml').send(twiml.toString());
+        }
+
+    } catch (error) {
+        console.error('Error processing SMS:', error);
+        const twiml = new twilio.twiml.MessagingResponse();
+        twiml.message("Désolé, une erreur est survenue.");
+        res.type('text/xml').send(twiml.toString());
+    }
+});
+
+// Helper function for async tasks (scoring, qualification, webhook, intelligence)
+async function runAsyncTasks(phone, agentId, agentConfig, history, lastUserMessage) {
+    try {
+        // Using global supabase client
+
+        // Get existing contact
+        const { data: contact } = await supabase
+            .from('contacts')
+            .select('*')
+            .eq('phone', phone)
+            .eq('agent_id', agentId)
+            .single();
+
+        const existingContext = contact?.extracted_context || {};
+
+        // 1. INTELLIGENCE ANALYSIS - Extract context, detect intent, calculate score
+        console.log(`[Intelligence] Analyzing message from ${phone}...`);
+        const analysis = await intelligenceService.analyzeMessage(
+            lastUserMessage,
+            history,
+            existingContext,
+            agentConfig
+        );
+
+        console.log(`[Intelligence] Intent: ${analysis.intent.primary_intent}, Score: ${analysis.score.score}`);
+
+        // 2. UPDATE CONTACT with extracted information and score
+        const updateData = {
+            score: analysis.score.score,
+            score_reason: analysis.score.breakdown ? 
+                `B:${analysis.score.breakdown.budget?.score || 0} A:${analysis.score.breakdown.authority?.score || 0} N:${analysis.score.breakdown.need?.score || 0} T:${analysis.score.breakdown.timing?.score || 0}` :
+                analysis.score.recommended_next_step,
+            extracted_context: analysis.context.fullContext,
+            last_intent: analysis.intent.primary_intent,
+            qualification_status: analysis.score.qualification_status,
+            last_message_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
+        // Update contact name if extracted
+        if (analysis.context.newInfo?.name && !contact?.name) {
+            updateData.name = analysis.context.newInfo.name;
+        }
+        if (analysis.context.newInfo?.company && !contact?.company_name) {
+            updateData.company_name = analysis.context.newInfo.company;
+        }
+        if (analysis.context.newInfo?.job_title && !contact?.job_title) {
+            updateData.job_title = analysis.context.newInfo.job_title;
+        }
+
+        await supabase
+            .from('contacts')
+            .update(updateData)
+            .eq('phone', phone)
+            .eq('agent_id', agentId);
+
+        // 3. CHECK ESCALATION
+        if (analysis.escalation.should_escalate) {
+            console.log(`[Escalation] Lead ${phone} should be escalated: ${analysis.escalation.reason}`);
+            
+            // Create escalation notification
+            await supabase
+                .from('notifications')
+                .insert({
+                    user_id: agentId,
+                    type: 'escalation',
+                    title: `🚨 Escalade requise: ${contact?.name || phone}`,
+                    message: analysis.escalation.reason,
+                    data: {
+                        phone,
+                        urgency: analysis.escalation.urgency,
+                        escalation_type: analysis.escalation.escalation_type,
+                        internal_note: analysis.escalation.internal_note
+                    },
+                    read: false,
+                    created_at: new Date().toISOString()
+                });
+
+            // Update contact status
+            await supabase
+                .from('contacts')
+                .update({ 
+                    status: 'escalated',
+                    escalation_reason: analysis.escalation.reason
+                })
+                .eq('phone', phone)
+                .eq('agent_id', agentId);
+        }
+
+        // 4. QUALIFICATION CHECK
+        if (analysis.score.score >= 70) {
+            console.log(`[Qualified] Lead ${phone} qualified with score ${analysis.score.score}!`);
+            
+            // Trigger webhook if configured
+            if (agentConfig.webhook_url) {
+                await webhookService.triggerWebhook(agentConfig.webhook_url, {
+                    phone: phone,
+                    score: analysis.score.score,
+                    qualification_status: analysis.score.qualification_status,
+                    context: analysis.context.fullContext,
+                    recommended_action: analysis.score.recommended_next_step,
+                    history: history.slice(-10)
+                });
+            }
+
+            // Send email notification to user
+            try {
+                const { data: userProfile } = await supabase
+                    .from('profiles')
+                    .select('email, email_notifications')
+                    .eq('id', agentId)
+                    .single();
+
+                if (userProfile?.email && userProfile.email_notifications !== false) {
+                    // Get contact details
+                    const { data: contactData } = await supabase
+                        .from('contacts')
+                        .select('*')
+                        .eq('phone', phone)
+                        .eq('agent_id', agentId)
+                        .single();
+
+                    await emailService.sendQualifiedLeadNotification(
+                        userProfile.email,
+                        contactData || { phone, name: analysis.context.fullContext?.name || 'Contact' },
+                        analysis.score.score,
+                        {
+                            reason: analysis.score.recommended_next_step,
+                            budget: analysis.context.fullContext?.budget
+                        }
+                    );
+                }
+            } catch (emailError) {
+                console.error('Error sending email notification:', emailError);
+            }
+
+            // Update status
+            await supabase
+                .from('contacts')
+                .update({ status: 'qualified' })
+                .eq('phone', phone)
+                .eq('agent_id', agentId);
+        }
+
+        // 5. LOG HOT LEAD NOTIFICATION
+        if (analysis.score.qualification_status === 'hot') {
+            await supabase
+                .from('notifications')
+                .insert({
+                    user_id: agentId,
+                    type: 'hot_lead',
+                    title: `🔥 Lead chaud: ${contact?.name || phone}`,
+                    message: `Score: ${analysis.score.score}/100. ${analysis.score.recommended_next_step}`,
+                    data: { phone, score: analysis.score.score },
+                    read: false,
+                    created_at: new Date().toISOString()
+                });
+        }
+
+        console.log(`[Intelligence] Analysis complete for ${phone}`);
+
+    } catch (error) {
+        console.error('Error in async tasks:', error);
+    }
+}
+
+// Import Leads Endpoint
+app.post('/import-leads', async (req, res) => {
+    try {
+        const { leads, agentId, sendInitialSms } = req.body;
+        console.log(`Importing ${leads.length} leads for agent ${agentId}`);
+
+        if (!leads || !agentId) {
+            return res.status(400).json({ error: 'Missing leads or agentId' });
+        }
+
+        // 1. Fetch Agent Config
+        const agentConfig = await agentService.getAgentConfigById(agentId);
+        if (!agentConfig) {
+            return res.status(404).json({ error: 'Agent config not found' });
+        }
+
+        const results = [];
+
+        // 2. Process Leads
+        for (const lead of leads) {
+            // Insert into Supabase 'contacts' is done by Frontend for now (or could be done here)
+            // Assuming Frontend did the insert, we just handle the SMS.
+            // BUT, to be safe and atomic, let's assume Frontend sends us the data to insert OR just to message.
+            // The plan said "Inserts into contacts table". Let's do that here to be robust.
+
+            // Actually, for MVP speed, let's assume Frontend inserts into Supabase (since it has the client)
+            // and just calls this endpoint to trigger SMS. 
+            // WAIT, the plan said: "Receives JSON list... Inserts into contacts table... Calls outboundService".
+            // So I should do the insert here.
+
+            // However, I need the supabase client here. agentService has it.
+            // Let's just do the SMS part here for now to keep it simple, 
+            // OR import supabase here. agentService has it private.
+            // Let's stick to: Frontend inserts, Backend sends SMS.
+            // It's cleaner for RLS if Frontend does it (user context).
+            // So this endpoint is purely "Trigger Outbound Campaign".
+
+            if (sendInitialSms) {
+                const success = await outboundService.sendInitialMessage(lead, agentConfig);
+                results.push({ phone: lead.phone, success });
+            }
+        }
+
+        res.json({ success: true, results });
+
+    } catch (error) {
+        console.error('Error importing leads:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Inbound Lead Webhook
+app.post('/webhooks/:agentId/leads', async (req, res) => {
+    try {
+        const { agentId } = req.params;
+        const { name, phone, ...extraData } = req.body; // Capture all other fields
+
+        // Normalize keys to snake_case for Supabase
+        const normalizedData = {};
+        for (const key in extraData) {
+            const lowerKey = key.toLowerCase();
+            // Simple mapping for common variations
+            if (lowerKey === 'source') normalizedData.source = extraData[key];
+            else if (lowerKey === 'company' || lowerKey === 'company name' || lowerKey === 'company_name') normalizedData.company_name = extraData[key];
+            else if (lowerKey === 'job' || lowerKey === 'job title' || lowerKey === 'job_title') normalizedData.job_title = extraData[key];
+            else if (lowerKey === 'email') normalizedData.email = extraData[key];
+            else if (lowerKey === 'budget' || lowerKey === 'budget range') normalizedData.budget_range = extraData[key];
+            else normalizedData[key.toLowerCase().replace(/\s+/g, '_')] = extraData[key]; // Fallback: lowercase and snake_case
+        }
+
+        console.log(`Received inbound lead for agent ${agentId}: ${name} (${phone})`);
+
+        if (!name || !phone) {
+            return res.status(400).json({ error: 'Missing name or phone' });
+        }
+
+        // 1. Fetch Agent Config
+        const agentConfig = await agentService.getAgentConfigById(agentId);
+        if (!agentConfig) {
+            return res.status(404).json({ error: 'Agent not found' });
+        }
+
+        // 2. Score Lead (if criteria exists)
+        let scoreData = { score: 0, reason: '' };
+        console.log('Scoring Criteria:', agentConfig.scoring_criteria);
+        if (agentConfig.scoring_criteria) {
+            scoreData = await openaiService.scoreNewLead({ name, phone, ...normalizedData }, agentConfig.scoring_criteria);
+            console.log('Score Result:', scoreData);
+        } else {
+            console.log('No scoring criteria found.');
+        }
+
+        // 3. Create Contact
+        const contactService = require('./services/contactService');
+        const contact = await contactService.createContact(agentId, name, phone, {
+            ...normalizedData,
+            score: scoreData.score,
+            score_reason: scoreData.reason
+        });
+
+        // 3. Send Initial SMS
+        const success = await outboundService.sendInitialMessage(contact, agentConfig);
+
+        res.json({
+            success: true,
+            contactId: contact.id,
+            smsSent: success
+        });
+
+    } catch (error) {
+        console.error('Error processing inbound lead:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Generate Agent Templates Endpoint
+app.post('/api/generate-templates', async (req, res) => {
+    try {
+        const { companyName, website, description } = req.body;
+        if (!companyName && !website && !description) {
+            return res.status(400).json({ error: 'Missing business info' });
+        }
+
+        console.log('Generating templates for:', companyName);
+        const templates = await openaiService.generateAgentTemplates({ companyName, website, description });
+        res.json({ templates });
+
+    } catch (error) {
+        console.error('Error generating templates:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Onboarding V2 Endpoints
+
+app.post('/api/onboarding/analyze', async (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url) return res.status(400).json({ error: 'Missing URL' });
+        const result = await openaiService.analyzeBusiness(url);
+        res.json(result);
+    } catch (error) {
+        console.error('Error analyzing business:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/api/onboarding/generate-persona', async (req, res) => {
+    try {
+        const { businessType } = req.body;
+        if (!businessType) return res.status(400).json({ error: 'Missing businessType' });
+        const result = await openaiService.generatePersona(businessType);
+        res.json(result);
+    } catch (error) {
+        console.error('Error generating persona:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/api/onboarding/simulate', async (req, res) => {
+    try {
+        const { businessType, tone } = req.body;
+        if (!businessType) return res.status(400).json({ error: 'Missing parameters' });
+        const result = await openaiService.simulateConversation(businessType, tone || 'Professional');
+        res.json({ conversation: result });
+    } catch (error) {
+        console.error('Error simulating conversation:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Create/Update Agent Configuration
+app.post('/api/agents/create', async (req, res) => {
+    try {
+        const { userId, agentConfig, onboardingData } = req.body;
+        
+        if (!userId) {
+            return res.status(400).json({ error: 'Missing userId' });
+        }
+
+        // Using global supabase client
+
+        // Build complete agent configuration
+        const fullConfig = {
+            // Agent Identity
+            name: agentConfig?.name || onboardingData?.agentPersona?.name || 'Agent IA',
+            role: agentConfig?.role || onboardingData?.agentPersona?.role || 'Assistant Commercial',
+            company: onboardingData?.companyName || onboardingData?.businessType || 'Mon Entreprise',
+            
+            // Behavior
+            tone: agentConfig?.tone || 50,
+            politeness: agentConfig?.politeness || 'vous',
+            behaviorMode: agentConfig?.behaviorMode || onboardingData?.behaviorMode || 'assistant',
+            responseDelay: agentConfig?.responseDelay || onboardingData?.responseDelay || 2,
+            
+            // Schedule (operating hours)
+            schedule: agentConfig?.schedule || onboardingData?.schedule || {
+                startTime: '09:00',
+                endTime: '18:00',
+                days: ['L', 'M', 'Me', 'J', 'V']
+            },
+            
+            // Context & Goals
+            context: agentConfig?.context || onboardingData?.valueProposition || '',
+            goal: onboardingData?.goal || 'qualify',
+            
+            // ICP Data
+            icp: {
+                sector: onboardingData?.icpSector || '',
+                size: onboardingData?.icpSize || '',
+                decider: onboardingData?.icpDecider || '',
+                budget: onboardingData?.icpBudget || ''
+            },
+            
+            // Qualification
+            quality_criteria: onboardingData?.qualificationCriteria?.map((c, i) => ({
+                id: i,
+                text: typeof c === 'string' ? c : c.text,
+                type: 'must_have'
+            })) || [],
+            
+            // Pain Points & Needs
+            painPoints: onboardingData?.painPoints || [],
+            needs: onboardingData?.needs || [],
+            objections: onboardingData?.objections || [],
+            
+            // Products/Services
+            products: onboardingData?.products || [],
+            faqs: onboardingData?.faqs || [],
+            
+            // Channels & CRM
+            channels: onboardingData?.channels || { sms: true, whatsapp: false },
+            crm: onboardingData?.crm || null,
+            
+            // Calendar URL for booking
+            calendarUrl: agentConfig?.calendarUrl || onboardingData?.calendarUrl || null,
+            
+            // Metadata
+            businessType: onboardingData?.businessType || '',
+            website: onboardingData?.website || '',
+            language: onboardingData?.language || 'Français',
+            country: onboardingData?.country || 'France',
+            
+            // Agent Persona
+            agentPersona: onboardingData?.agentPersona || null,
+            selectedAgentId: onboardingData?.selectedAgentId || null,
+            
+            // Timestamps
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        // Generate scoring criteria text from quality criteria
+        const scoringCriteria = fullConfig.quality_criteria
+            .map(c => `- ${c.text}`)
+            .join('\n');
+
+        // Generate first message template
+        const firstMessageTemplate = onboardingData?.agentPersona?.firstMessage || 
+            `Bonjour {{name}}, merci pour votre intérêt ! Je suis ${fullConfig.name}, ${fullConfig.role} chez ${fullConfig.company}. Comment puis-je vous aider ?`;
+
+        // Update profile in Supabase
+        const { data, error } = await supabase
+            .from('profiles')
+            .update({
+                agent_config: fullConfig,
+                first_message_template: firstMessageTemplate,
+                scoring_criteria: scoringCriteria,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error saving agent config:', error);
+            return res.status(500).json({ error: 'Failed to save agent configuration', details: error.message });
+        }
+
+        console.log(`Agent created/updated for user ${userId}`);
+        
+        res.json({
+            success: true,
+            agentId: userId,
+            config: fullConfig,
+            webhookUrl: `https://api.agentiaseo.com/webhooks/${userId}/leads`
+        });
+
+    } catch (error) {
+        console.error('Error creating agent:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get Agent Configuration
+app.get('/api/agents/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Using global supabase client
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('agent_config, first_message_template, scoring_criteria, onboarding_completed')
+            .eq('id', userId)
+            .single();
+
+        if (error) {
+            return res.status(404).json({ error: 'Agent not found' });
+        }
+
+        res.json({
+            agentConfig: data.agent_config,
+            firstMessageTemplate: data.first_message_template,
+            scoringCriteria: data.scoring_criteria,
+            onboardingCompleted: data.onboarding_completed
+        });
+
+    } catch (error) {
+        console.error('Error fetching agent:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================================
+// STRIPE INTEGRATION
+// =============================================================================
+
+// Create Stripe Checkout Session
+app.post('/api/stripe/create-checkout-session', async (req, res) => {
+    try {
+        const { userId, userEmail, planId, priceId, trialDays, successUrl, cancelUrl } = req.body;
+
+        console.log('Stripe checkout request:', { userId, userEmail, planId, priceId, trialDays });
+
+        if (!userId || !planId || !priceId) {
+            console.error('Missing required fields:', { userId, planId, priceId });
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Verify Stripe is configured
+        if (!process.env.STRIPE_SECRET_KEY) {
+            console.error('STRIPE_SECRET_KEY is not configured');
+            return res.status(500).json({ error: 'Stripe is not configured on the server' });
+        }
+
+        // Coupon ID for -50% during 6 months (create in Stripe Dashboard)
+        const earlyBirdCouponId = process.env.STRIPE_EARLYBIRD_COUPON_ID || null;
+        console.log('Using coupon:', earlyBirdCouponId || 'none');
+
+        const sessionConfig = {
+            customer_email: userEmail,
+            payment_method_types: ['card'],
+            line_items: [{
+                price: priceId,
+                quantity: 1,
+            }],
+            mode: 'subscription',
+            subscription_data: {
+                trial_period_days: trialDays || 7,
+                metadata: {
+                    userId: userId,
+                    planId: planId
+                }
+            },
+            success_url: successUrl,
+            cancel_url: cancelUrl,
+            metadata: {
+                userId: userId,
+                planId: planId
+            }
+        };
+
+        // Apply early bird coupon if available and valid
+        if (earlyBirdCouponId) {
+            try {
+                // Verify coupon exists before adding it
+                await stripe.coupons.retrieve(earlyBirdCouponId);
+                sessionConfig.discounts = [{
+                    coupon: earlyBirdCouponId
+                }];
+            } catch (couponError) {
+                console.warn('Coupon not found or invalid, proceeding without discount:', couponError.message);
+                // Continue without the coupon
+            }
+        }
+
+        console.log('Creating Stripe session with config:', JSON.stringify(sessionConfig, null, 2));
+        const session = await stripe.checkout.sessions.create(sessionConfig);
+
+        console.log('Stripe session created:', session.id);
+        res.json({ url: session.url, sessionId: session.id });
+
+    } catch (error) {
+        console.error('Stripe checkout error:', error.message);
+        console.error('Full error:', error);
+        res.status(500).json({ 
+            error: error.message,
+            type: error.type || 'unknown',
+            code: error.code || 'unknown'
+        });
+    }
+});
+
+// Create Stripe Customer Portal session
+app.post('/api/stripe/create-portal-session', async (req, res) => {
+    try {
+        const { userId, returnUrl } = req.body;
+
+        // Using global supabase client
+
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('stripe_customer_id')
+            .eq('id', userId)
+            .single();
+
+        if (!profile?.stripe_customer_id) {
+            return res.status(400).json({ error: 'No Stripe customer found' });
+        }
+
+        const portalSession = await stripe.billingPortal.sessions.create({
+            customer: profile.stripe_customer_id,
+            return_url: returnUrl
+        });
+
+        res.json({ url: portalSession.url });
+
+    } catch (error) {
+        console.error('Portal session error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// =============================================================================
+// PLAYGROUND API - Test agent responses in onboarding
+// =============================================================================
+
+app.post('/api/playground/test', async (req, res) => {
+    try {
+        const { message, conversationHistory, agentConfig } = req.body;
+
+        if (!message) {
+            return res.status(400).json({ error: 'Message is required' });
+        }
+
+        // Build context from agent config
+        const systemPrompt = buildPlaygroundPrompt(agentConfig);
+        
+        // Format conversation history for OpenAI
+        const messages = [
+            { role: 'system', content: systemPrompt }
+        ];
+
+        // Add conversation history
+        if (conversationHistory && conversationHistory.length > 0) {
+            conversationHistory.forEach(msg => {
+                messages.push({
+                    role: msg.sender === 'lead' ? 'user' : 'assistant',
+                    content: msg.text
+                });
+            });
+        }
+
+        // Add the new user message
+        messages.push({ role: 'user', content: message });
+
+        // Call OpenAI
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: messages,
+            max_tokens: 200,
+            temperature: 0.7
+        });
+
+        const agentResponse = completion.choices[0].message.content;
+
+        res.json({ 
+            response: agentResponse,
+            success: true 
+        });
+
+    } catch (error) {
+        console.error('Playground error:', error);
+        res.status(500).json({ error: 'Failed to generate response' });
+    }
+});
+
+// Build prompt for playground testing
+function buildPlaygroundPrompt(config) {
+    const agentName = config?.agentName || 'Assistant Commercial';
+    const company = config?.company || 'notre entreprise';
+    const firstMessage = config?.firstMessage || 'Bonjour ! Comment puis-je vous aider ?';
+    const behaviorMode = config?.behaviorMode || 'assistant';
+    const goal = config?.goal || 'qualify';
+
+    let goalInstructions = '';
+    switch (goal) {
+        case 'qualify':
+            goalInstructions = `🎯 OBJECTIF : QUALIFIER LE LEAD
+Tu dois découvrir ces 4 éléments (BANT) :
+1. BUDGET : "Vous avez une enveloppe en tête ?"
+2. AUTORITÉ : "C'est vous qui décidez ?"
+3. BESOIN : "C'est quoi votre problème principal ?"
+4. TIMING : "C'est urgent ? Vous voulez avancer quand ?"
+
+FLOW : Accueil → Besoin → Contexte → Budget → Timing → Si qualifié, propose un RDV`;
+            break;
+        case 'book':
+            goalInstructions = `🎯 OBJECTIF : BOOKER UN RDV RAPIDEMENT
+Tu es un BOOKING ASSISTANT. Ta mission est de CONVERTIR en RDV.
+
+STRATÉGIE :
+- DÈS le 2ème ou 3ème message, propose un RDV
+- Donne des créneaux concrets : "Demain 14h ou jeudi 10h ?"
+- Si hésitation, insiste gentiment : "15 min suffisent pour voir si on peut vous aider"
+- Ne fais pas de longue qualification, va droit au but
+
+PHRASES CLÉS :
+- "Je peux vous proposer demain à 14h, ça vous va ?"
+- "On se cale un call rapide de 15 min ?"
+- "J'ai un créneau dispo cette semaine, vous préférez quel jour ?"
+
+⚠️ Tu dois PROPOSER UN RDV dans tes 3 premiers messages.`;
+            break;
+        case 'expert':
+        case 'support':
+            goalInstructions = `🎯 OBJECTIF : CONSEILLER ET ORIENTER
+Tu es un EXPERT ADVISOR. Tu guides vers la bonne solution.
+
+STRATÉGIE :
+- Écoute le besoin technique
+- Pose des questions précises
+- Propose des solutions adaptées
+- Si complexe, suggère un appel avec un expert`;
+            break;
+        case 'nurture':
+            goalInstructions = `🎯 OBJECTIF : NOURRIR LA RELATION
+Pas de pression, juste de la valeur et des conseils utiles.`;
+            break;
+        case 'reactivate':
+            goalInstructions = `🎯 OBJECTIF : RÉACTIVER UN ANCIEN LEAD
+Rappelle la relation passée, demande ce qui a changé, propose quelque chose de nouveau.`;
+            break;
+        default:
+            goalInstructions = `Ton objectif est de qualifier ce lead et comprendre ses besoins.`;
+    }
+
+    let behaviorInstructions = '';
+    if (behaviorMode === 'human') {
+        behaviorInstructions = `🚨 MODE HUMAIN :
+- Tu es un VRAI humain, pas une IA
+- Si on demande "Es-tu un robot ?" → "Non, je suis ${agentName} de ${company} 😊"
+- Expressions naturelles : "ah", "hmm", "en fait", "du coup"
+- Sois chaleureux et empathique`;
+    } else {
+        behaviorInstructions = `Tu es un assistant IA professionnel et transparent.`;
+    }
+
+    return `Tu es ${agentName}, commercial pour ${company}.
+
+${behaviorInstructions}
+
+${goalInstructions}
+
+📱 RÈGLES SMS :
+1. Messages COURTS (max 160 caractères)
+2. UNE SEULE question par message
+3. Langage naturel et conversationnel
+4. Un emoji occasionnel (pas systématique)
+5. Avance vers ton objectif à chaque message
+
+C'est une SIMULATION DE TEST. Réponds comme en vrai conversation SMS.
+
+Message d'accueil de référence : "${firstMessage}"`;
+}
+
+// =============================================================================
+// NOTIFICATIONS API
+// =============================================================================
+
+// Get notifications for a user
+app.get('/api/notifications/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Using global supabase client
+
+        // Get hot leads (score > 80) from last 24h
+        const { data: hotLeads } = await supabase
+            .from('contacts')
+            .select('id, name, score, created_at')
+            .eq('agent_id', userId)
+            .gte('score', 80)
+            .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        // Get recent messages (last 1h)
+        const { data: recentMessages } = await supabase
+            .from('messages')
+            .select('id, phone_number, content, created_at')
+            .eq('agent_id', userId)
+            .eq('role', 'user')
+            .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        // Get inactive leads (no response in 48h)
+        const { data: inactiveLeads } = await supabase
+            .from('contacts')
+            .select('id, name, updated_at')
+            .eq('agent_id', userId)
+            .lt('updated_at', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
+            .is('score', null)
+            .limit(10);
+
+        // Build notifications
+        const notifications = [];
+
+        // Hot lead notifications
+        (hotLeads || []).forEach(lead => {
+            notifications.push({
+                id: `hot-${lead.id}`,
+                type: 'hot_lead',
+                title: '🔥 Lead chaud !',
+                message: `${lead.name} vient d'être qualifié (Score: ${lead.score})`,
+                time: getRelativeTime(lead.created_at),
+                read: false,
+                priority: 'high'
+            });
+        });
+
+        // Recent reply notifications
+        (recentMessages || []).forEach(msg => {
+            notifications.push({
+                id: `msg-${msg.id}`,
+                type: 'reply',
+                title: '💬 Nouvelle réponse',
+                message: `${msg.content.substring(0, 50)}...`,
+                time: getRelativeTime(msg.created_at),
+                read: false,
+                priority: 'medium'
+            });
+        });
+
+        // Inactive leads warning
+        if ((inactiveLeads || []).length > 0) {
+            notifications.push({
+                id: 'inactive-warning',
+                type: 'warning',
+                title: '⚠️ Inactivité détectée',
+                message: `${inactiveLeads.length} lead(s) n'ont pas répondu depuis 48h`,
+                time: 'Action requise',
+                read: false,
+                priority: 'low'
+            });
+        }
+
+        // Sort by priority and time
+        notifications.sort((a, b) => {
+            const priorityOrder = { high: 0, medium: 1, low: 2 };
+            return priorityOrder[a.priority] - priorityOrder[b.priority];
+        });
+
+        res.json({ notifications });
+
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Helper function for relative time
+function getRelativeTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'À l\'instant';
+    if (diffMins < 60) return `Il y a ${diffMins} min`;
+    if (diffHours < 24) return `Il y a ${diffHours}h`;
+    if (diffDays < 7) return `Il y a ${diffDays}j`;
+    return date.toLocaleDateString('fr-FR');
+}
+
+// =============================================================================
+// TEMPLATES API
+// =============================================================================
+
+// Get all templates (default + custom)
+app.get('/api/templates/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Using global supabase client
+        
+        const templates = await templateService.getAllTemplates(supabase, userId);
+        res.json(templates);
+    } catch (error) {
+        console.error('Error getting templates:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get templates by category
+app.get('/api/templates/category/:category', (req, res) => {
+    try {
+        const { category } = req.params;
+        const templates = templateService.getTemplatesByCategory(category);
+        res.json(templates);
+    } catch (error) {
+        console.error('Error getting templates by category:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Create custom template
+app.post('/api/templates/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const templateData = req.body;
+        
+        // Using global supabase client
+        
+        const template = await templateService.createTemplate(supabase, userId, templateData);
+        res.json(template);
+    } catch (error) {
+        console.error('Error creating template:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Delete custom template
+app.delete('/api/templates/:userId/:templateId', async (req, res) => {
+    try {
+        const { userId, templateId } = req.params;
+        
+        // Using global supabase client
+        
+        await templateService.deleteTemplate(supabase, templateId, userId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting template:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Preview template with variables
+app.post('/api/templates/preview', (req, res) => {
+    try {
+        const { template, variables } = req.body;
+        const preview = templateService.replaceVariables(template, variables);
+        res.json({ preview });
+    } catch (error) {
+        console.error('Error previewing template:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================================
+// TAGS & SEGMENTS API
+// =============================================================================
+
+// Get all tags
+app.get('/api/tags/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Using global supabase client
+        
+        const tags = await tagService.getAllTags(supabase, userId);
+        res.json(tags);
+    } catch (error) {
+        console.error('Error getting tags:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Create custom tag
+app.post('/api/tags/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const tagData = req.body;
+        
+        // Using global supabase client
+        
+        const tag = await tagService.createTag(supabase, userId, tagData);
+        res.json(tag);
+    } catch (error) {
+        console.error('Error creating tag:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Delete custom tag
+app.delete('/api/tags/:userId/:tagId', async (req, res) => {
+    try {
+        const { userId, tagId } = req.params;
+        
+        // Using global supabase client
+        
+        await tagService.deleteTag(supabase, tagId, userId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting tag:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Add tag to contact
+app.post('/api/contacts/:contactId/tags/:tagId', async (req, res) => {
+    try {
+        const { contactId, tagId } = req.params;
+        
+        // Using global supabase client
+        
+        await tagService.addTagToContact(supabase, contactId, tagId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error adding tag:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Remove tag from contact
+app.delete('/api/contacts/:contactId/tags/:tagId', async (req, res) => {
+    try {
+        const { contactId, tagId } = req.params;
+        
+        // Using global supabase client
+        
+        await tagService.removeTagFromContact(supabase, contactId, tagId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error removing tag:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get segments
+app.get('/api/segments', (req, res) => {
+    try {
+        const segments = tagService.getDefaultSegments();
+        res.json(segments);
+    } catch (error) {
+        console.error('Error getting segments:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get contacts by segment
+app.get('/api/segments/:segmentId/contacts/:userId', async (req, res) => {
+    try {
+        const { segmentId, userId } = req.params;
+        
+        // Using global supabase client
+        
+        const contacts = await tagService.getSegmentContacts(supabase, userId, segmentId);
+        res.json({ contacts, count: contacts.length });
+    } catch (error) {
+        console.error('Error getting segment contacts:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================================
+// BLACKLIST / RGPD API
+// =============================================================================
+
+// Get blacklist
+app.get('/api/blacklist/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Using global supabase client
+        
+        const blacklist = await blacklistService.getBlacklist(supabase, userId);
+        const stats = await blacklistService.getStats(supabase, userId);
+        
+        res.json({ blacklist, stats });
+    } catch (error) {
+        console.error('Error getting blacklist:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Check if phone is blacklisted
+app.get('/api/blacklist/:userId/check/:phone', async (req, res) => {
+    try {
+        const { userId, phone } = req.params;
+        
+        // Using global supabase client
+        
+        const result = await blacklistService.isBlacklisted(supabase, phone, userId);
+        res.json(result);
+    } catch (error) {
+        console.error('Error checking blacklist:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Add to blacklist
+app.post('/api/blacklist/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { phone, reason } = req.body;
+        
+        // Using global supabase client
+        
+        const result = await blacklistService.addToBlacklist(supabase, phone, userId, reason, 'manual');
+        res.json(result);
+    } catch (error) {
+        console.error('Error adding to blacklist:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Remove from blacklist
+app.delete('/api/blacklist/:userId/:phone', async (req, res) => {
+    try {
+        const { userId, phone } = req.params;
+        
+        // Using global supabase client
+        
+        await blacklistService.removeFromBlacklist(supabase, phone, userId);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error removing from blacklist:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Bulk import blacklist
+app.post('/api/blacklist/:userId/import', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { phoneNumbers, reason } = req.body;
+        
+        // Using global supabase client
+        
+        const result = await blacklistService.bulkImport(supabase, userId, phoneNumbers, reason);
+        res.json(result);
+    } catch (error) {
+        console.error('Error importing blacklist:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Export blacklist (GDPR)
+app.get('/api/blacklist/:userId/export', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Using global supabase client
+        
+        const data = await blacklistService.exportBlacklist(supabase, userId);
+        res.json(data);
+    } catch (error) {
+        console.error('Error exporting blacklist:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================================
+// FOLLOW-UP API
+// =============================================================================
+
+// Get contacts needing follow-up
+app.get('/api/follow-ups/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Using global supabase client
+        
+        const contacts = await followUpService.getContactsNeedingFollowUp(supabase, userId);
+        
+        res.json({ 
+            count: contacts.length,
+            contacts: contacts.map(c => ({
+                id: c.contact.id,
+                name: c.contact.name,
+                phone: c.contact.phone,
+                daysSinceLastMessage: c.daysSinceLastMessage,
+                followUpNumber: c.followUpNumber,
+                reason: c.reason
+            }))
+        });
+    } catch (error) {
+        console.error('Error getting follow-ups:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Trigger follow-ups for a user
+app.post('/api/follow-ups/:userId/send', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Using global supabase client
+        const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+        
+        // Get agent config
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('agent_config')
+            .eq('id', userId)
+            .single();
+        
+        const agentConfig = profile?.agent_config || {};
+        
+        const results = await followUpService.processUserFollowUps(
+            supabase,
+            twilioClient,
+            userId,
+            agentConfig
+        );
+        
+        res.json(results);
+    } catch (error) {
+        console.error('Error sending follow-ups:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================================
+// INTELLIGENCE API - Analyze messages on demand
+// =============================================================================
+
+// Analyze a specific conversation
+app.post('/api/intelligence/analyze', async (req, res) => {
+    try {
+        const { message, conversationHistory, existingContext, agentConfig } = req.body;
+        
+        const analysis = await intelligenceService.analyzeMessage(
+            message,
+            conversationHistory || [],
+            existingContext || {},
+            agentConfig || {}
+        );
+        
+        res.json(analysis);
+    } catch (error) {
+        console.error('Error in intelligence analysis:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get contact intelligence summary
+app.get('/api/intelligence/contact/:contactId', async (req, res) => {
+    try {
+        const { contactId } = req.params;
+        
+        // Using global supabase client
+        
+        const { data: contact, error } = await supabase
+            .from('contacts')
+            .select('*')
+            .eq('id', contactId)
+            .single();
+        
+        if (error || !contact) {
+            return res.status(404).json({ error: 'Contact not found' });
+        }
+        
+        res.json({
+            contact: {
+                id: contact.id,
+                name: contact.name,
+                phone: contact.phone,
+                company: contact.company_name,
+                job_title: contact.job_title
+            },
+            intelligence: {
+                score: contact.score,
+                score_breakdown: contact.score_reason,
+                qualification_status: contact.qualification_status,
+                last_intent: contact.last_intent,
+                extracted_context: contact.extracted_context || {},
+                escalation_reason: contact.escalation_reason
+            }
+        });
+    } catch (error) {
+        console.error('Error getting contact intelligence:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================================
+// ANALYTICS API
+// =============================================================================
+
+// Get analytics data for dashboard
+app.get('/api/analytics/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { range = '7d' } = req.query;
+        
+        // Using global supabase client
+
+        // Calculate date range
+        let daysAgo = 7;
+        if (range === '30d') daysAgo = 30;
+        if (range === '90d') daysAgo = 90;
+        const startDate = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString();
+
+        // Fetch contacts in range
+        const { data: contacts } = await supabase
+            .from('contacts')
+            .select('*')
+            .eq('agent_id', userId)
+            .gte('created_at', startDate);
+
+        // Fetch messages in range
+        const { data: messages } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('agent_id', userId)
+            .gte('created_at', startDate);
+
+        // Calculate metrics
+        const total = (contacts || []).length;
+        const qualified = (contacts || []).filter(c => c.score >= 70).length;
+        const disqualified = (contacts || []).filter(c => c.score !== null && c.score < 30).length;
+        const scoredContacts = (contacts || []).filter(c => c.score !== null);
+        const avgScore = scoredContacts.length > 0
+            ? Math.round(scoredContacts.reduce((acc, c) => acc + c.score, 0) / scoredContacts.length)
+            : 0;
+
+        const messagesSent = (messages || []).filter(m => m.role === 'assistant').length;
+        const messagesReceived = (messages || []).filter(m => m.role === 'user').length;
+        const responseRate = messagesSent > 0 ? Math.round((messagesReceived / messagesSent) * 100) : 0;
+
+        // Source performance
+        const sourceMap = {};
+        (contacts || []).forEach(c => {
+            const source = c.source || 'Direct';
+            if (!sourceMap[source]) sourceMap[source] = { leads: 0, qualified: 0 };
+            sourceMap[source].leads++;
+            if (c.score >= 70) sourceMap[source].qualified++;
+        });
+
+        const sourceData = Object.entries(sourceMap)
+            .map(([source, data]) => ({
+                source,
+                leads: data.leads,
+                qualified: data.qualified,
+                rate: data.leads > 0 ? Math.round((data.qualified / data.leads) * 100) : 0
+            }))
+            .sort((a, b) => b.leads - a.leads)
+            .slice(0, 5);
+
+        // Daily breakdown
+        const dailyMap = {};
+        for (let i = daysAgo - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const key = date.toISOString().split('T')[0];
+            dailyMap[key] = { leads: 0, qualified: 0 };
+        }
+
+        (contacts || []).forEach(c => {
+            const key = new Date(c.created_at).toISOString().split('T')[0];
+            if (dailyMap[key]) {
+                dailyMap[key].leads++;
+                if (c.score >= 70) dailyMap[key].qualified++;
+            }
+        });
+
+        const trendData = Object.entries(dailyMap).map(([date, data]) => ({
+            date: new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+            leads: data.leads,
+            qualified: data.qualified
+        }));
+
+        res.json({
+            metrics: {
+                total,
+                qualified,
+                disqualified,
+                avgScore,
+                qualificationRate: total > 0 ? Math.round((qualified / total) * 100) : 0,
+                messagesSent,
+                messagesReceived,
+                responseRate
+            },
+            sourceData,
+            trendData
+        });
+
+    } catch (error) {
+        console.error('Error fetching analytics:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// ==========================================================================
+// NEW USER SIGNUP NOTIFICATION
+// ==========================================================================
+
+app.post('/api/notify/new-user', async (req, res) => {
+    try {
+        const { user } = req.body;
+        
+        if (!user || !user.email) {
+            return res.status(400).json({ error: 'User data required' });
+        }
+
+        console.log(`New user signup notification requested for: ${user.email}`);
+        
+        const result = await emailService.notifyNewUserSignup(user);
+        
+        res.json({ 
+            success: true, 
+            message: 'Notifications sent',
+            results: result
+        });
+    } catch (error) {
+        console.error('Error sending new user notifications:', error);
+        res.status(500).json({ error: 'Failed to send notifications' });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});

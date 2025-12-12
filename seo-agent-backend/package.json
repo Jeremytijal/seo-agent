@@ -1,0 +1,26 @@
+{
+  "name": "seo-agent-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
+    "axios": "^1.7.2",
+    "body-parser": "^2.2.1",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "openai": "^6.9.1",
+    "stripe": "^14.10.0",
+    "twilio": "^5.10.6",
+    "node-fetch": "^2.7.0"
+  }
+}
