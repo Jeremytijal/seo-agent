@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
             },
         });
         if (error) throw error;
-        return data.user;
+        return { user: data.user, session: data.session };
     };
 
     const logout = async () => {
