@@ -1,87 +1,174 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     Search, Target, TrendingUp, TrendingDown, ArrowUpRight, Plus,
     Trash2, Star, StarOff, Filter, Download, RefreshCw,
-    BarChart3, Globe, Users, DollarSign, ArrowRight
+    BarChart3, Globe, Users, DollarSign, ArrowRight, Loader2, AlertCircle
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import './Keywords.css';
 
 const Keywords = () => {
+    const { user } = useAuth();
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState(null);
-    const [savedKeywords, setSavedKeywords] = useState([
-        { id: 1, keyword: 'agence seo paris', volume: 1200, difficulty: 45, cpc: 8.50, trend: 'up', saved: true },
-        { id: 2, keyword: 'référencement naturel', volume: 8100, difficulty: 72, cpc: 12.30, trend: 'stable', saved: true },
-        { id: 3, keyword: 'audit seo gratuit', volume: 2400, difficulty: 38, cpc: 5.20, trend: 'up', saved: true },
-        { id: 4, keyword: 'optimisation seo', volume: 3600, difficulty: 55, cpc: 7.80, trend: 'down', saved: true },
-    ]);
+    const [savedKeywords, setSavedKeywords] = useState([]);
+    const [loadingFavorites, setLoadingFavorites] = useState(true);
     const [activeTab, setActiveTab] = useState('research');
+    const [error, setError] = useState(null);
+
+    // Charger les mots-clés favoris au démarrage
+    useEffect(() => {
+        if (user) {
+            fetchFavorites();
+        }
+    }, [user]);
+
+    const fetchFavorites = async () => {
+        try {
+            setLoadingFavorites(true);
+            const response = await fetch(`${API_URL}/api/keywords/favorites/${user.id}`);
+            const data = await response.json();
+            setSavedKeywords((data.favorites || []).map(kw => ({ ...kw, saved: true })));
+        } catch (err) {
+            console.error('Error fetching favorites:', err);
+        } finally {
+            setLoadingFavorites(false);
+        }
+    };
 
     const handleSearch = async (e) => {
         e.preventDefault();
         if (!searchQuery) return;
 
         setIsSearching(true);
+        setError(null);
 
-        // Simulation de recherche (à remplacer par l'appel API réel)
-        setTimeout(() => {
-            setSearchResults({
-                seedKeyword: searchQuery,
-                keywords: [
-                    { id: 101, keyword: searchQuery, volume: 5400, difficulty: 62, cpc: 9.20, trend: 'up', saved: false },
-                    { id: 102, keyword: `${searchQuery} gratuit`, volume: 2100, difficulty: 35, cpc: 4.50, trend: 'up', saved: false },
-                    { id: 103, keyword: `meilleur ${searchQuery}`, volume: 1800, difficulty: 48, cpc: 11.00, trend: 'stable', saved: false },
-                    { id: 104, keyword: `${searchQuery} 2024`, volume: 3200, difficulty: 28, cpc: 6.30, trend: 'up', saved: false },
-                    { id: 105, keyword: `${searchQuery} en ligne`, volume: 890, difficulty: 42, cpc: 7.80, trend: 'stable', saved: false },
-                    { id: 106, keyword: `comment faire ${searchQuery}`, volume: 1450, difficulty: 25, cpc: 3.20, trend: 'up', saved: false },
-                    { id: 107, keyword: `${searchQuery} prix`, volume: 2800, difficulty: 55, cpc: 15.40, trend: 'up', saved: false },
-                    { id: 108, keyword: `${searchQuery} avis`, volume: 1200, difficulty: 32, cpc: 5.60, trend: 'stable', saved: false },
-                ]
+        try {
+            const response = await fetch(`${API_URL}/api/keywords/search`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user?.id,
+                    keyword: searchQuery,
+                    country: 'fr',
+                    language: 'fr'
+                })
             });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Marquer les mots-clés déjà sauvegardés
+                const savedIds = new Set(savedKeywords.map(k => k.keyword.toLowerCase()));
+                const resultsWithSaved = data.results.map(kw => ({
+                    ...kw,
+                    saved: savedIds.has(kw.keyword.toLowerCase())
+                }));
+
+                setSearchResults({
+                    seedKeyword: searchQuery,
+                    keywords: resultsWithSaved
+                });
+            } else {
+                setError(data.error || 'Erreur lors de la recherche');
+            }
+        } catch (err) {
+            console.error('Search error:', err);
+            setError('Impossible de se connecter au serveur');
+        } finally {
             setIsSearching(false);
-        }, 2000);
+        }
     };
 
-    const toggleSaveKeyword = (keyword) => {
+    const toggleSaveKeyword = async (keyword) => {
         if (keyword.saved) {
-            setSavedKeywords(prev => prev.filter(k => k.id !== keyword.id));
-            if (searchResults) {
-                setSearchResults(prev => ({
-                    ...prev,
-                    keywords: prev.keywords.map(k => 
-                        k.id === keyword.id ? { ...k, saved: false } : k
-                    )
-                }));
+            // Supprimer des favoris
+            try {
+                await fetch(`${API_URL}/api/keywords/favorites/${user.id}/${keyword.id}`, {
+                    method: 'DELETE'
+                });
+                setSavedKeywords(prev => prev.filter(k => k.keyword !== keyword.keyword));
+                
+                if (searchResults) {
+                    setSearchResults(prev => ({
+                        ...prev,
+                        keywords: prev.keywords.map(k => 
+                            k.keyword === keyword.keyword ? { ...k, saved: false } : k
+                        )
+                    }));
+                }
+            } catch (err) {
+                console.error('Error removing favorite:', err);
             }
         } else {
-            const newKeyword = { ...keyword, saved: true };
-            setSavedKeywords(prev => [...prev, newKeyword]);
-            if (searchResults) {
-                setSearchResults(prev => ({
-                    ...prev,
-                    keywords: prev.keywords.map(k => 
-                        k.id === keyword.id ? { ...k, saved: true } : k
-                    )
-                }));
+            // Ajouter aux favoris
+            try {
+                const response = await fetch(`${API_URL}/api/keywords/favorites/${user.id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(keyword)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const newKeyword = { ...data.keyword, saved: true };
+                    setSavedKeywords(prev => [...prev, newKeyword]);
+                    
+                    if (searchResults) {
+                        setSearchResults(prev => ({
+                            ...prev,
+                            keywords: prev.keywords.map(k => 
+                                k.keyword === keyword.keyword ? { ...k, saved: true, id: data.keyword.id } : k
+                            )
+                        }));
+                    }
+                }
+            } catch (err) {
+                console.error('Error saving favorite:', err);
             }
         }
     };
 
-    const removeKeyword = (id) => {
-        setSavedKeywords(prev => prev.filter(k => k.id !== id));
+    const removeKeyword = async (keyword) => {
+        try {
+            await fetch(`${API_URL}/api/keywords/favorites/${user.id}/${keyword.id}`, {
+                method: 'DELETE'
+            });
+            setSavedKeywords(prev => prev.filter(k => k.id !== keyword.id));
+        } catch (err) {
+            console.error('Error removing keyword:', err);
+        }
+    };
+
+    const exportKeywords = () => {
+        const data = savedKeywords.map(k => ({
+            'Mot-clé': k.keyword,
+            'Volume': k.volume,
+            'Difficulté': k.difficulty,
+            'CPC': k.cpc,
+            'Tendance': k.trend
+        }));
+        
+        const csv = [
+            Object.keys(data[0]).join(','),
+            ...data.map(row => Object.values(row).join(','))
+        ].join('\n');
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `keywords_seoagent_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
     };
 
     const getDifficultyColor = (difficulty) => {
         if (difficulty <= 30) return '#10B981';
         if (difficulty <= 60) return '#F59E0B';
         return '#EF4444';
-    };
-
-    const getDifficultyLabel = (difficulty) => {
-        if (difficulty <= 30) return 'Facile';
-        if (difficulty <= 60) return 'Moyen';
-        return 'Difficile';
     };
 
     const formatVolume = (volume) => {
@@ -105,10 +192,12 @@ const Keywords = () => {
                     <p>Trouvez les meilleures opportunités SEO pour votre contenu</p>
                 </div>
                 <div className="header-actions">
-                    <button className="btn-secondary">
-                        <Download size={18} />
-                        Exporter
-                    </button>
+                    {savedKeywords.length > 0 && (
+                        <button className="btn-secondary" onClick={exportKeywords}>
+                            <Download size={18} />
+                            Exporter
+                        </button>
+                    )}
                 </div>
             </header>
 
@@ -147,7 +236,7 @@ const Keywords = () => {
                             <button type="submit" disabled={isSearching} className="btn-search">
                                 {isSearching ? (
                                     <>
-                                        <RefreshCw size={18} className="animate-spin" />
+                                        <Loader2 size={18} className="animate-spin" />
                                         Recherche...
                                     </>
                                 ) : (
@@ -159,6 +248,14 @@ const Keywords = () => {
                             </button>
                         </form>
                     </div>
+
+                    {/* Error State */}
+                    {error && (
+                        <div className="keywords-error">
+                            <AlertCircle size={20} />
+                            <span>{error}</span>
+                        </div>
+                    )}
 
                     {/* Search Results */}
                     {searchResults && !isSearching && (
@@ -192,8 +289,8 @@ const Keywords = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {searchResults.keywords.map((kw) => (
-                                            <tr key={kw.id}>
+                                        {searchResults.keywords.map((kw, index) => (
+                                            <tr key={kw.id || index}>
                                                 <td className="kw-cell">
                                                     <span className="kw-text">{kw.keyword}</span>
                                                 </td>
@@ -220,7 +317,7 @@ const Keywords = () => {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span className="cpc-badge">{kw.cpc.toFixed(2)}€</span>
+                                                    <span className="cpc-badge">{(kw.cpc || 0).toFixed(2)}€</span>
                                                 </td>
                                                 <td>
                                                     <TrendIcon trend={kw.trend} />
@@ -261,7 +358,7 @@ const Keywords = () => {
                     {/* Loading State */}
                     {isSearching && (
                         <div className="keywords-loading">
-                            <RefreshCw size={32} className="animate-spin" />
+                            <Loader2 size={32} className="animate-spin" />
                             <h3>Recherche en cours...</h3>
                             <p>Analyse des données pour "{searchQuery}"</p>
                         </div>
@@ -271,7 +368,12 @@ const Keywords = () => {
 
             {activeTab === 'saved' && (
                 <div className="saved-keywords">
-                    {savedKeywords.length > 0 ? (
+                    {loadingFavorites ? (
+                        <div className="keywords-loading">
+                            <Loader2 size={32} className="animate-spin" />
+                            <p>Chargement des favoris...</p>
+                        </div>
+                    ) : savedKeywords.length > 0 ? (
                         <>
                             <div className="saved-stats">
                                 <div className="stat-card">
@@ -285,7 +387,7 @@ const Keywords = () => {
                                     <Users size={20} />
                                     <div>
                                         <span className="stat-value">
-                                            {formatVolume(savedKeywords.reduce((acc, k) => acc + k.volume, 0))}
+                                            {formatVolume(savedKeywords.reduce((acc, k) => acc + (k.volume || 0), 0))}
                                         </span>
                                         <span className="stat-label">Volume total</span>
                                     </div>
@@ -294,7 +396,7 @@ const Keywords = () => {
                                     <BarChart3 size={20} />
                                     <div>
                                         <span className="stat-value">
-                                            {Math.round(savedKeywords.reduce((acc, k) => acc + k.difficulty, 0) / savedKeywords.length)}
+                                            {Math.round(savedKeywords.reduce((acc, k) => acc + (k.difficulty || 0), 0) / savedKeywords.length)}
                                         </span>
                                         <span className="stat-label">Difficulté moy.</span>
                                     </div>
@@ -320,7 +422,7 @@ const Keywords = () => {
                                                     <span className="kw-text">{kw.keyword}</span>
                                                 </td>
                                                 <td>
-                                                    <span className="volume-badge">{formatVolume(kw.volume)}</span>
+                                                    <span className="volume-badge">{formatVolume(kw.volume || 0)}</span>
                                                 </td>
                                                 <td>
                                                     <div className="difficulty-cell">
@@ -328,21 +430,21 @@ const Keywords = () => {
                                                             <div 
                                                                 className="difficulty-fill"
                                                                 style={{ 
-                                                                    width: `${kw.difficulty}%`,
-                                                                    background: getDifficultyColor(kw.difficulty)
+                                                                    width: `${kw.difficulty || 0}%`,
+                                                                    background: getDifficultyColor(kw.difficulty || 0)
                                                                 }}
                                                             ></div>
                                                         </div>
                                                         <span 
                                                             className="difficulty-label"
-                                                            style={{ color: getDifficultyColor(kw.difficulty) }}
+                                                            style={{ color: getDifficultyColor(kw.difficulty || 0) }}
                                                         >
-                                                            {kw.difficulty}
+                                                            {kw.difficulty || 0}
                                                         </span>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span className="cpc-badge">{kw.cpc.toFixed(2)}€</span>
+                                                    <span className="cpc-badge">{(kw.cpc || 0).toFixed(2)}€</span>
                                                 </td>
                                                 <td>
                                                     <TrendIcon trend={kw.trend} />
@@ -352,12 +454,13 @@ const Keywords = () => {
                                                         <button 
                                                             className="btn-action create"
                                                             title="Créer un article"
+                                                            onClick={() => window.location.href = `/contents?keyword=${encodeURIComponent(kw.keyword)}`}
                                                         >
                                                             <ArrowRight size={14} />
                                                         </button>
                                                         <button 
                                                             className="btn-action delete"
-                                                            onClick={() => removeKeyword(kw.id)}
+                                                            onClick={() => removeKeyword(kw)}
                                                             title="Supprimer"
                                                         >
                                                             <Trash2 size={14} />
@@ -390,4 +493,3 @@ const Keywords = () => {
 };
 
 export default Keywords;
-
