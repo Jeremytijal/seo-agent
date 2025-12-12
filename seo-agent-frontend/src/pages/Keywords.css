@@ -395,6 +395,14 @@
     background: #FEE2E2;
 }
 
+.btn-action.calendar {
+    color: #8B5CF6;
+}
+
+.btn-action.calendar:hover {
+    background: #EDE9FE;
+}
+
 /* ==========================================================================
    EMPTY & LOADING STATES
    ========================================================================== */

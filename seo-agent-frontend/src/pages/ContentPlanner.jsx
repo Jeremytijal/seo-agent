@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
     Calendar, ChevronLeft, ChevronRight, Plus, Sparkles, 
     FileText, Target, GripVertical, X, Clock, CheckCircle,
@@ -7,6 +8,7 @@ import {
 import './ContentPlanner.css';
 
 const ContentPlanner = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [scheduledArticles, setScheduledArticles] = useState({
         '2025-01-13': [
@@ -30,6 +32,26 @@ const ContentPlanner = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [draggedArticle, setDraggedArticle] = useState(null);
     const [draggedFromDate, setDraggedFromDate] = useState(null);
+    const [initialKeywordData, setInitialKeywordData] = useState(null);
+
+    // Récupérer le mot-clé depuis l'URL (venant de la page Keywords)
+    useEffect(() => {
+        const keyword = searchParams.get('keyword');
+        const volume = searchParams.get('volume');
+        const difficulty = searchParams.get('difficulty');
+        
+        if (keyword) {
+            setInitialKeywordData({
+                keyword: decodeURIComponent(keyword),
+                volume: volume || '',
+                difficulty: difficulty || ''
+            });
+            setSelectedDate(new Date());
+            setShowAddModal(true);
+            // Nettoyer l'URL
+            setSearchParams({});
+        }
+    }, [searchParams]);
 
     const monthNames = [
         'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -352,7 +374,11 @@ const ContentPlanner = () => {
             {showAddModal && (
                 <AddArticleModal 
                     date={selectedDate}
-                    onClose={() => setShowAddModal(false)}
+                    initialData={initialKeywordData}
+                    onClose={() => {
+                        setShowAddModal(false);
+                        setInitialKeywordData(null);
+                    }}
                     onAdd={(article) => {
                         const dateKey = formatDateKey(selectedDate);
                         setScheduledArticles(prev => ({
@@ -360,6 +386,7 @@ const ContentPlanner = () => {
                             [dateKey]: [...(prev[dateKey] || []), article]
                         }));
                         setShowAddModal(false);
+                        setInitialKeywordData(null);
                     }}
                 />
             )}
@@ -368,12 +395,12 @@ const ContentPlanner = () => {
 };
 
 // Add Article Modal Component
-const AddArticleModal = ({ date, onClose, onAdd }) => {
+const AddArticleModal = ({ date, initialData, onClose, onAdd }) => {
     const [formData, setFormData] = useState({
-        title: '',
-        keyword: '',
-        volume: '',
-        difficulty: '',
+        title: initialData?.keyword ? `Article sur ${initialData.keyword}` : '',
+        keyword: initialData?.keyword || '',
+        volume: initialData?.volume || '',
+        difficulty: initialData?.difficulty || '',
         type: 'Guide'
     });
 

@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { 
     Search, Target, TrendingUp, TrendingDown, ArrowUpRight, Plus,
     Trash2, Star, StarOff, Filter, Download, RefreshCw,
-    BarChart3, Globe, Users, DollarSign, ArrowRight, Loader2, AlertCircle
+    BarChart3, Globe, Users, DollarSign, ArrowRight, Loader2, AlertCircle,
+    CalendarPlus
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../config';
 import './Keywords.css';
 
 const Keywords = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState(null);
@@ -178,6 +181,11 @@ const Keywords = () => {
         return volume;
     };
 
+    const addToCalendar = (keyword) => {
+        // Naviguer vers le planificateur avec le mot-clé pré-rempli
+        navigate(`/planner?keyword=${encodeURIComponent(keyword.keyword)}&volume=${keyword.volume || 0}&difficulty=${keyword.difficulty || 0}`);
+    };
+
     const TrendIcon = ({ trend }) => {
         if (trend === 'up') return <TrendingUp size={14} className="trend-icon up" />;
         if (trend === 'down') return <TrendingDown size={14} className="trend-icon down" />;
@@ -323,12 +331,22 @@ const Keywords = () => {
                                                     <TrendIcon trend={kw.trend} />
                                                 </td>
                                                 <td>
-                                                    <button 
-                                                        className={`btn-save ${kw.saved ? 'saved' : ''}`}
-                                                        onClick={() => toggleSaveKeyword(kw)}
-                                                    >
-                                                        {kw.saved ? <Star size={16} /> : <StarOff size={16} />}
-                                                    </button>
+                                                    <div className="action-buttons">
+                                                        <button 
+                                                            className="btn-action calendar"
+                                                            onClick={() => addToCalendar(kw)}
+                                                            title="Ajouter au calendrier"
+                                                        >
+                                                            <CalendarPlus size={16} />
+                                                        </button>
+                                                        <button 
+                                                            className={`btn-save ${kw.saved ? 'saved' : ''}`}
+                                                            onClick={() => toggleSaveKeyword(kw)}
+                                                            title={kw.saved ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                                                        >
+                                                            {kw.saved ? <Star size={16} /> : <StarOff size={16} />}
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -452,9 +470,16 @@ const Keywords = () => {
                                                 <td>
                                                     <div className="action-buttons">
                                                         <button 
+                                                            className="btn-action calendar"
+                                                            title="Ajouter au calendrier"
+                                                            onClick={() => addToCalendar(kw)}
+                                                        >
+                                                            <CalendarPlus size={14} />
+                                                        </button>
+                                                        <button 
                                                             className="btn-action create"
                                                             title="Créer un article"
-                                                            onClick={() => window.location.href = `/contents?keyword=${encodeURIComponent(kw.keyword)}`}
+                                                            onClick={() => navigate(`/contents?keyword=${encodeURIComponent(kw.keyword)}`)}
                                                         >
                                                             <ArrowRight size={14} />
                                                         </button>
