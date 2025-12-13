@@ -629,6 +629,11 @@
         display: none;
     }
     
+    /* Sidebar dans le menu mobile doit être visible */
+    .mobile-sidebar-wrapper .sidebar {
+        display: flex !important;
+    }
+    
     .account-modal {
         margin: 16px;
         max-width: calc(100% - 32px);
