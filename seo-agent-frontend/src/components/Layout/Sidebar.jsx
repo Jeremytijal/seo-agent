@@ -24,7 +24,7 @@ import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../supabaseClient';
 import './Sidebar.css';
 
-const Sidebar = () => {
+const Sidebar = ({ onNavigate }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showAccountModal, setShowAccountModal] = useState(false);

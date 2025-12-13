@@ -204,3 +204,6 @@ Vérifier que ces tables existent:
 **Date de vérification**: 2025-01-12
 **Statut global**: 🟡 **Presque prêt** - Quelques ajustements mineurs recommandés
 
+
+
+

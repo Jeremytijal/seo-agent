@@ -535,7 +535,7 @@
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .keywords-page {
         padding: 16px;
     }
@@ -543,22 +543,83 @@
     .keywords-header {
         flex-direction: column;
         gap: 16px;
+        align-items: flex-start;
+    }
+    
+    .keywords-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .keywords-search-card {
+        padding: 16px;
     }
     
     .keywords-form {
         flex-direction: column;
+        gap: 12px;
+    }
+    
+    .input-wrapper {
+        width: 100%;
     }
     
     .btn-search {
+        width: 100%;
         justify-content: center;
     }
     
     .keywords-tabs {
-        flex-direction: column;
+        flex-wrap: wrap;
+        gap: 8px;
     }
     
     .keywords-tabs button {
+        flex: 1;
+        min-width: calc(50% - 4px);
         justify-content: center;
+    }
+    
+    .keywords-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .keywords-table table {
+        min-width: 600px;
+    }
+    
+    .keyword-row {
+        padding: 12px;
+    }
+    
+    .keyword-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .keyword-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .keyword-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .saved-stats {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .stat-card {
+        width: 100%;
     }
 }
 

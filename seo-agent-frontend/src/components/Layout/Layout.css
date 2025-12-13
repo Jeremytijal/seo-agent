@@ -2,6 +2,7 @@
     display: flex;
     min-height: 100vh;
     background: #F5F3EF;
+    position: relative;
 }
 
 .main-content {
@@ -14,10 +15,91 @@
     background: #F5F3EF;
 }
 
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1000;
+    width: 48px;
+    height: 48px;
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    color: #111;
+    transition: all 0.2s;
+}
+
+.mobile-menu-toggle:hover {
+    background: #F9FAFB;
+    border-color: #10B981;
+    color: #10B981;
+}
+
+/* Mobile Menu Overlay */
+.mobile-menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.mobile-sidebar-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: white;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    animation: slideInLeft 0.3s ease-out;
+    overflow-y: auto;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
 @media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: flex;
+    }
+
+    .mobile-menu-overlay {
+        display: block;
+    }
+
     .main-content {
         margin-left: 0;
-        padding-bottom: 5rem;
-        /* Space for mobile nav if added */
+        padding-bottom: 0;
+        width: 100%;
+    }
+    
+    .app-layout {
+        flex-direction: column;
     }
 }

@@ -726,7 +726,7 @@
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .dashboard-seo {
         padding: 16px;
     }
@@ -735,6 +735,14 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+    }
+    
+    .dash-header-left h1 {
+        font-size: 1.3rem;
+    }
+    
+    .dash-subtitle {
+        font-size: 0.85rem;
     }
     
     .dash-header-right {
@@ -748,10 +756,73 @@
     
     .quick-actions-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .quick-action-card {
+        padding: 14px 16px;
+    }
+    
+    .qa-icon {
+        width: 40px;
+        height: 40px;
     }
     
     .kpi-grid-seo {
         grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .kpi-card-seo {
+        padding: 16px;
+    }
+    
+    .kpi-value-seo {
+        font-size: 1.5rem;
+    }
+    
+    .charts-section-seo {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .chart-card-seo {
+        padding: 16px;
+    }
+    
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .chart-legend-inline {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .chart-wrapper {
+        margin: 0;
+    }
+    
+    .recent-section {
+        padding: 16px;
+    }
+    
+    .content-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px;
+    }
+    
+    .content-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .content-meta {
+        flex-wrap: wrap;
     }
     
     .gs-actions {
@@ -762,6 +833,10 @@
     .gs-actions button {
         width: 100%;
         justify-content: center;
+    }
+    
+    .getting-started {
+        padding: 24px 16px;
     }
     
     .dashboard-connect-banner {
