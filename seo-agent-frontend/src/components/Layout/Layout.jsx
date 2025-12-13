@@ -50,7 +50,10 @@ const Layout = () => {
                 </div>
             )}
 
-            <Sidebar />
+            {/* Desktop Sidebar - hidden on mobile */}
+            <div className="desktop-sidebar">
+                <Sidebar />
+            </div>
             <main className="main-content">
                 <Outlet />
             </main>

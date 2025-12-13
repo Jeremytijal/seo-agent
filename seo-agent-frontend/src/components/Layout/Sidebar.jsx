@@ -140,6 +140,11 @@ const Sidebar = ({ onNavigate }) => {
               className={({ isActive }) =>
                 `nav-item ${isActive ? 'active' : ''}`
               }
+              onClick={() => {
+                if (onNavigate) {
+                  onNavigate();
+                }
+              }}
             >
               <item.icon size={20} />
               <span>{item.label}</span>
@@ -188,7 +193,12 @@ const Sidebar = ({ onNavigate }) => {
             ></div>
           </div>
           {(isNearLimit || usage.isTrial) && (
-            <button className="usage-upgrade" onClick={() => navigate('/subscription')}>
+            <button className="usage-upgrade" onClick={() => {
+              navigate('/subscription');
+              if (onNavigate) {
+                onNavigate();
+              }
+            }}>
               <TrendingUp size={14} />
               {usage.isTrial ? "S'abonner" : 'Upgrader'}
             </button>
@@ -196,11 +206,21 @@ const Sidebar = ({ onNavigate }) => {
         </div>
 
         <div className="sidebar-footer">
-          <button className="nav-item account-btn" onClick={() => setShowAccountModal(true)}>
+          <button className="nav-item account-btn" onClick={() => {
+            setShowAccountModal(true);
+            if (onNavigate) {
+              onNavigate();
+            }
+          }}>
             <User size={20} />
             <span>Mon compte</span>
           </button>
-          <button className="nav-item logout-btn" onClick={handleLogout}>
+          <button className="nav-item logout-btn" onClick={() => {
+            handleLogout();
+            if (onNavigate) {
+              onNavigate();
+            }
+          }}>
             <LogOut size={20} />
             <span>Déconnexion</span>
           </button>
