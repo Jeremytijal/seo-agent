@@ -12,6 +12,9 @@ import Onboarding from './pages/Onboarding';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import LandingPage from './pages/LandingPage';
+import LandingPageRedacteur from './pages/LandingPageRedacteur';
+import LandingPageAutomation from './pages/LandingPageAutomation';
+import LandingPageTraffic from './pages/LandingPageTraffic';
 import Subscription from './pages/Subscription';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
@@ -30,6 +33,9 @@ function App() {
       <Router>
         <Routes>
           <Route path="/landing" element={<LandingPage />} />
+          <Route path="/landing/redacteur" element={<LandingPageRedacteur />} />
+          <Route path="/landing/automation" element={<LandingPageAutomation />} />
+          <Route path="/landing/traffic" element={<LandingPageTraffic />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/terms" element={<Terms />} />
