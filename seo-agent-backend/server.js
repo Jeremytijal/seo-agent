@@ -137,6 +137,13 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
             const planId = session.metadata?.planId;
 
             if (userId && planId) {
+                // Get user info for notification
+                const { data: userProfile } = await supabase
+                    .from('profiles')
+                    .select('email, id')
+                    .eq('id', userId)
+                    .single();
+
                 await supabase
                     .from('profiles')
                     .update({
@@ -150,6 +157,18 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
                     .eq('id', userId);
 
                 console.log(`Subscription started for user ${userId} on plan ${planId}`);
+
+                // Send Slack notification for new subscription
+                if (userProfile) {
+                    const amount = session.amount_total || 0;
+                    const currency = session.currency?.toUpperCase() || 'EUR';
+                    emailService.sendSlackNewSubscriptionNotification(
+                        { id: userProfile.id, email: userProfile.email },
+                        planId,
+                        amount,
+                        currency
+                    ).catch(err => console.error('Error sending Slack subscription notification:', err));
+                }
             }
             break;
         }
@@ -238,7 +257,7 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
             
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('id, subscription_status')
+                .select('id, email, subscription_status, subscription_plan')
                 .eq('stripe_customer_id', customerId)
                 .single();
 
@@ -252,6 +271,18 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
                     .eq('id', profile.id);
 
                 console.log(`Subscription activated for user ${profile.id} after successful payment`);
+
+                // Send Slack notification when subscription becomes active (after trial or payment)
+                if (profile.subscription_plan) {
+                    const amount = invoice.amount_paid || 0;
+                    const currency = invoice.currency?.toUpperCase() || 'EUR';
+                    emailService.sendSlackNewSubscriptionNotification(
+                        { id: profile.id, email: profile.email },
+                        profile.subscription_plan,
+                        amount,
+                        currency
+                    ).catch(err => console.error('Error sending Slack subscription notification:', err));
+                }
             }
             break;
         }

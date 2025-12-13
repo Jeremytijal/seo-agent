@@ -366,6 +366,103 @@ const sendSlackNewUserNotification = async (user) => {
 };
 
 /**
+ * Send Slack notification for new subscription
+ */
+const sendSlackNewSubscriptionNotification = async (user, planId, amount, currency = 'EUR') => {
+    const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
+    
+    if (!slackWebhookUrl) {
+        console.log('Slack webhook not configured - skipping notification');
+        return { success: false, reason: 'Slack not configured' };
+    }
+
+    try {
+        // Format plan name
+        const planNames = {
+            'starter': 'Starter',
+            'growth': 'Growth',
+            'scale': 'Scale'
+        };
+        const planName = planNames[planId?.toLowerCase()] || planId || 'N/A';
+
+        // Format amount
+        const formattedAmount = (amount / 100).toFixed(2);
+        const currencySymbol = currency === 'EUR' ? '€' : currency;
+
+        const message = {
+            blocks: [
+                {
+                    type: "header",
+                    text: {
+                        type: "plain_text",
+                        text: "💰 Nouvel abonnement activé !",
+                        emoji: true
+                    }
+                },
+                {
+                    type: "section",
+                    fields: [
+                        {
+                            type: "mrkdwn",
+                            text: `*Email:*\n${user.email || 'N/A'}`
+                        },
+                        {
+                            type: "mrkdwn",
+                            text: `*Plan:*\n${planName}`
+                        }
+                    ]
+                },
+                {
+                    type: "section",
+                    fields: [
+                        {
+                            type: "mrkdwn",
+                            text: `*Montant:*\n${formattedAmount} ${currencySymbol}/mois`
+                        },
+                        {
+                            type: "mrkdwn",
+                            text: `*Date:*\n${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`
+                        }
+                    ]
+                },
+                {
+                    type: "section",
+                    fields: [
+                        {
+                            type: "mrkdwn",
+                            text: `*ID Utilisateur:*\n\`${user.id?.slice(0, 8) || 'N/A'}...\``
+                        },
+                        {
+                            type: "mrkdwn",
+                            text: `*ID Plan:*\n\`${planId || 'N/A'}\``
+                        }
+                    ]
+                },
+                {
+                    type: "divider"
+                },
+                {
+                    type: "context",
+                    elements: [
+                        {
+                            type: "mrkdwn",
+                            text: "📊 <https://app.agentiaseo.com/|Voir le dashboard Agent IA SEO>"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        await axios.post(slackWebhookUrl, message);
+        console.log(`Slack notification sent for new subscription: ${user.email} - ${planName}`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error sending Slack subscription notification:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
  * Send email notification for new user signup (to admin)
  */
 const sendNewUserEmailNotification = async (user) => {
@@ -462,6 +559,7 @@ module.exports = {
     sendQualifiedLeadNotification,
     sendWeeklyReport,
     sendSlackNewUserNotification,
+    sendSlackNewSubscriptionNotification,
     sendNewUserEmailNotification,
     sendWelcomeEmail,
     notifyNewUserSignup
