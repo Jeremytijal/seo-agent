@@ -25,6 +25,7 @@ import FunnelAnalyze from './pages/FunnelAnalyze';
 import FunnelResults from './pages/FunnelResults';
 import FunnelConvert from './pages/FunnelConvert';
 import FunnelPayment from './pages/FunnelPayment';
+import LandingPageLongVariantB from './pages/LandingPageLongVariantB';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const ProtectedRoute = () => {
@@ -56,6 +57,9 @@ function App() {
           <Route path="/funnel/results" element={<FunnelResults />} />
           <Route path="/funnel/convert" element={<FunnelConvert />} />
           <Route path="/funnel/payment" element={<FunnelPayment />} />
+          
+          {/* Landing Page Long Variant B */}
+          <Route path="/lp-variant-b" element={<LandingPageLongVariantB />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<Onboarding />} />

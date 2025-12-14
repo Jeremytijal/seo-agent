@@ -2017,6 +2017,59 @@ app.get('/api/wordpress/:siteId/categories', async (req, res) => {
 // =============================================================================
 
 // Create expert request
+// ============================================================================
+// LEADS API - Funnel Meta Ads
+// ============================================================================
+
+app.post('/api/leads', async (req, res) => {
+    try {
+        const { email, source = 'meta', variant = 'A' } = req.body;
+
+        if (!email || !email.includes('@')) {
+            return res.status(400).json({ error: 'Email invalide' });
+        }
+
+        // Sauvegarder le lead dans Supabase
+        const { data, error } = await supabase
+            .from('leads')
+            .insert({
+                email: email.toLowerCase().trim(),
+                source,
+                variant,
+                created_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (error) {
+            // Si l'email existe déjà, on retourne quand même un succès
+            if (error.code === '23505') { // Duplicate key
+                console.log(`Lead déjà existant: ${email}`);
+                return res.json({ 
+                    success: true, 
+                    message: 'Lead enregistré',
+                    existing: true 
+                });
+            }
+            throw error;
+        }
+
+        console.log(`Nouveau lead enregistré: ${email} (source: ${source}, variant: ${variant})`);
+
+        res.json({ 
+            success: true, 
+            message: 'Lead enregistré avec succès',
+            lead: data
+        });
+    } catch (error) {
+        console.error('Error saving lead:', error);
+        res.status(500).json({ 
+            error: 'Erreur lors de l\'enregistrement du lead',
+            details: error.message 
+        });
+    }
+});
+
 app.post('/api/expert-request', async (req, res) => {
     try {
         const { userId, platform, siteUrl, message, phone, name, email } = req.body;
