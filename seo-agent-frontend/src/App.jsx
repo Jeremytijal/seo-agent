@@ -19,6 +19,12 @@ import LandingPagePrix from './pages/LandingPagePrix';
 import Subscription from './pages/Subscription';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import FunnelLanding from './pages/FunnelLanding';
+import FunnelURL from './pages/FunnelURL';
+import FunnelAnalyze from './pages/FunnelAnalyze';
+import FunnelResults from './pages/FunnelResults';
+import FunnelConvert from './pages/FunnelConvert';
+import FunnelPayment from './pages/FunnelPayment';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const ProtectedRoute = () => {
@@ -42,6 +48,14 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
+          
+          {/* Funnel Routes */}
+          <Route path="/funnel" element={<FunnelLanding />} />
+          <Route path="/funnel/url" element={<FunnelURL />} />
+          <Route path="/funnel/analyze" element={<FunnelAnalyze />} />
+          <Route path="/funnel/results" element={<FunnelResults />} />
+          <Route path="/funnel/convert" element={<FunnelConvert />} />
+          <Route path="/funnel/payment" element={<FunnelPayment />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/onboarding" element={<Onboarding />} />

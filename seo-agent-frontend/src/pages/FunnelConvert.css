@@ -1,0 +1,228 @@
+/* ==========================================================================
+   FUNNEL CONVERT PAGE - Mobile First
+   ========================================================================== */
+
+.funnel-convert {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+    padding: 24px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-bottom: 40px;
+}
+
+.funnel-container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Header */
+.funnel-header {
+    text-align: center;
+}
+
+.funnel-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #111;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+}
+
+.funnel-subtitle {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* CTA Cards */
+.cta-card {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.cta-card.primary {
+    border-color: #10B981;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);
+}
+
+.cta-card.secondary {
+    border-color: #E5E7EB;
+}
+
+.cta-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #10B981, #059669);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 0 auto;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.cta-card.secondary .cta-icon {
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.cta-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+    text-align: center;
+}
+
+.cta-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #4B5563;
+    margin: 0;
+    text-align: center;
+}
+
+.cta-benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #F9FAFB;
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.benefit-item svg {
+    color: #10B981;
+    flex-shrink: 0;
+}
+
+.cta-button {
+    width: 100%;
+    padding: 18px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.cta-button.primary {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.cta-button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+}
+
+.cta-button.secondary {
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: white;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+.cta-button.secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+}
+
+.cta-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #6B7280;
+    margin: 0;
+    text-align: center;
+}
+
+.cta-note svg {
+    color: #10B981;
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 8px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.divider span {
+    padding: 0 16px;
+    color: #9CA3AF;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Trust Signals */
+.trust-signals {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 20px 0;
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+.trust-item svg {
+    color: #10B981;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+    .funnel-convert {
+        padding: 40px;
+    }
+    
+    .funnel-title {
+        font-size: 2rem;
+    }
+}
+

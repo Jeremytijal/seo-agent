@@ -1,0 +1,241 @@
+/* ==========================================================================
+   FUNNEL ANALYZE PAGE - Mobile First
+   ========================================================================== */
+
+.funnel-analyze {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.funnel-container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* Progress Bar */
+.funnel-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #E5E7EB;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10B981, #059669);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+/* Header */
+.funnel-header {
+    text-align: center;
+}
+
+.funnel-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #111;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+}
+
+.funnel-subtitle {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* Analysis Steps */
+.analysis-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.analysis-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    opacity: 0.4;
+    transition: all 0.3s;
+}
+
+.analysis-step.active {
+    opacity: 1;
+}
+
+.analysis-step.completed {
+    opacity: 1;
+}
+
+.step-icon-wrapper {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F3F4F6;
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.analysis-step.active .step-icon-wrapper {
+    background: linear-gradient(135deg, #10B981, #059669);
+}
+
+.analysis-step.completed .step-icon-wrapper {
+    background: #D1FAE5;
+}
+
+.step-icon {
+    color: #6B7280;
+    transition: all 0.3s;
+}
+
+.analysis-step.active .step-icon {
+    color: white;
+}
+
+.analysis-step.completed .step-icon {
+    color: #10B981;
+}
+
+.step-content {
+    flex: 1;
+    padding-top: 4px;
+}
+
+.step-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111;
+    margin: 0 0 8px 0;
+}
+
+.analysis-step:not(.active) .step-text {
+    color: #6B7280;
+    font-weight: 500;
+}
+
+.step-loading {
+    margin-top: 8px;
+}
+
+.loading-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.loading-dots span {
+    width: 6px;
+    height: 6px;
+    background: #10B981;
+    border-radius: 50%;
+    animation: dotPulse 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+    0%, 80%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Info Message */
+.analysis-info {
+    background: #F9FAFB;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid #10B981;
+}
+
+.analysis-info p {
+    margin: 0 0 12px 0;
+    font-weight: 600;
+    color: #111;
+    font-size: 0.95rem;
+}
+
+.analysis-info ul {
+    margin: 0;
+    padding-left: 20px;
+    list-style: none;
+}
+
+.analysis-info li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    color: #4B5563;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.analysis-info li:before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #10B981;
+    font-weight: 700;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+    .funnel-analyze {
+        padding: 40px;
+    }
+    
+    .funnel-title {
+        font-size: 2rem;
+    }
+}
+

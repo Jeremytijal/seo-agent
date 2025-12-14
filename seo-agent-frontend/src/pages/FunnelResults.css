@@ -1,0 +1,286 @@
+/* ==========================================================================
+   FUNNEL RESULTS PAGE - Mobile First
+   ========================================================================== */
+
+.funnel-results {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+    padding: 24px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-bottom: 40px;
+}
+
+.funnel-container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Progress Bar */
+.funnel-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #E5E7EB;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10B981, #059669);
+    border-radius: 3px;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+/* Header */
+.funnel-header {
+    text-align: center;
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #10B981, #059669);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.funnel-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #111;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+}
+
+.funnel-subtitle {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* Results Section */
+.results-section {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #F3F4F6;
+}
+
+.section-header svg {
+    color: #10B981;
+}
+
+.section-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+}
+
+/* Keywords List */
+.keywords-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.keyword-card {
+    padding: 16px;
+    background: #F9FAFB;
+    border-radius: 12px;
+    border-left: 4px solid #10B981;
+}
+
+.keyword-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.keyword-number {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.keyword-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+}
+
+.keyword-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #6B7280;
+}
+
+.stat-item svg {
+    color: #10B981;
+}
+
+.keyword-opportunity {
+    font-size: 0.9rem;
+    color: #4B5563;
+    margin: 0;
+    font-style: italic;
+}
+
+/* Calendar Preview */
+.calendar-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #F9FAFB;
+    border-radius: 8px;
+    position: relative;
+    padding: 4px;
+}
+
+.calendar-day.has-content {
+    background: #ECFDF5;
+    border: 2px solid #10B981;
+}
+
+.day-number {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6B7280;
+}
+
+.calendar-day.has-content .day-number {
+    color: #10B981;
+}
+
+.day-content {
+    position: absolute;
+    bottom: 2px;
+}
+
+.content-dot {
+    width: 6px;
+    height: 6px;
+    background: #10B981;
+    border-radius: 50%;
+}
+
+.calendar-note {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #4B5563;
+    margin: 0;
+}
+
+.calendar-note strong {
+    color: #10B981;
+    font-weight: 700;
+}
+
+/* CTA */
+.funnel-cta {
+    width: 100%;
+    padding: 18px 24px;
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.funnel-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+}
+
+/* Trust Note */
+.trust-note {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+    .funnel-results {
+        padding: 40px;
+    }
+    
+    .funnel-title {
+        font-size: 2rem;
+    }
+}
+
