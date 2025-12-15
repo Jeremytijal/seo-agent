@@ -1,18 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Zap, Headphones, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+import { ArrowRight, Zap, Headphones, CheckCircle, Clock, TrendingUp, Rocket } from 'lucide-react';
+import { CALENDLY_URL } from '../config';
 import './FunnelConvert.css';
+
+// Analytics tracking function
+const track = (eventName, payload = {}) => {
+    console.log(`[Analytics] ${eventName}`, payload);
+    if (window.fbq) {
+        window.fbq('track', eventName, payload);
+    }
+};
 
 const FunnelConvert = () => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Track page view
+        track('activation_page_view');
+    }, []);
 
     const handleActivate = () => {
         navigate('/funnel/payment');
     };
 
     const handleCall = () => {
-        // Rediriger vers Calendly
-        window.open('https://zcal.co/i/7LMkT11o', '_blank');
+        window.open(CALENDLY_URL, '_blank');
     };
 
     return (
@@ -23,6 +36,9 @@ const FunnelConvert = () => {
                     <h1 className="funnel-title">
                         Activez votre agent SEO
                     </h1>
+                    <p className="funnel-subtitle-mobile">
+                        Recommandé sur mobile : choisissez "On le fait ensemble".
+                    </p>
                     <p className="funnel-subtitle">
                         Choisissez comment vous souhaitez démarrer
                     </p>
@@ -52,7 +68,8 @@ const FunnelConvert = () => {
                         </div>
                     </div>
                     <button onClick={handleActivate} className="cta-button primary">
-                        Activer mon agent SEO
+                        <Rocket size={20} />
+                        Lancer mon SEO automatiquement
                         <ArrowRight size={20} />
                     </button>
                     <p className="cta-note">
@@ -90,7 +107,7 @@ const FunnelConvert = () => {
                         </div>
                     </div>
                     <button onClick={handleCall} className="cta-button secondary">
-                        Réserver un appel (15 min)
+                        💬 Réserver un appel (15 min)
                         <ArrowRight size={20} />
                     </button>
                     <p className="cta-note">
@@ -120,4 +137,6 @@ const FunnelConvert = () => {
 };
 
 export default FunnelConvert;
+
+
 

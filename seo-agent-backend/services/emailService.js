@@ -555,6 +555,91 @@ const notifyNewUserSignup = async (user) => {
     };
 };
 
+/**
+ * Send SEO plan by email to user
+ */
+const sendPlanEmail = async (email, planId, planData) => {
+    if (!RESEND_API_KEY) {
+        console.log('Resend API key not configured - skipping plan email');
+        return { success: false, reason: 'Email not configured' };
+    }
+
+    const keywordsHtml = planData.keywords.map((kw, index) => `
+        <div style="background: #F9FAFB; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #10B981;">
+            <h3 style="margin: 0 0 8px 0; color: #111827; font-size: 1.1rem;">
+                ${index + 1}. ${kw.keyword}
+            </h3>
+            <div style="display: flex; gap: 16px; font-size: 0.9rem; color: #6B7280;">
+                <span>📊 ${kw.volume.toLocaleString()} recherches/mois</span>
+                <span>📈 Difficulté: ${kw.difficulty}%</span>
+            </div>
+        </div>
+    `).join('');
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #10B981, #059669); padding: 32px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 1.75rem; }
+        .content { padding: 32px; }
+        .cta-button { display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #10B981, #059669); color: white; text-decoration: none; border-radius: 10px; font-weight: 600; margin: 24px 0; }
+        .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Votre plan SEO est prêt !</h1>
+        </div>
+        <div class="content">
+            <p style="color: #111827; font-size: 16px; line-height: 1.6;">
+                Bonjour,
+            </p>
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
+                Voici votre plan SEO personnalisé avec <strong>${planData.articlesCount} articles</strong> planifiés sur les <strong>${planData.duration} prochains jours</strong>.
+            </p>
+            
+            <h2 style="color: #111827; margin-top: 32px; margin-bottom: 16px;">📌 Vos 3 mots-clés prioritaires</h2>
+            ${keywordsHtml}
+            
+            <div style="background: #F0FDF4; padding: 20px; border-radius: 12px; margin: 24px 0; border-left: 4px solid #10B981;">
+                <h3 style="margin: 0 0 8px 0; color: #111827;">🚀 Prochaines étapes</h3>
+                <p style="margin: 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
+                    Pour activer votre agent SEO et commencer à publier automatiquement ces articles, 
+                    <a href="https://agent-seo.netlify.app/funnel/convert" style="color: #10B981; font-weight: 600;">cliquez ici</a>.
+                </p>
+            </div>
+            
+            <p style="color: #4b5563; font-size: 14px; line-height: 1.6; margin-top: 24px;">
+                Besoin d'aide ? Répondez simplement à cet email ou réservez un appel de 15 minutes avec un expert.
+            </p>
+        </div>
+        <div class="footer">
+            <p>© 2025 SEO Agent - Tous droits réservés</p>
+        </div>
+    </div>
+</body>
+</html>
+    `;
+
+    try {
+        const result = await sendEmail(
+            email,
+            '🎯 Votre plan SEO personnalisé - SEO Agent',
+            htmlContent
+        );
+        return result;
+    } catch (error) {
+        console.error('Error in sendPlanEmail:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 module.exports = {
     sendQualifiedLeadNotification,
     sendWeeklyReport,
@@ -562,5 +647,6 @@ module.exports = {
     sendSlackNewSubscriptionNotification,
     sendNewUserEmailNotification,
     sendWelcomeEmail,
-    notifyNewUserSignup
+    notifyNewUserSignup,
+    sendPlanEmail
 };

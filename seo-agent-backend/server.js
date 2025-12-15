@@ -2070,6 +2070,50 @@ app.post('/api/leads', async (req, res) => {
     }
 });
 
+// ============================================================================
+// PLAN EMAIL API - Send SEO plan by email
+// ============================================================================
+
+app.post('/api/plan/send', async (req, res) => {
+    try {
+        const { email, planId } = req.body;
+
+        if (!email || !email.includes('@')) {
+            return res.status(400).json({ error: 'Email invalide' });
+        }
+
+        // Récupérer les données du plan depuis localStorage ou générer un plan basique
+        // Pour l'instant, on envoie un email avec les informations du plan SEO
+        const planData = {
+            keywords: [
+                { keyword: 'marketing digital', volume: 12000, difficulty: 35 },
+                { keyword: 'formation en ligne', volume: 8500, difficulty: 42 },
+                { keyword: 'e-commerce', volume: 15000, difficulty: 55 }
+            ],
+            articlesCount: 10,
+            duration: 30
+        };
+
+        // Envoyer l'email via emailService
+        const emailResult = await emailService.sendPlanEmail(
+            email.toLowerCase().trim(),
+            planId || 'meta_funnel_plan',
+            planData
+        );
+
+        if (!emailResult.success) {
+            console.error('Error sending plan email:', emailResult.error);
+            return res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'email' });
+        }
+
+        console.log(`Plan email sent to: ${email} (Plan ID: ${planId})`);
+        res.json({ success: true, message: 'Plan envoyé avec succès' });
+    } catch (error) {
+        console.error('Error processing plan send request:', error);
+        res.status(500).json({ error: 'Erreur interne du serveur' });
+    }
+});
+
 app.post('/api/expert-request', async (req, res) => {
     try {
         const { userId, platform, siteUrl, message, phone, name, email } = req.body;

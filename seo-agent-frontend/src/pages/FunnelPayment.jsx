@@ -145,3 +145,5 @@ const FunnelPayment = () => {
 
 export default FunnelPayment;
 
+
+

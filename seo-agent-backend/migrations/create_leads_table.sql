@@ -30,3 +30,5 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_leads_email_unique ON leads(email);
 -- CREATE POLICY "Leads are viewable by service role" ON leads FOR SELECT USING (true);
 -- CREATE POLICY "Leads are insertable by service role" ON leads FOR INSERT WITH CHECK (true);
 
+
+
