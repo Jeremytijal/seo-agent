@@ -2326,20 +2326,26 @@ app.post('/api/funnel/checkout', async (req, res) => {
                 source: source,
                 funnel: 'meta_ads',
                 email: email
-            },
-            allow_promotion_codes: true
+            }
         };
 
         // Appliquer le coupon early bird si disponible
+        // Note: On ne peut pas utiliser allow_promotion_codes ET discounts en même temps
         if (earlyBirdCouponId) {
             try {
                 await stripe.coupons.retrieve(earlyBirdCouponId);
                 sessionConfig.discounts = [{
                     coupon: earlyBirdCouponId
                 }];
+                console.log(`Applying early bird coupon: ${earlyBirdCouponId}`);
             } catch (couponError) {
-                console.warn('Coupon not found, proceeding without discount:', couponError.message);
+                console.warn('Coupon not found, allowing promotion codes instead:', couponError.message);
+                // Si le coupon n'existe pas, permettre les codes promo manuels
+                sessionConfig.allow_promotion_codes = true;
             }
+        } else {
+            // Pas de coupon automatique, permettre les codes promo manuels
+            sessionConfig.allow_promotion_codes = true;
         }
 
         console.log(`Creating Stripe checkout session for funnel: ${email} (plan: ${planId})`);
