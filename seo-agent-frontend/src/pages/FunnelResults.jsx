@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Target, TrendingUp, Calendar, CheckCircle, BarChart3, Mail, MessageCircle, Rocket } from 'lucide-react';
+import { ArrowRight, Target, TrendingUp, Calendar, CheckCircle, BarChart3, Mail, MessageCircle, Rocket, Loader2 } from 'lucide-react';
 import { API_URL, CALENDLY_URL } from '../config';
 import './FunnelResults.css';
 
@@ -165,12 +165,53 @@ const FunnelResults = () => {
 
     const handleExpertCall = () => {
         track('expert_call_clicked', { variant: 'meta_funnel_v2' });
-        window.open(CALENDLY_URL, '_blank');
+        window.open('https://zcal.co/i/7LMkT11o', '_blank');
     };
 
-    const handleAutoActivation = () => {
+    const handleAutoActivation = async () => {
         track('auto_activation_clicked', { variant: 'meta_funnel_v2' });
-        navigate('/funnel/convert');
+        
+        if (!email) {
+            // Si pas d'email, rediriger vers la page de conversion classique
+            navigate('/funnel/convert');
+            return;
+        }
+
+        try {
+            setIsSendingEmail(true); // Réutiliser le state de loading
+            
+            // Créer une session Stripe checkout pour le funnel
+            const response = await fetch(`${API_URL}/api/funnel/checkout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    planId: 'starter', // Plan par défaut pour le funnel
+                    source: 'meta_funnel'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la création de la session de paiement');
+            }
+
+            const data = await response.json();
+            
+            if (data.url) {
+                // Rediriger vers Stripe checkout
+                window.location.href = data.url;
+            } else {
+                throw new Error('URL de checkout non disponible');
+            }
+        } catch (error) {
+            console.error('Error creating checkout session:', error);
+            // En cas d'erreur, rediriger vers la page de conversion classique
+            navigate('/funnel/convert');
+        } finally {
+            setIsSendingEmail(false);
+        }
     };
 
     return (
@@ -322,6 +363,7 @@ const FunnelResults = () => {
                         {/* Option 3 - Auto (tertiary) */}
                         <button 
                             onClick={handleAutoActivation}
+                            disabled={isSendingEmail}
                             className="cta-option tertiary"
                         >
                             <Rocket size={20} />
@@ -329,7 +371,11 @@ const FunnelResults = () => {
                                 <span className="cta-option-text">Lancer mon SEO automatiquement</span>
                                 <span className="cta-option-microcopy">Setup offert • Activation en 24h • Annulable à tout moment</span>
                             </div>
-                            <ArrowRight size={20} />
+                            {isSendingEmail ? (
+                                <Loader2 size={20} className="spinning" />
+                            ) : (
+                                <ArrowRight size={20} />
+                            )}
                         </button>
                     </div>
                 </div>

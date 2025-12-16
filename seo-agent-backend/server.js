@@ -2208,6 +2208,107 @@ app.post('/api/keywords/analyze-competitors', async (req, res) => {
 });
 
 // ============================================================================
+// FUNNEL CHECKOUT API - Create Stripe checkout for funnel (no auth required)
+// ============================================================================
+
+app.post('/api/funnel/checkout', async (req, res) => {
+    try {
+        const { email, planId = 'starter', source = 'meta_funnel' } = req.body;
+
+        if (!email || !email.includes('@')) {
+            return res.status(400).json({ error: 'Email invalide' });
+        }
+
+        // Verify Stripe is configured
+        if (!process.env.STRIPE_SECRET_KEY) {
+            console.error('STRIPE_SECRET_KEY is not configured');
+            return res.status(500).json({ error: 'Stripe is not configured on the server' });
+        }
+
+        // Configuration des plans (utiliser les price IDs Stripe)
+        const plans = {
+            starter: {
+                priceId: process.env.STRIPE_PRICE_ID_STARTER || process.env.STRIPE_TEST_PRICE_ID_STARTER,
+                name: 'Starter',
+                trialDays: 7
+            },
+            pro: {
+                priceId: process.env.STRIPE_PRICE_ID_PRO || process.env.STRIPE_TEST_PRICE_ID_PRO,
+                name: 'Pro',
+                trialDays: 7
+            }
+        };
+
+        const selectedPlan = plans[planId] || plans.starter;
+        
+        if (!selectedPlan.priceId) {
+            console.error('Price ID not configured for plan:', planId);
+            return res.status(500).json({ error: 'Plan non configuré' });
+        }
+
+        // URLs de redirection
+        const frontendUrl = process.env.FRONTEND_URL || 'https://agent-seo.netlify.app';
+        const successUrl = `${frontendUrl}/funnel/payment-success?session_id={CHECKOUT_SESSION_ID}`;
+        const cancelUrl = `${frontendUrl}/funnel/results`;
+
+        // Coupon early bird si disponible
+        const earlyBirdCouponId = process.env.STRIPE_EARLYBIRD_COUPON_ID || null;
+
+        const sessionConfig = {
+            customer_email: email.toLowerCase().trim(),
+            payment_method_types: ['card'],
+            line_items: [{
+                price: selectedPlan.priceId,
+                quantity: 1,
+            }],
+            mode: 'subscription',
+            subscription_data: {
+                trial_period_days: selectedPlan.trialDays,
+                metadata: {
+                    planId: planId,
+                    source: source,
+                    funnel: 'meta_ads'
+                }
+            },
+            success_url: successUrl,
+            cancel_url: cancelUrl,
+            metadata: {
+                planId: planId,
+                source: source,
+                funnel: 'meta_ads',
+                email: email
+            },
+            allow_promotion_codes: true
+        };
+
+        // Appliquer le coupon early bird si disponible
+        if (earlyBirdCouponId) {
+            try {
+                await stripe.coupons.retrieve(earlyBirdCouponId);
+                sessionConfig.discounts = [{
+                    coupon: earlyBirdCouponId
+                }];
+            } catch (couponError) {
+                console.warn('Coupon not found, proceeding without discount:', couponError.message);
+            }
+        }
+
+        console.log(`Creating Stripe checkout session for funnel: ${email} (plan: ${planId})`);
+        const session = await stripe.checkout.sessions.create(sessionConfig);
+
+        console.log(`Stripe checkout session created: ${session.id}`);
+        res.json({ url: session.url, sessionId: session.id });
+
+    } catch (error) {
+        console.error('Funnel checkout error:', error);
+        res.status(500).json({ 
+            error: 'Erreur lors de la création de la session de paiement',
+            message: error.message 
+        });
+    }
+});
+
+// ============================================================================
 // FUNNEL ANALYSIS API - Analyze site for Meta Ads funnel
 // ============================================================================
 

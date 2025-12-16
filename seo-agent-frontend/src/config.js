@@ -18,9 +18,9 @@ export const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'https://agentias
 export const DOCS_URL = import.meta.env.VITE_DOCS_URL || 'https://docs.agentiaseo.com';
 
 // External Links
-export const CALENDLY_URL = import.meta.env.VITE_CALENDLY_URL || 'https://zcal.co/i/CkMTM7p_';
+export const CALENDLY_URL = import.meta.env.VITE_CALENDLY_URL || 'https://zcal.co/i/7LMkT11o';
 export const CONTACT_URL = `${LANDING_URL}/contact`;
-export const SALES_CALL_URL = 'https://zcal.co/i/CkMTM7p_';
+export const SALES_CALL_URL = 'https://zcal.co/i/7LMkT11o';
 
 // API Endpoints helper
 export const endpoints = {
