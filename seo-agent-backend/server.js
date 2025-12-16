@@ -2076,21 +2076,20 @@ app.post('/api/leads', async (req, res) => {
 
 app.post('/api/plan/send', async (req, res) => {
     try {
-        const { email, planId } = req.body;
+        const { email, planId, keywords, calendar } = req.body;
 
         if (!email || !email.includes('@')) {
             return res.status(400).json({ error: 'Email invalide' });
         }
 
-        // Récupérer les données du plan depuis localStorage ou générer un plan basique
-        // Pour l'instant, on envoie un email avec les informations du plan SEO
+        // Utiliser les mots-clés fournis ou générer un plan basique
         const planData = {
-            keywords: [
+            keywords: keywords || [
                 { keyword: 'marketing digital', volume: 12000, difficulty: 35 },
                 { keyword: 'formation en ligne', volume: 8500, difficulty: 42 },
                 { keyword: 'e-commerce', volume: 15000, difficulty: 55 }
             ],
-            articlesCount: 10,
+            articlesCount: calendar ? calendar.filter(d => d.hasArticle).length : 10,
             duration: 30
         };
 
@@ -2207,6 +2206,157 @@ app.post('/api/keywords/analyze-competitors', async (req, res) => {
         });
     }
 });
+
+// ============================================================================
+// FUNNEL ANALYSIS API - Analyze site for Meta Ads funnel
+// ============================================================================
+
+app.post('/api/funnel/analyze', async (req, res) => {
+    try {
+        const { url } = req.body;
+
+        if (!url || !url.trim()) {
+            // Si pas d'URL, générer des mots-clés génériques basés sur des tendances
+            const genericKeywords = [
+                {
+                    keyword: 'marketing digital',
+                    volume: 12000,
+                    difficulty: 35,
+                    opportunity: 'Forte opportunité - faible concurrence',
+                    intent: 'informational',
+                    reason: 'Mot-clé générique à fort potentiel'
+                },
+                {
+                    keyword: 'formation en ligne',
+                    volume: 8500,
+                    difficulty: 42,
+                    opportunity: 'Potentiel de trafic élevé',
+                    intent: 'commercial',
+                    reason: 'Secteur en croissance avec bonne opportunité'
+                },
+                {
+                    keyword: 'e-commerce',
+                    volume: 15000,
+                    difficulty: 55,
+                    opportunity: 'Volume important - stratégie long terme',
+                    intent: 'informational',
+                    reason: 'Mot-clé principal avec volume élevé'
+                }
+            ];
+
+            return res.json({
+                success: true,
+                keywords: genericKeywords,
+                calendar: generateCalendar(genericKeywords, 30)
+            });
+        }
+
+        // Normaliser l'URL
+        let websiteUrl = url.trim();
+        if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+            websiteUrl = 'https://' + websiteUrl;
+        }
+
+        console.log(`Funnel analysis for: ${websiteUrl}`);
+
+        // Analyser le site (sans concurrents pour aller plus vite)
+        const result = await keywordService.analyzeCompetitors(websiteUrl, []);
+
+        // Sélectionner les 3 meilleurs mots-clés (opportunité high prioritaire)
+        const topKeywords = result.keywords
+            .filter(kw => kw.opportunity === 'high')
+            .slice(0, 3);
+
+        // Si pas assez de mots-clés avec opportunité high, prendre les meilleurs par volume
+        if (topKeywords.length < 3) {
+            const sortedByVolume = [...result.keywords]
+                .sort((a, b) => b.volume - a.volume)
+                .slice(0, 3);
+            topKeywords.push(...sortedByVolume.slice(0, 3 - topKeywords.length));
+        }
+
+        // Générer le calendrier
+        const calendar = generateCalendar(topKeywords.slice(0, 3), 30);
+
+        res.json({
+            success: true,
+            keywords: topKeywords.slice(0, 3).map(kw => ({
+                keyword: kw.keyword,
+                volume: kw.volume,
+                difficulty: kw.difficulty,
+                opportunity: kw.reason || 'Opportunité identifiée pour votre site',
+                intent: kw.intent
+            })),
+            calendar,
+            analysis: result.analysis
+        });
+    } catch (error) {
+        console.error('Funnel analysis error:', error);
+        
+        // En cas d'erreur, retourner des mots-clés génériques
+        const fallbackKeywords = [
+            {
+                keyword: 'marketing digital',
+                volume: 12000,
+                difficulty: 35,
+                opportunity: 'Forte opportunité - faible concurrence',
+                intent: 'informational'
+            },
+            {
+                keyword: 'formation en ligne',
+                volume: 8500,
+                difficulty: 42,
+                opportunity: 'Potentiel de trafic élevé',
+                intent: 'commercial'
+            },
+            {
+                keyword: 'e-commerce',
+                volume: 15000,
+                difficulty: 55,
+                opportunity: 'Volume important - stratégie long terme',
+                intent: 'informational'
+            }
+        ];
+
+        res.json({
+            success: true,
+            keywords: fallbackKeywords,
+            calendar: generateCalendar(fallbackKeywords, 30),
+            error: 'Utilisation de mots-clés génériques suite à une erreur d\'analyse'
+        });
+    }
+});
+
+// Helper function to generate calendar
+function generateCalendar(keywords, days = 30) {
+    const calendar = [];
+    const today = new Date();
+    const articlesPerKeyword = Math.ceil(10 / keywords.length); // ~10 articles sur 30 jours
+    
+    let articleIndex = 0;
+    for (let i = 0; i < days; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() + i);
+        
+        // Répartir les articles sur 30 jours (environ tous les 3 jours)
+        const hasArticle = i > 0 && i % 3 === 0 && articleIndex < 10;
+        const keywordIndex = hasArticle ? Math.floor(articleIndex / articlesPerKeyword) : null;
+        
+        calendar.push({
+            date: date.toISOString(),
+            day: date.getDate(),
+            month: date.getMonth(),
+            weekday: date.getDay(),
+            hasArticle: hasArticle,
+            keyword: hasArticle && keywordIndex < keywords.length ? keywords[keywordIndex].keyword : null,
+            articleNumber: hasArticle ? articleIndex + 1 : null
+        });
+        
+        if (hasArticle) articleIndex++;
+    }
+    
+    return calendar;
+}
 
 // Get favorite keywords
 app.get('/api/keywords/favorites/:userId', async (req, res) => {

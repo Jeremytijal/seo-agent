@@ -19,49 +19,91 @@ const FunnelResults = () => {
     const [showToast, setShowToast] = useState(false);
     const [isSendingEmail, setIsSendingEmail] = useState(false);
 
+    const [keywords, setKeywords] = useState([]);
+    const [calendarDays, setCalendarDays] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => {
         const savedUrl = localStorage.getItem('funnel_url');
         const savedEmail = localStorage.getItem('funnel_email');
+        const savedKeywords = localStorage.getItem('funnel_keywords');
+        const savedCalendar = localStorage.getItem('funnel_calendar');
+        
         if (savedUrl) {
             setUrl(savedUrl);
         }
         if (savedEmail) {
             setEmail(savedEmail);
         }
-    }, []);
 
-    // Mots-clés auto-sélectionnés (simulation)
-    const keywords = [
-        {
-            keyword: 'marketing digital',
-            volume: 12000,
-            difficulty: 35,
-            opportunity: 'Forte opportunité - faible concurrence'
-        },
-        {
-            keyword: 'formation en ligne',
-            volume: 8500,
-            difficulty: 42,
-            opportunity: 'Potentiel de trafic élevé'
-        },
-        {
-            keyword: 'e-commerce',
-            volume: 15000,
-            difficulty: 55,
-            opportunity: 'Volume important - stratégie long terme'
+        // Charger les mots-clés depuis localStorage
+        if (savedKeywords) {
+            try {
+                const parsedKeywords = JSON.parse(savedKeywords);
+                setKeywords(parsedKeywords);
+            } catch (e) {
+                console.error('Error parsing keywords:', e);
+            }
         }
-    ];
 
-    // Calendrier simplifié (30 jours)
-    const calendarDays = Array.from({ length: 30 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() + i);
-        return {
-            date: date,
-            hasContent: i % 3 === 0 && i > 0, // Un article tous les 3 jours
-            keyword: i % 3 === 0 && i > 0 ? keywords[i % 3].keyword : null
-        };
-    });
+        // Charger le calendrier depuis localStorage
+        if (savedCalendar) {
+            try {
+                const parsedCalendar = JSON.parse(savedCalendar);
+                // Convertir les dates ISO en objets Date
+                const calendarWithDates = parsedCalendar.map(day => ({
+                    ...day,
+                    date: new Date(day.date)
+                }));
+                setCalendarDays(calendarWithDates);
+            } catch (e) {
+                console.error('Error parsing calendar:', e);
+            }
+        }
+
+        // Si pas de données sauvegardées, utiliser des valeurs par défaut
+        if (!savedKeywords) {
+            const defaultKeywords = [
+                {
+                    keyword: 'marketing digital',
+                    volume: 12000,
+                    difficulty: 35,
+                    opportunity: 'Forte opportunité - faible concurrence'
+                },
+                {
+                    keyword: 'formation en ligne',
+                    volume: 8500,
+                    difficulty: 42,
+                    opportunity: 'Potentiel de trafic élevé'
+                },
+                {
+                    keyword: 'e-commerce',
+                    volume: 15000,
+                    difficulty: 55,
+                    opportunity: 'Volume important - stratégie long terme'
+                }
+            ];
+            setKeywords(defaultKeywords);
+            
+            // Générer un calendrier par défaut
+            const defaultCalendar = Array.from({ length: 30 }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                return {
+                    date: date,
+                    day: date.getDate(),
+                    month: date.getMonth(),
+                    weekday: date.getDay(),
+                    hasArticle: i > 0 && i % 3 === 0,
+                    keyword: i > 0 && i % 3 === 0 ? defaultKeywords[Math.floor((i / 3) % 3)].keyword : null,
+                    articleNumber: i > 0 && i % 3 === 0 ? Math.floor(i / 3) : null
+                };
+            });
+            setCalendarDays(defaultCalendar);
+        }
+
+        setIsLoading(false);
+    }, []);
 
     // Générer un planId fictif (à remplacer par un vrai planId si vous avez un système de plans)
     const planId = 'meta_funnel_plan_' + Date.now();
@@ -82,7 +124,9 @@ const FunnelResults = () => {
                 },
                 body: JSON.stringify({
                     email,
-                    planId
+                    planId,
+                    keywords,
+                    calendar: calendarDays
                 })
             });
 
@@ -171,23 +215,51 @@ const FunnelResults = () => {
                         <h2>Votre calendrier SEO (30 jours)</h2>
                     </div>
                     <div className="calendar-preview">
-                        <div className="calendar-grid">
-                            {calendarDays.slice(0, 14).map((day, index) => (
-                                <div 
-                                    key={index} 
-                                    className={`calendar-day ${day.hasContent ? 'has-content' : ''}`}
-                                >
-                                    <span className="day-number">{day.date.getDate()}</span>
-                                    {day.hasContent && (
-                                        <div className="day-content">
-                                            <div className="content-dot"></div>
-                                        </div>
-                                    )}
-                                </div>
+                        {/* En-tête du calendrier avec jours de la semaine */}
+                        <div className="calendar-weekdays">
+                            {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, index) => (
+                                <div key={index} className="weekday-label">{day}</div>
                             ))}
                         </div>
+                        
+                        <div className="calendar-grid">
+                            {calendarDays.slice(0, 30).map((day, index) => {
+                                const isToday = day.date.toDateString() === new Date().toDateString();
+                                const isPast = day.date < new Date() && !isToday;
+                                
+                                return (
+                                    <div 
+                                        key={index} 
+                                        className={`calendar-day ${day.hasArticle ? 'has-article' : ''} ${isToday ? 'today' : ''} ${isPast ? 'past' : ''}`}
+                                        title={day.hasArticle ? `Article ${day.articleNumber}: ${day.keyword}` : ''}
+                                    >
+                                        <span className="day-number">{day.day}</span>
+                                        {day.hasArticle && (
+                                            <div className="article-indicator">
+                                                <div className="article-dot"></div>
+                                                {index < 14 && (
+                                                    <span className="article-keyword">{day.keyword?.substring(0, 15)}...</span>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        
+                        <div className="calendar-stats">
+                            <div className="stat-item">
+                                <div className="stat-dot has-article"></div>
+                                <span>{calendarDays.filter(d => d.hasArticle).length} articles planifiés</span>
+                            </div>
+                            <div className="stat-item">
+                                <div className="stat-dot today"></div>
+                                <span>Aujourd'hui</span>
+                            </div>
+                        </div>
+                        
                         <p className="calendar-note">
-                            <strong>10 articles</strong> planifiés sur les 30 prochains jours
+                            <strong>{calendarDays.filter(d => d.hasArticle).length} articles</strong> planifiés sur les 30 prochains jours
                         </p>
                     </div>
                 </div>

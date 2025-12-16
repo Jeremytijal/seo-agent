@@ -184,6 +184,25 @@
     gap: 16px;
 }
 
+/* Weekdays Header */
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.weekday-label {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 0;
+}
+
+/* Calendar Grid */
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -192,41 +211,140 @@
 
 .calendar-day {
     aspect-ratio: 1;
+    min-height: 44px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    background: #F9FAFB;
-    border-radius: 8px;
+    justify-content: flex-start;
+    background: #FFFFFF;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
     position: relative;
-    padding: 4px;
+    padding: 6px 4px;
+    transition: all 0.2s ease;
+    cursor: default;
 }
 
-.calendar-day.has-content {
-    background: #ECFDF5;
-    border: 2px solid #10B981;
+.calendar-day:hover {
+    border-color: #D1D5DB;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-day.past {
+    opacity: 0.5;
+    background: #F9FAFB;
+}
+
+.calendar-day.today {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border-color: #FCD34D;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+}
+
+.calendar-day.today .day-number {
+    color: #92400E;
+    font-weight: 700;
+}
+
+.calendar-day.has-article {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    border-color: #10B981;
+    border-width: 2px;
+}
+
+.calendar-day.has-article .day-number {
+    color: #065F46;
+    font-weight: 700;
 }
 
 .day-number {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: #6B7280;
+    color: #374151;
+    margin-bottom: 2px;
 }
 
-.calendar-day.has-content .day-number {
-    color: #10B981;
-}
-
-.day-content {
+/* Article Indicator */
+.article-indicator {
     position: absolute;
-    bottom: 2px;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
 }
 
-.content-dot {
+.article-dot {
     width: 6px;
     height: 6px;
     background: #10B981;
     border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+.article-keyword {
+    font-size: 0.6rem;
+    color: #059669;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+    padding: 0 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    display: none; /* Masqué par défaut sur mobile */
+}
+
+/* Calendar Stats */
+.calendar-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 16px 0;
+    border-top: 1px solid #E5E7EB;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #4B5563;
+}
+
+.stat-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.stat-dot.has-article {
+    background: #10B981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.stat-dot.today {
+    background: linear-gradient(135deg, #FCD34D 0%, #FBBF24 100%);
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
 }
 
 .calendar-note {
@@ -234,11 +352,33 @@
     font-size: 0.9rem;
     color: #4B5563;
     margin: 0;
+    padding-top: 8px;
 }
 
 .calendar-note strong {
     color: #10B981;
     font-weight: 700;
+}
+
+/* Desktop - Show article keywords on hover */
+@media (min-width: 768px) {
+    .calendar-day.has-article {
+        min-height: 60px;
+    }
+    
+    .article-keyword {
+        display: block;
+    }
+    
+    .calendar-day.has-article:hover {
+        z-index: 10;
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .calendar-day.has-article:hover .article-keyword {
+        display: block;
+    }
 }
 
 /* CTA */
