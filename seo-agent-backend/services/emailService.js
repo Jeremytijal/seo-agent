@@ -564,7 +564,37 @@ const sendPlanEmail = async (email, planId, planData) => {
         return { success: false, reason: 'Email not configured' };
     }
 
-    const keywordsHtml = planData.keywords.map((kw, index) => `
+    // Valider les données
+    if (!planData || !planData.keywords || !Array.isArray(planData.keywords)) {
+        console.error('Invalid planData provided to sendPlanEmail:', planData);
+        return { success: false, error: 'Invalid plan data' };
+    }
+
+    // S'assurer que tous les mots-clés ont les propriétés nécessaires
+    const validKeywords = planData.keywords
+        .filter(kw => kw && (kw.keyword || typeof kw === 'string'))
+        .map((kw, index) => {
+            if (typeof kw === 'string') {
+                return {
+                    keyword: kw,
+                    volume: 0,
+                    difficulty: 0
+                };
+            }
+            return {
+                keyword: kw.keyword || `Mot-clé ${index + 1}`,
+                volume: kw.volume || 0,
+                difficulty: kw.difficulty || 0
+            };
+        })
+        .slice(0, 6); // Limiter à 6 mots-clés
+
+    if (validKeywords.length === 0) {
+        console.error('No valid keywords found in planData');
+        return { success: false, error: 'No valid keywords' };
+    }
+
+    const keywordsHtml = validKeywords.map((kw, index) => `
         <div style="background: #F9FAFB; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #10B981;">
             <h3 style="margin: 0 0 8px 0; color: #111827; font-size: 1.1rem;">
                 ${index + 1}. ${kw.keyword}
@@ -604,7 +634,7 @@ const sendPlanEmail = async (email, planId, planData) => {
                 Voici votre plan SEO personnalisé avec <strong>${planData.articlesCount} articles</strong> planifiés sur les <strong>${planData.duration} prochains jours</strong>.
             </p>
             
-            <h2 style="color: #111827; margin-top: 32px; margin-bottom: 16px;">📌 Vos 3 mots-clés prioritaires</h2>
+            <h2 style="color: #111827; margin-top: 32px; margin-bottom: 16px;">📌 Vos ${validKeywords.length} mots-clés prioritaires</h2>
             ${keywordsHtml}
             
             <div style="background: #F0FDF4; padding: 20px; border-radius: 12px; margin: 24px 0; border-left: 4px solid #10B981;">

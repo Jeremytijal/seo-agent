@@ -2078,20 +2078,53 @@ app.post('/api/plan/send', async (req, res) => {
     try {
         const { email, planId, keywords, calendar } = req.body;
 
+        console.log('Plan send request received:', { 
+            email: email ? email.substring(0, 10) + '...' : 'missing',
+            planId,
+            keywordsCount: keywords?.length || 0,
+            calendarCount: calendar?.length || 0
+        });
+
         if (!email || !email.includes('@')) {
+            console.error('Invalid email provided');
             return res.status(400).json({ error: 'Email invalide' });
         }
 
-        // Utiliser les mots-clés fournis ou générer un plan basique
-        const planData = {
-            keywords: keywords || [
+        // Valider et formater les mots-clés
+        let formattedKeywords = [];
+        if (Array.isArray(keywords) && keywords.length > 0) {
+            formattedKeywords = keywords.map(kw => ({
+                keyword: kw.keyword || kw,
+                volume: kw.volume || 0,
+                difficulty: kw.difficulty || 0
+            }));
+        } else {
+            // Mots-clés par défaut
+            formattedKeywords = [
                 { keyword: 'marketing digital', volume: 12000, difficulty: 35 },
                 { keyword: 'formation en ligne', volume: 8500, difficulty: 42 },
                 { keyword: 'e-commerce', volume: 15000, difficulty: 55 }
-            ],
-            articlesCount: calendar ? calendar.filter(d => d.hasArticle).length : 10,
+            ];
+        }
+
+        // Calculer le nombre d'articles
+        let articlesCount = 10;
+        if (Array.isArray(calendar)) {
+            const articlesInCalendar = calendar.filter(d => d.hasArticle || d.has_content);
+            articlesCount = articlesInCalendar.length || 10;
+        }
+
+        const planData = {
+            keywords: formattedKeywords.slice(0, 6), // Limiter à 6 mots-clés max
+            articlesCount: articlesCount,
             duration: 30
         };
+
+        console.log('Sending plan email with data:', {
+            email: email.substring(0, 10) + '...',
+            keywordsCount: planData.keywords.length,
+            articlesCount: planData.articlesCount
+        });
 
         // Envoyer l'email via emailService
         const emailResult = await emailService.sendPlanEmail(
@@ -2101,15 +2134,22 @@ app.post('/api/plan/send', async (req, res) => {
         );
 
         if (!emailResult.success) {
-            console.error('Error sending plan email:', emailResult.error);
-            return res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'email' });
+            console.error('Error sending plan email:', emailResult.error || emailResult.reason);
+            return res.status(500).json({ 
+                error: 'Erreur lors de l\'envoi de l\'email',
+                details: emailResult.error || emailResult.reason
+            });
         }
 
-        console.log(`Plan email sent to: ${email} (Plan ID: ${planId})`);
+        console.log(`Plan email sent successfully to: ${email} (Plan ID: ${planId})`);
         res.json({ success: true, message: 'Plan envoyé avec succès' });
     } catch (error) {
         console.error('Error processing plan send request:', error);
-        res.status(500).json({ error: 'Erreur interne du serveur' });
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ 
+            error: 'Erreur interne du serveur',
+            message: error.message 
+        });
     }
 });
 
