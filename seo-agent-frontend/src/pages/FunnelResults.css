@@ -116,11 +116,26 @@
     gap: 16px;
 }
 
+.keywords-list.compact {
+    gap: 10px;
+}
+
 .keyword-card {
     padding: 16px;
     background: #F9FAFB;
     border-radius: 12px;
     border-left: 4px solid #10B981;
+    transition: all 0.2s ease;
+}
+
+.keyword-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+}
+
+.keyword-card.compact {
+    padding: 12px 14px;
+    border-radius: 10px;
 }
 
 .keyword-header {
@@ -128,6 +143,10 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 12px;
+}
+
+.keyword-card.compact .keyword-header {
+    margin-bottom: 8px;
 }
 
 .keyword-number {
@@ -144,11 +163,24 @@
     flex-shrink: 0;
 }
 
+.keyword-card.compact .keyword-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+}
+
 .keyword-text {
     font-size: 1.1rem;
     font-weight: 700;
     color: #111;
     margin: 0;
+    flex: 1;
+}
+
+.keyword-card.compact .keyword-text {
+    font-size: 0.95rem;
+    line-height: 1.4;
 }
 
 .keyword-stats {
@@ -156,6 +188,11 @@
     gap: 16px;
     margin-bottom: 8px;
     flex-wrap: wrap;
+}
+
+.keyword-card.compact .keyword-stats {
+    gap: 12px;
+    margin-bottom: 0;
 }
 
 .stat-item {
@@ -166,8 +203,14 @@
     color: #6B7280;
 }
 
+.keyword-card.compact .stat-item {
+    font-size: 0.8rem;
+    gap: 4px;
+}
+
 .stat-item svg {
     color: #10B981;
+    flex-shrink: 0;
 }
 
 .keyword-opportunity {
@@ -175,6 +218,21 @@
     color: #4B5563;
     margin: 0;
     font-style: italic;
+}
+
+/* Grid layout pour desktop si beaucoup de mots-clés */
+@media (min-width: 768px) {
+    .keywords-list.compact {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .keywords-list.compact {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 /* Calendar Preview */

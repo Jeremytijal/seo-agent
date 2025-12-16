@@ -2241,6 +2241,30 @@ app.post('/api/funnel/analyze', async (req, res) => {
                     opportunity: 'Volume important - stratégie long terme',
                     intent: 'informational',
                     reason: 'Mot-clé principal avec volume élevé'
+                },
+                {
+                    keyword: 'référencement naturel',
+                    volume: 6800,
+                    difficulty: 38,
+                    opportunity: 'Opportunité SEO moyenne',
+                    intent: 'informational',
+                    reason: 'Mot-clé technique avec bon potentiel'
+                },
+                {
+                    keyword: 'création de site web',
+                    volume: 9200,
+                    difficulty: 45,
+                    opportunity: 'Volume élevé - concurrence modérée',
+                    intent: 'commercial',
+                    reason: 'Mot-clé transactionnel intéressant'
+                },
+                {
+                    keyword: 'stratégie SEO',
+                    volume: 5400,
+                    difficulty: 32,
+                    opportunity: 'Faible concurrence - bonne opportunité',
+                    intent: 'informational',
+                    reason: 'Longue traîne avec bon potentiel'
                 }
             ];
 
@@ -2262,25 +2286,29 @@ app.post('/api/funnel/analyze', async (req, res) => {
         // Analyser le site (sans concurrents pour aller plus vite)
         const result = await keywordService.analyzeCompetitors(websiteUrl, []);
 
-        // Sélectionner les 3 meilleurs mots-clés (opportunité high prioritaire)
+        // Sélectionner jusqu'à 8 meilleurs mots-clés (opportunité high prioritaire)
         const topKeywords = result.keywords
             .filter(kw => kw.opportunity === 'high')
-            .slice(0, 3);
+            .slice(0, 8);
 
         // Si pas assez de mots-clés avec opportunité high, prendre les meilleurs par volume
-        if (topKeywords.length < 3) {
+        if (topKeywords.length < 8) {
             const sortedByVolume = [...result.keywords]
                 .sort((a, b) => b.volume - a.volume)
-                .slice(0, 3);
-            topKeywords.push(...sortedByVolume.slice(0, 3 - topKeywords.length));
+                .filter(kw => !topKeywords.find(tk => tk.keyword === kw.keyword))
+                .slice(0, 8 - topKeywords.length);
+            topKeywords.push(...sortedByVolume);
         }
 
-        // Générer le calendrier
-        const calendar = generateCalendar(topKeywords.slice(0, 3), 30);
+        // Prendre les 6-8 meilleurs
+        const selectedKeywords = topKeywords.slice(0, 8);
+
+        // Générer le calendrier avec les mots-clés sélectionnés
+        const calendar = generateCalendar(selectedKeywords, 30);
 
         res.json({
             success: true,
-            keywords: topKeywords.slice(0, 3).map(kw => ({
+            keywords: selectedKeywords.map(kw => ({
                 keyword: kw.keyword,
                 volume: kw.volume,
                 difficulty: kw.difficulty,
@@ -2315,6 +2343,27 @@ app.post('/api/funnel/analyze', async (req, res) => {
                 difficulty: 55,
                 opportunity: 'Volume important - stratégie long terme',
                 intent: 'informational'
+            },
+            {
+                keyword: 'référencement naturel',
+                volume: 6800,
+                difficulty: 38,
+                opportunity: 'Opportunité SEO moyenne',
+                intent: 'informational'
+            },
+            {
+                keyword: 'création de site web',
+                volume: 9200,
+                difficulty: 45,
+                opportunity: 'Volume élevé - concurrence modérée',
+                intent: 'commercial'
+            },
+            {
+                keyword: 'stratégie SEO',
+                volume: 5400,
+                difficulty: 32,
+                opportunity: 'Faible concurrence - bonne opportunité',
+                intent: 'informational'
             }
         ];
 
@@ -2331,16 +2380,25 @@ app.post('/api/funnel/analyze', async (req, res) => {
 function generateCalendar(keywords, days = 30) {
     const calendar = [];
     const today = new Date();
-    const articlesPerKeyword = Math.ceil(10 / keywords.length); // ~10 articles sur 30 jours
+    const totalArticles = Math.min(10, keywords.length * 2); // ~10 articles max, ou 2 par mot-clé
+    const articlesPerKeyword = Math.ceil(totalArticles / keywords.length);
     
     let articleIndex = 0;
+    let keywordRotation = 0;
+    
     for (let i = 0; i < days; i++) {
         const date = new Date(today);
         date.setDate(date.getDate() + i);
         
         // Répartir les articles sur 30 jours (environ tous les 3 jours)
-        const hasArticle = i > 0 && i % 3 === 0 && articleIndex < 10;
-        const keywordIndex = hasArticle ? Math.floor(articleIndex / articlesPerKeyword) : null;
+        const hasArticle = i > 0 && i % 3 === 0 && articleIndex < totalArticles;
+        let keywordIndex = null;
+        
+        if (hasArticle) {
+            // Rotation des mots-clés pour varier
+            keywordIndex = keywordRotation % keywords.length;
+            keywordRotation++;
+        }
         
         calendar.push({
             date: date.toISOString(),
@@ -2348,7 +2406,7 @@ function generateCalendar(keywords, days = 30) {
             month: date.getMonth(),
             weekday: date.getDay(),
             hasArticle: hasArticle,
-            keyword: hasArticle && keywordIndex < keywords.length ? keywords[keywordIndex].keyword : null,
+            keyword: hasArticle && keywordIndex !== null && keywordIndex < keywords.length ? keywords[keywordIndex].keyword : null,
             articleNumber: hasArticle ? articleIndex + 1 : null
         });
         

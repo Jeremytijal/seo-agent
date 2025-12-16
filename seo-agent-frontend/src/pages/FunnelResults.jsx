@@ -61,7 +61,7 @@ const FunnelResults = () => {
             }
         }
 
-        // Si pas de données sauvegardées, utiliser des valeurs par défaut
+            // Si pas de données sauvegardées, utiliser des valeurs par défaut
         if (!savedKeywords) {
             const defaultKeywords = [
                 {
@@ -81,6 +81,24 @@ const FunnelResults = () => {
                     volume: 15000,
                     difficulty: 55,
                     opportunity: 'Volume important - stratégie long terme'
+                },
+                {
+                    keyword: 'référencement naturel',
+                    volume: 6800,
+                    difficulty: 38,
+                    opportunity: 'Opportunité SEO moyenne'
+                },
+                {
+                    keyword: 'création de site web',
+                    volume: 9200,
+                    difficulty: 45,
+                    opportunity: 'Volume élevé - concurrence modérée'
+                },
+                {
+                    keyword: 'stratégie SEO',
+                    volume: 5400,
+                    difficulty: 32,
+                    opportunity: 'Faible concurrence - bonne opportunité'
                 }
             ];
             setKeywords(defaultKeywords);
@@ -183,26 +201,25 @@ const FunnelResults = () => {
                 <div className="results-section">
                     <div className="section-header">
                         <Target size={24} />
-                        <h2>3 mots-clés à fort potentiel</h2>
+                        <h2>{keywords.length} mots-clés à fort potentiel</h2>
                     </div>
-                    <div className="keywords-list">
+                    <div className="keywords-list compact">
                         {keywords.map((kw, index) => (
-                            <div key={index} className="keyword-card">
+                            <div key={index} className="keyword-card compact">
                                 <div className="keyword-header">
                                     <span className="keyword-number">{index + 1}</span>
                                     <h3 className="keyword-text">{kw.keyword}</h3>
                                 </div>
                                 <div className="keyword-stats">
                                     <div className="stat-item">
-                                        <TrendingUp size={16} />
+                                        <TrendingUp size={14} />
                                         <span>{kw.volume.toLocaleString()}/mois</span>
                                     </div>
                                     <div className="stat-item">
-                                        <BarChart3 size={16} />
-                                        <span>Difficulté: {kw.difficulty}%</span>
+                                        <BarChart3 size={14} />
+                                        <span>{kw.difficulty}%</span>
                                     </div>
                                 </div>
-                                <p className="keyword-opportunity">{kw.opportunity}</p>
                             </div>
                         ))}
                     </div>
