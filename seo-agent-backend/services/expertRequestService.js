@@ -78,7 +78,7 @@ async function notifyAdminNewRequest(request, userEmail, userName) {
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     await resend.emails.send({
-        from: 'SEO Agent <notifications@agentiaseo.com>',
+        from: 'SEO Agent <notifications@smart-caller.ai>',
         to: adminEmail,
         subject: `🆘 Nouvelle demande d'aide expert - ${request.platform}`,
         html: `
@@ -155,7 +155,7 @@ async function sendUserConfirmation(userEmail, userName, requestData) {
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     await resend.emails.send({
-        from: 'SEO Agent <support@agentiaseo.com>',
+        from: 'SEO Agent <support@smart-caller.ai>',
         to: userEmail,
         subject: '✅ Votre demande d\'aide a été reçue - SEO Agent',
         html: `

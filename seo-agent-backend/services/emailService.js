@@ -7,7 +7,7 @@ const axios = require('axios');
 
 // Resend API configuration
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = process.env.FROM_EMAIL || 'Agent IA SEO <noreply@agentiaseo.com>';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'SEO Agent <noreply@smart-caller.ai>';
 
 /**
  * Send email using Resend API
