@@ -2267,24 +2267,32 @@ app.post('/api/funnel/checkout', async (req, res) => {
         }
 
         // Configuration des plans (utiliser les price IDs Stripe)
+        // Price IDs par défaut pour le plan Starter à 29€ (test et production)
+        const DEFAULT_STARTER_PRICE_ID = 'price_1SdY1tG7TquWCqOJA8uMm6RS'; // Plan Starter 29€
+        const DEFAULT_PRO_PRICE_ID = 'price_1SdY29G7TquWCqOJ77Tya1j1'; // Plan Pro 49€
+        
         const plans = {
             starter: {
-                priceId: process.env.STRIPE_PRICE_ID_STARTER || process.env.STRIPE_TEST_PRICE_ID_STARTER,
+                priceId: process.env.STRIPE_PRICE_ID_STARTER || process.env.STRIPE_TEST_PRICE_ID_STARTER || DEFAULT_STARTER_PRICE_ID,
                 name: 'Starter',
+                price: 29,
                 trialDays: 7
             },
             pro: {
-                priceId: process.env.STRIPE_PRICE_ID_PRO || process.env.STRIPE_TEST_PRICE_ID_PRO,
+                priceId: process.env.STRIPE_PRICE_ID_PRO || process.env.STRIPE_TEST_PRICE_ID_PRO || DEFAULT_PRO_PRICE_ID,
                 name: 'Pro',
+                price: 49,
                 trialDays: 7
             }
         };
 
         const selectedPlan = plans[planId] || plans.starter;
         
+        console.log(`Using plan: ${selectedPlan.name} (${selectedPlan.price}€/mois) with priceId: ${selectedPlan.priceId}`);
+        
         if (!selectedPlan.priceId) {
             console.error('Price ID not configured for plan:', planId);
-            return res.status(500).json({ error: 'Plan non configuré' });
+            return res.status(500).json({ error: 'Plan non configuré - Price ID manquant' });
         }
 
         // URLs de redirection

@@ -172,13 +172,16 @@ const FunnelResults = () => {
         track('auto_activation_clicked', { variant: 'meta_funnel_v2' });
         
         if (!email) {
+            console.warn('No email found, redirecting to convert page');
             // Si pas d'email, rediriger vers la page de conversion classique
             navigate('/funnel/convert');
             return;
         }
 
         try {
-            setIsSendingEmail(true); // Réutiliser le state de loading
+            setIsSendingEmail(true);
+            
+            console.log('Creating Stripe checkout session for:', email);
             
             // Créer une session Stripe checkout pour le funnel
             const response = await fetch(`${API_URL}/api/funnel/checkout`, {
@@ -188,26 +191,31 @@ const FunnelResults = () => {
                 },
                 body: JSON.stringify({
                     email,
-                    planId: 'starter', // Plan par défaut pour le funnel
+                    planId: 'starter', // Plan Starter à 29€
                     source: 'meta_funnel'
                 })
             });
 
+            const responseData = await response.json();
+
             if (!response.ok) {
-                throw new Error('Erreur lors de la création de la session de paiement');
+                console.error('Checkout API error:', responseData);
+                throw new Error(responseData.error || 'Erreur lors de la création de la session de paiement');
             }
 
-            const data = await response.json();
-            
-            if (data.url) {
+            if (responseData.url) {
+                console.log('Redirecting to Stripe checkout:', responseData.url);
                 // Rediriger vers Stripe checkout
-                window.location.href = data.url;
+                window.location.href = responseData.url;
             } else {
+                console.error('No checkout URL in response:', responseData);
                 throw new Error('URL de checkout non disponible');
             }
         } catch (error) {
             console.error('Error creating checkout session:', error);
+            track('checkout_error', { variant: 'meta_funnel_v2', error: error.message });
             // En cas d'erreur, rediriger vers la page de conversion classique
+            alert('Une erreur est survenue. Redirection vers la page d\'activation...');
             navigate('/funnel/convert');
         } finally {
             setIsSendingEmail(false);

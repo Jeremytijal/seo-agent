@@ -606,7 +606,7 @@ const sendPlanEmail = async (email, planId, planData) => {
         </div>
     `).join('');
 
-    // Générer le calendrier HTML si disponible
+    // Générer le calendrier HTML si disponible (utiliser tables HTML pour compatibilité email)
     let calendarHtml = '';
     if (planData.calendar && Array.isArray(planData.calendar) && planData.calendar.length > 0) {
         const calendarDays = planData.calendar.slice(0, 30);
@@ -618,51 +618,61 @@ const sendPlanEmail = async (email, planId, planData) => {
             weeks.push(calendarDays.slice(i, i + 7));
         }
 
+        // Générer les cellules de la semaine avec padding pour égaliser
+        const generateWeekRow = (week) => {
+            return week.map((day, dayIndex) => {
+                const date = new Date(day.date || day);
+                const dayNum = date.getDate();
+                const hasArticle = day.hasArticle || day.has_content;
+                const isToday = date.toDateString() === new Date().toDateString();
+                
+                const bgColor = hasArticle ? '#ECFDF5' : (isToday ? '#FEF3C7' : '#FFFFFF');
+                const borderColor = hasArticle ? '#10B981' : (isToday ? '#FCD34D' : '#E5E7EB');
+                const textColor = hasArticle ? '#065F46' : (isToday ? '#92400E' : '#374151');
+                const fontWeight = hasArticle || isToday ? '700' : '500';
+                
+                return `
+                    <td style="
+                        width: 14.28%;
+                        background: ${bgColor};
+                        border: 2px solid ${borderColor};
+                        border-radius: 6px;
+                        padding: 8px 4px;
+                        text-align: center;
+                        font-size: 13px;
+                        font-weight: ${fontWeight};
+                        color: ${textColor};
+                        vertical-align: middle;
+                    ">
+                        <div style="line-height: 1.2;">${dayNum}</div>
+                        ${hasArticle ? '<div style="width: 5px; height: 5px; background: #10B981; border-radius: 50%; margin: 4px auto 0; display: block;"></div>' : ''}
+                    </td>
+                `;
+            }).join('');
+        };
+
         calendarHtml = `
-            <h2 style="color: #111827; margin-top: 32px; margin-bottom: 16px;">📅 Votre calendrier SEO (30 jours)</h2>
-            <div style="background: #F9FAFB; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
-                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px;">
+            <h2 style="color: #111827; margin-top: 32px; margin-bottom: 16px; font-size: 18px;">📅 Votre calendrier SEO (30 jours)</h2>
+            <table width="100%" cellpadding="0" cellspacing="0" style="background: #F9FAFB; border-radius: 12px; padding: 16px; margin-bottom: 24px; border-collapse: separate; border-spacing: 4px;">
+                <!-- En-tête jours de la semaine -->
+                <tr>
                     ${weekDays.map(day => `
-                        <div style="text-align: center; font-weight: 700; font-size: 0.75rem; color: #6B7280; padding: 6px;">
+                        <td style="text-align: center; font-weight: 700; font-size: 11px; color: #6B7280; padding: 8px 4px;">
                             ${day}
-                        </div>
+                        </td>
                     `).join('')}
-                </div>
+                </tr>
+                <!-- Semaines -->
                 ${weeks.map(week => `
-                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px;">
-                        ${week.map((day, dayIndex) => {
-                            const date = new Date(day.date || day);
-                            const dayNum = date.getDate();
-                            const hasArticle = day.hasArticle || day.has_content;
-                            const isToday = date.toDateString() === new Date().toDateString();
-                            
-                            return `
-                                <div style="
-                                    aspect-ratio: 1;
-                                    display: flex;
-                                    flex-direction: column;
-                                    align-items: center;
-                                    justify-content: center;
-                                    background: ${hasArticle ? '#ECFDF5' : '#FFFFFF'};
-                                    border: 2px solid ${hasArticle ? '#10B981' : (isToday ? '#FCD34D' : '#E5E7EB')};
-                                    border-radius: 6px;
-                                    padding: 4px;
-                                    font-size: 0.75rem;
-                                    font-weight: ${hasArticle || isToday ? '700' : '500'};
-                                    color: ${hasArticle ? '#065F46' : (isToday ? '#92400E' : '#374151')};
-                                    position: relative;
-                                ">
-                                    <span>${dayNum}</span>
-                                    ${hasArticle ? '<div style="width: 4px; height: 4px; background: #10B981; border-radius: 50%; margin-top: 2px;"></div>' : ''}
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
+                    <tr>
+                        ${generateWeekRow(week)}
+                        ${week.length < 7 ? Array(7 - week.length).fill('<td style="width: 14.28%;"></td>').join('') : ''}
+                    </tr>
                 `).join('')}
-                <p style="text-align: center; font-size: 0.85rem; color: #6B7280; margin-top: 12px; margin-bottom: 0;">
-                    <strong style="color: #10B981;">${planData.articlesCount} articles</strong> planifiés sur les 30 prochains jours
-                </p>
-            </div>
+            </table>
+            <p style="text-align: center; font-size: 14px; color: #6B7280; margin-top: 12px; margin-bottom: 0;">
+                <strong style="color: #10B981;">${planData.articlesCount} articles</strong> planifiés sur les 30 prochains jours
+            </p>
         `;
     }
 
