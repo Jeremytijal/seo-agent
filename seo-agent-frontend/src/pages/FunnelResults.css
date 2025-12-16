@@ -109,47 +109,36 @@
     margin: 0;
 }
 
-/* Keywords List */
-.keywords-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.keywords-list.compact {
-    gap: 10px;
+/* Keywords Grid */
+.keywords-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
 }
 
 .keyword-card {
-    padding: 16px;
-    background: #F9FAFB;
+    background: white;
     border-radius: 12px;
-    border-left: 4px solid #10B981;
+    padding: 16px;
+    border: 2px solid #E5E7EB;
+    position: relative;
     transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .keyword-card:hover {
-    transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+    border-color: #10B981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    transform: translateY(-2px);
 }
 
-.keyword-card.compact {
-    padding: 12px 14px;
-    border-radius: 10px;
-}
-
-.keyword-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.keyword-card.compact .keyword-header {
-    margin-bottom: 8px;
-}
-
-.keyword-number {
+.keyword-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
     width: 32px;
     height: 32px;
     background: linear-gradient(135deg, #10B981, #059669);
@@ -161,77 +150,92 @@
     font-weight: 700;
     font-size: 0.9rem;
     flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
 }
 
-.keyword-card.compact .keyword-number {
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
-    border-radius: 6px;
+.keyword-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 40px; /* Espace pour le badge */
 }
 
 .keyword-text {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #111;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
     margin: 0;
-    flex: 1;
+    line-height: 1.5;
+    word-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.keyword-card.compact .keyword-text {
-    font-size: 0.95rem;
-    line-height: 1.4;
-}
-
-.keyword-stats {
+.keyword-metrics {
     display: flex;
     gap: 16px;
-    margin-bottom: 8px;
     flex-wrap: wrap;
 }
 
-.keyword-card.compact .keyword-stats {
-    gap: 12px;
-    margin-bottom: 0;
-}
-
-.stat-item {
+.metric-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    color: #6B7280;
+    gap: 8px;
+    flex: 1;
+    min-width: 120px;
 }
 
-.keyword-card.compact .stat-item {
-    font-size: 0.8rem;
-    gap: 4px;
-}
-
-.stat-item svg {
+.metric-item svg {
     color: #10B981;
     flex-shrink: 0;
 }
 
-.keyword-opportunity {
-    font-size: 0.9rem;
-    color: #4B5563;
-    margin: 0;
-    font-style: italic;
+.metric-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-/* Grid layout pour desktop si beaucoup de mots-clés */
-@media (min-width: 768px) {
-    .keywords-list.compact {
-        display: grid;
+.metric-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #6B7280;
+    line-height: 1.2;
+    text-transform: lowercase;
+}
+
+/* Grid layout responsive */
+@media (min-width: 640px) {
+    .keywords-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: 14px;
+    }
+    
+    .keyword-card {
+        padding: 18px;
+    }
+    
+    .keyword-text {
+        font-size: 1.05rem;
     }
 }
 
 @media (min-width: 1024px) {
-    .keywords-list.compact {
+    .keywords-grid {
         grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    
+    .keyword-card {
+        padding: 20px;
     }
 }
 
