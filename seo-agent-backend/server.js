@@ -2407,6 +2407,38 @@ app.post('/api/funnel/analyze', async (req, res) => {
                     opportunity: 'Faible concurrence - bonne opportunité',
                     intent: 'informational',
                     reason: 'Longue traîne avec bon potentiel'
+                },
+                {
+                    keyword: 'optimisation SEO',
+                    volume: 4800,
+                    difficulty: 40,
+                    opportunity: 'Opportunité moyenne',
+                    intent: 'informational',
+                    reason: 'Mot-clé technique avec volume correct'
+                },
+                {
+                    keyword: 'contenu SEO',
+                    volume: 3600,
+                    difficulty: 35,
+                    opportunity: 'Faible concurrence',
+                    intent: 'informational',
+                    reason: 'Longue traîne intéressante'
+                },
+                {
+                    keyword: 'audit SEO',
+                    volume: 2900,
+                    difficulty: 30,
+                    opportunity: 'Très faible concurrence',
+                    intent: 'commercial',
+                    reason: 'Mot-clé transactionnel avec bonne opportunité'
+                },
+                {
+                    keyword: 'backlinks SEO',
+                    volume: 2100,
+                    difficulty: 45,
+                    opportunity: 'Opportunité moyenne',
+                    intent: 'informational',
+                    reason: 'Mot-clé technique spécialisé'
                 }
             ];
 
@@ -2506,6 +2538,34 @@ app.post('/api/funnel/analyze', async (req, res) => {
                 volume: 5400,
                 difficulty: 32,
                 opportunity: 'Faible concurrence - bonne opportunité',
+                intent: 'informational'
+            },
+            {
+                keyword: 'optimisation SEO',
+                volume: 4800,
+                difficulty: 40,
+                opportunity: 'Opportunité moyenne',
+                intent: 'informational'
+            },
+            {
+                keyword: 'contenu SEO',
+                volume: 3600,
+                difficulty: 35,
+                opportunity: 'Faible concurrence',
+                intent: 'informational'
+            },
+            {
+                keyword: 'audit SEO',
+                volume: 2900,
+                difficulty: 30,
+                opportunity: 'Très faible concurrence',
+                intent: 'commercial'
+            },
+            {
+                keyword: 'backlinks SEO',
+                volume: 2100,
+                difficulty: 45,
+                opportunity: 'Opportunité moyenne',
                 intent: 'informational'
             }
         ];
