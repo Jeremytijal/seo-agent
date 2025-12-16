@@ -206,26 +206,22 @@ const FunnelResults = () => {
                     <div className="keywords-grid">
                         {keywords.map((kw, index) => (
                             <div key={index} className="keyword-card">
-                                <div className="keyword-badge">{index + 1}</div>
-                                <div className="keyword-content">
-                                    <h3 className="keyword-text" title={kw.keyword}>
-                                        {kw.keyword}
-                                    </h3>
-                                    <div className="keyword-metrics">
-                                        <div className="metric-item">
-                                            <TrendingUp size={16} />
-                                            <div className="metric-content">
-                                                <span className="metric-value">{kw.volume.toLocaleString()}</span>
-                                                <span className="metric-label">recherches/mois</span>
-                                            </div>
-                                        </div>
-                                        <div className="metric-item">
-                                            <BarChart3 size={16} />
-                                            <div className="metric-content">
-                                                <span className="metric-value">{kw.difficulty}%</span>
-                                                <span className="metric-label">difficulté</span>
-                                            </div>
-                                        </div>
+                                <div className="keyword-header-row">
+                                    <div className="keyword-badge">{index + 1}</div>
+                                    <h3 className="keyword-text">{kw.keyword}</h3>
+                                </div>
+                                <div className="keyword-metrics-row">
+                                    <div className="metric-badge">
+                                        <TrendingUp size={14} />
+                                        <span className="metric-text">
+                                            <strong>{kw.volume.toLocaleString()}</strong> recherches/mois
+                                        </span>
+                                    </div>
+                                    <div className="metric-badge">
+                                        <BarChart3 size={14} />
+                                        <span className="metric-text">
+                                            Difficulté <strong>{kw.difficulty}%</strong>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
