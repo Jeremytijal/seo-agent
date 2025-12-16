@@ -587,7 +587,7 @@ const sendPlanEmail = async (email, planId, planData) => {
                 difficulty: kw.difficulty || 0
             };
         })
-        .slice(0, 6); // Limiter à 6 mots-clés
+        .slice(0, 10); // Limiter à 10 mots-clés
 
     if (validKeywords.length === 0) {
         console.error('No valid keywords found in planData');
@@ -595,16 +595,76 @@ const sendPlanEmail = async (email, planId, planData) => {
     }
 
     const keywordsHtml = validKeywords.map((kw, index) => `
-        <div style="background: #F9FAFB; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #10B981;">
-            <h3 style="margin: 0 0 8px 0; color: #111827; font-size: 1.1rem;">
+        <div style="background: #F9FAFB; padding: 14px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #10B981;">
+            <h3 style="margin: 0 0 6px 0; color: #111827; font-size: 1rem; font-weight: 600;">
                 ${index + 1}. ${kw.keyword}
             </h3>
-            <div style="display: flex; gap: 16px; font-size: 0.9rem; color: #6B7280;">
+            <div style="display: flex; gap: 16px; font-size: 0.85rem; color: #6B7280;">
                 <span>📊 ${kw.volume.toLocaleString()} recherches/mois</span>
                 <span>📈 Difficulté: ${kw.difficulty}%</span>
             </div>
         </div>
     `).join('');
+
+    // Générer le calendrier HTML si disponible
+    let calendarHtml = '';
+    if (planData.calendar && Array.isArray(planData.calendar) && planData.calendar.length > 0) {
+        const calendarDays = planData.calendar.slice(0, 30);
+        const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+        
+        // Grouper par semaines
+        const weeks = [];
+        for (let i = 0; i < calendarDays.length; i += 7) {
+            weeks.push(calendarDays.slice(i, i + 7));
+        }
+
+        calendarHtml = `
+            <h2 style="color: #111827; margin-top: 32px; margin-bottom: 16px;">📅 Votre calendrier SEO (30 jours)</h2>
+            <div style="background: #F9FAFB; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px;">
+                    ${weekDays.map(day => `
+                        <div style="text-align: center; font-weight: 700; font-size: 0.75rem; color: #6B7280; padding: 6px;">
+                            ${day}
+                        </div>
+                    `).join('')}
+                </div>
+                ${weeks.map(week => `
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px;">
+                        ${week.map((day, dayIndex) => {
+                            const date = new Date(day.date || day);
+                            const dayNum = date.getDate();
+                            const hasArticle = day.hasArticle || day.has_content;
+                            const isToday = date.toDateString() === new Date().toDateString();
+                            
+                            return `
+                                <div style="
+                                    aspect-ratio: 1;
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    justify-content: center;
+                                    background: ${hasArticle ? '#ECFDF5' : '#FFFFFF'};
+                                    border: 2px solid ${hasArticle ? '#10B981' : (isToday ? '#FCD34D' : '#E5E7EB')};
+                                    border-radius: 6px;
+                                    padding: 4px;
+                                    font-size: 0.75rem;
+                                    font-weight: ${hasArticle || isToday ? '700' : '500'};
+                                    color: ${hasArticle ? '#065F46' : (isToday ? '#92400E' : '#374151')};
+                                    position: relative;
+                                ">
+                                    <span>${dayNum}</span>
+                                    ${hasArticle ? '<div style="width: 4px; height: 4px; background: #10B981; border-radius: 50%; margin-top: 2px;"></div>' : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `).join('')}
+                <p style="text-align: center; font-size: 0.85rem; color: #6B7280; margin-top: 12px; margin-bottom: 0;">
+                    <strong style="color: #10B981;">${planData.articlesCount} articles</strong> planifiés sur les 30 prochains jours
+                </p>
+            </div>
+        `;
+    }
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -637,16 +697,40 @@ const sendPlanEmail = async (email, planId, planData) => {
             <h2 style="color: #111827; margin-top: 32px; margin-bottom: 16px;">📌 Vos ${validKeywords.length} mots-clés prioritaires</h2>
             ${keywordsHtml}
             
-            <div style="background: #F0FDF4; padding: 20px; border-radius: 12px; margin: 24px 0; border-left: 4px solid #10B981;">
-                <h3 style="margin: 0 0 8px 0; color: #111827;">🚀 Prochaines étapes</h3>
+            ${calendarHtml}
+            
+            <div style="background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%); padding: 24px; border-radius: 12px; margin: 32px 0; border: 2px solid #10B981;">
+                <h3 style="margin: 0 0 12px 0; color: #111827; font-size: 1.2rem;">🚀 Mettez votre plan en application</h3>
+                <p style="margin: 0 0 20px 0; color: #4b5563; font-size: 15px; line-height: 1.6;">
+                    Réservez un appel de 15 minutes avec un expert pour mettre en place votre calendrier SEO automatiquement sur votre site.
+                </p>
+                <a href="https://zcal.co/i/7LMkT11o" style="
+                    display: inline-block;
+                    padding: 14px 28px;
+                    background: linear-gradient(135deg, #10B981, #059669);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 10px;
+                    font-weight: 600;
+                    font-size: 15px;
+                    text-align: center;
+                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                ">📅 Réserver un appel (15 min)</a>
+                <p style="margin: 12px 0 0 0; color: #6B7280; font-size: 0.85rem; font-style: italic;">
+                    On configure tout ensemble • Sans engagement • Gratuit
+                </p>
+            </div>
+            
+            <div style="background: #F9FAFB; padding: 20px; border-radius: 12px; margin: 24px 0; border-left: 4px solid #10B981;">
+                <h3 style="margin: 0 0 8px 0; color: #111827;">💡 Autres options</h3>
                 <p style="margin: 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
-                    Pour activer votre agent SEO et commencer à publier automatiquement ces articles, 
-                    <a href="https://agent-seo.netlify.app/funnel/convert" style="color: #10B981; font-weight: 600;">cliquez ici</a>.
+                    Vous préférez activer automatiquement ? 
+                    <a href="https://agent-seo.netlify.app/funnel/convert" style="color: #10B981; font-weight: 600;">Activez votre agent SEO →</a>
                 </p>
             </div>
             
             <p style="color: #4b5563; font-size: 14px; line-height: 1.6; margin-top: 24px;">
-                Besoin d'aide ? Répondez simplement à cet email ou réservez un appel de 15 minutes avec un expert.
+                Besoin d'aide ? Répondez simplement à cet email.
             </p>
         </div>
         <div class="footer">

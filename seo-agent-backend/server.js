@@ -2115,9 +2115,10 @@ app.post('/api/plan/send', async (req, res) => {
         }
 
         const planData = {
-            keywords: formattedKeywords.slice(0, 6), // Limiter à 6 mots-clés max
+            keywords: formattedKeywords.slice(0, 10), // Limiter à 10 mots-clés max
             articlesCount: articlesCount,
-            duration: 30
+            duration: 30,
+            calendar: calendar || []
         };
 
         console.log('Sending plan email with data:', {
@@ -2409,10 +2410,11 @@ app.post('/api/funnel/analyze', async (req, res) => {
                 }
             ];
 
+            const defaultCalendar = generateCalendar(genericKeywords, 30);
             return res.json({
                 success: true,
                 keywords: genericKeywords,
-                calendar: generateCalendar(genericKeywords, 30)
+                calendar: defaultCalendar
             });
         }
 
@@ -2427,22 +2429,22 @@ app.post('/api/funnel/analyze', async (req, res) => {
         // Analyser le site (sans concurrents pour aller plus vite)
         const result = await keywordService.analyzeCompetitors(websiteUrl, []);
 
-        // Sélectionner jusqu'à 8 meilleurs mots-clés (opportunité high prioritaire)
+        // Sélectionner jusqu'à 10 meilleurs mots-clés (opportunité high prioritaire)
         const topKeywords = result.keywords
             .filter(kw => kw.opportunity === 'high')
-            .slice(0, 8);
+            .slice(0, 10);
 
         // Si pas assez de mots-clés avec opportunité high, prendre les meilleurs par volume
-        if (topKeywords.length < 8) {
+        if (topKeywords.length < 10) {
             const sortedByVolume = [...result.keywords]
                 .sort((a, b) => b.volume - a.volume)
                 .filter(kw => !topKeywords.find(tk => tk.keyword === kw.keyword))
-                .slice(0, 8 - topKeywords.length);
+                .slice(0, 10 - topKeywords.length);
             topKeywords.push(...sortedByVolume);
         }
 
-        // Prendre les 6-8 meilleurs
-        const selectedKeywords = topKeywords.slice(0, 8);
+        // Prendre les 10 meilleurs
+        const selectedKeywords = topKeywords.slice(0, 10);
 
         // Générer le calendrier avec les mots-clés sélectionnés
         const calendar = generateCalendar(selectedKeywords, 30);
@@ -2456,7 +2458,7 @@ app.post('/api/funnel/analyze', async (req, res) => {
                 opportunity: kw.reason || 'Opportunité identifiée pour votre site',
                 intent: kw.intent
             })),
-            calendar,
+            calendar: calendar,
             analysis: result.analysis
         });
     } catch (error) {
@@ -2508,10 +2510,11 @@ app.post('/api/funnel/analyze', async (req, res) => {
             }
         ];
 
+        const fallbackCalendar = generateCalendar(fallbackKeywords, 30);
         res.json({
             success: true,
             keywords: fallbackKeywords,
-            calendar: generateCalendar(fallbackKeywords, 30),
+            calendar: fallbackCalendar,
             error: 'Utilisation de mots-clés génériques suite à une erreur d\'analyse'
         });
     }
