@@ -463,6 +463,178 @@ const sendSlackNewSubscriptionNotification = async (user, planId, amount, curren
 };
 
 /**
+ * Send Slack notification for new funnel lead
+ */
+const sendSlackNewLeadNotification = async (lead) => {
+    const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
+    
+    if (!slackWebhookUrl) {
+        console.log('Slack webhook not configured - skipping lead notification');
+        return { success: false, reason: 'Slack not configured' };
+    }
+
+    try {
+        const sourceLabels = {
+            'meta': 'Meta Ads',
+            'google': 'Google Ads',
+            'direct': 'Direct',
+            'organic': 'Organique'
+        };
+
+        const variantLabels = {
+            'A': 'Variante A',
+            'B': 'Variante B',
+            'C': 'Variante C'
+        };
+
+        const message = {
+            blocks: [
+                {
+                    type: "header",
+                    text: {
+                        type: "plain_text",
+                        text: "🎯 Nouveau lead Funnel SEO",
+                        emoji: true
+                    }
+                },
+                {
+                    type: "section",
+                    fields: [
+                        {
+                            type: "mrkdwn",
+                            text: `*Email:*\n${lead.email}`
+                        },
+                        {
+                            type: "mrkdwn",
+                            text: `*Source:*\n${sourceLabels[lead.source] || lead.source}`
+                        }
+                    ]
+                },
+                {
+                    type: "section",
+                    fields: [
+                        {
+                            type: "mrkdwn",
+                            text: `*Variante:*\n${variantLabels[lead.variant] || lead.variant}`
+                        },
+                        {
+                            type: "mrkdwn",
+                            text: `*Date:*\n${new Date(lead.createdAt).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`
+                        }
+                    ]
+                },
+                {
+                    type: "divider"
+                },
+                {
+                    type: "section",
+                    text: {
+                        type: "mrkdwn",
+                        text: `📊 <https://agent-seo.netlify.app/funnel/results|Voir le plan SEO généré>`
+                    }
+                }
+            ]
+        };
+
+        await axios.post(slackWebhookUrl, message);
+        console.log(`Slack notification sent for new lead: ${lead.email}`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error sending Slack lead notification:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Send email notification to admin for new funnel lead
+ */
+const sendAdminNewLeadEmail = async (lead) => {
+    const adminEmail = process.env.ADMIN_EMAIL || 'jeremy@agentiaseo.com';
+    
+    if (!RESEND_API_KEY) {
+        console.log('Resend API key not configured - skipping admin email');
+        return { success: false, reason: 'Email not configured' };
+    }
+
+    const sourceLabels = {
+        'meta': 'Meta Ads',
+        'google': 'Google Ads',
+        'direct': 'Direct',
+        'organic': 'Organique'
+    };
+
+    const variantLabels = {
+        'A': 'Variante A',
+        'B': 'Variante B',
+        'C': 'Variante C'
+    };
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #10B981, #059669); padding: 24px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 1.5rem; }
+        .content { padding: 24px; }
+        .info-row { padding: 16px 0; border-bottom: 1px solid #e5e5e5; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #6b7280; font-size: 0.9rem; margin-bottom: 4px; }
+        .info-value { font-weight: 600; color: #1a1a1a; font-size: 1rem; }
+        .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Nouveau Lead Funnel SEO</h1>
+        </div>
+        <div class="content">
+            <div class="info-row">
+                <div class="info-label">Email</div>
+                <div class="info-value">${lead.email}</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label">Source</div>
+                <div class="info-value">${sourceLabels[lead.source] || lead.source}</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label">Variante</div>
+                <div class="info-value">${variantLabels[lead.variant] || lead.variant}</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label">Date</div>
+                <div class="info-value">${new Date(lead.createdAt).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}</div>
+            </div>
+        </div>
+        <div class="footer">
+            SEO Agent - Funnel Meta Ads
+        </div>
+    </div>
+</body>
+</html>
+    `;
+
+    try {
+        const result = await sendEmail(
+            adminEmail,
+            `🎯 Nouveau lead Funnel SEO - ${lead.email}`,
+            htmlContent
+        );
+        return result;
+    } catch (error) {
+        console.error('Error in sendAdminNewLeadEmail:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
  * Send email notification for new user signup (to admin)
  */
 const sendNewUserEmailNotification = async (user) => {
@@ -769,7 +941,9 @@ module.exports = {
     sendWeeklyReport,
     sendSlackNewUserNotification,
     sendSlackNewSubscriptionNotification,
+    sendSlackNewLeadNotification,
     sendNewUserEmailNotification,
+    sendAdminNewLeadEmail,
     sendWelcomeEmail,
     notifyNewUserSignup,
     sendPlanEmail

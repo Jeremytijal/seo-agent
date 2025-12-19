@@ -2056,6 +2056,24 @@ app.post('/api/leads', async (req, res) => {
 
         console.log(`Nouveau lead enregistré: ${email} (source: ${source}, variant: ${variant})`);
 
+        // Envoyer les notifications de manière asynchrone (ne pas bloquer la réponse)
+        const leadData = {
+            email: email.toLowerCase().trim(),
+            source,
+            variant,
+            createdAt: data.created_at || new Date().toISOString()
+        };
+
+        // Notification Slack
+        emailService.sendSlackNewLeadNotification(leadData).catch(err => {
+            console.error('Error sending Slack lead notification:', err);
+        });
+
+        // Notification Email Admin
+        emailService.sendAdminNewLeadEmail(leadData).catch(err => {
+            console.error('Error sending admin email for lead:', err);
+        });
+
         res.json({ 
             success: true, 
             message: 'Lead enregistré avec succès',
