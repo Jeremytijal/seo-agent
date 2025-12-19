@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, TrendingUp, Clock, Zap, CheckCircle } from 'lucide-react';
+import { API_URL } from '../config';
 import './FunnelLanding.css';
 
 const FunnelLanding = () => {
@@ -21,13 +22,32 @@ const FunnelLanding = () => {
         setError('');
 
         try {
+            // Appel API pour sauvegarder le lead et déclencher les notifications
+            const response = await fetch(`${API_URL}/api/leads`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    source: 'meta',
+                    variant: 'A'
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Erreur lors de l\'enregistrement');
+            }
+
             // Sauvegarder l'email dans localStorage
             localStorage.setItem('funnel_email', email);
             
             // Rediriger vers la page post-email
             navigate('/funnel/url');
         } catch (err) {
-            setError('Une erreur est survenue. Veuillez réessayer.');
+            console.error('Error submitting lead:', err);
+            setError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
             setIsLoading(false);
         }
     };
