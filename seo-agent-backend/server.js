@@ -2064,15 +2064,32 @@ app.post('/api/leads', async (req, res) => {
             createdAt: data.created_at || new Date().toISOString()
         };
 
-        // Notification Slack
-        emailService.sendSlackNewLeadNotification(leadData).catch(err => {
-            console.error('Error sending Slack lead notification:', err);
-        });
+        // Notification Slack (asynchrone)
+        console.log('📤 Triggering notifications for new lead...');
+        emailService.sendSlackNewLeadNotification(leadData)
+            .then(result => {
+                if (result.success) {
+                    console.log('✅ Slack notification sent successfully');
+                } else {
+                    console.warn('⚠️ Slack notification failed:', result.reason || result.error);
+                }
+            })
+            .catch(err => {
+                console.error('❌ Error sending Slack lead notification:', err);
+            });
 
-        // Notification Email Admin
-        emailService.sendAdminNewLeadEmail(leadData).catch(err => {
-            console.error('Error sending admin email for lead:', err);
-        });
+        // Notification Email Admin (asynchrone)
+        emailService.sendAdminNewLeadEmail(leadData)
+            .then(result => {
+                if (result.success) {
+                    console.log('✅ Admin email sent successfully');
+                } else {
+                    console.warn('⚠️ Admin email failed:', result.reason || result.error);
+                }
+            })
+            .catch(err => {
+                console.error('❌ Error sending admin email for lead:', err);
+            });
 
         res.json({ 
             success: true, 

@@ -468,8 +468,16 @@ const sendSlackNewSubscriptionNotification = async (user, planId, amount, curren
 const sendSlackNewLeadNotification = async (lead) => {
     const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
     
+    console.log('Attempting to send Slack notification for lead:', {
+        email: lead.email?.substring(0, 10) + '...',
+        source: lead.source,
+        variant: lead.variant,
+        hasWebhook: !!slackWebhookUrl
+    });
+    
     if (!slackWebhookUrl) {
-        console.log('Slack webhook not configured - skipping lead notification');
+        console.warn('⚠️ Slack webhook not configured - skipping lead notification');
+        console.warn('   Set SLACK_WEBHOOK_URL environment variable to enable notifications');
         return { success: false, reason: 'Slack not configured' };
     }
 
@@ -536,11 +544,16 @@ const sendSlackNewLeadNotification = async (lead) => {
             ]
         };
 
-        await axios.post(slackWebhookUrl, message);
-        console.log(`Slack notification sent for new lead: ${lead.email}`);
+        const response = await axios.post(slackWebhookUrl, message);
+        console.log(`✅ Slack notification sent successfully for lead: ${lead.email}`);
+        console.log('   Response status:', response.status);
         return { success: true };
     } catch (error) {
-        console.error('Error sending Slack lead notification:', error);
+        console.error('❌ Error sending Slack lead notification:', error.message);
+        if (error.response) {
+            console.error('   Response status:', error.response.status);
+            console.error('   Response data:', error.response.data);
+        }
         return { success: false, error: error.message };
     }
 };
