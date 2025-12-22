@@ -503,58 +503,71 @@ const sendSlackNewLeadNotification = async (lead) => {
         // Afficher les UTM dans la notification si disponibles
         const utmInfo = lead.utm || {};
         const utmFields = [];
-        if (utmInfo.utm_campaign) utmFields.push(`*Campagne:*\n${utmInfo.utm_campaign}`);
-        if (utmInfo.utm_medium) utmFields.push(`*Medium:*\n${utmInfo.utm_medium}`);
-        if (utmInfo.utm_content) utmFields.push(`*Content:*\n${utmInfo.utm_content}`);
+        if (utmInfo.utm_campaign) utmFields.push({
+            type: "mrkdwn",
+            text: `*Campagne:*\n${utmInfo.utm_campaign}`
+        });
+        if (utmInfo.utm_medium) utmFields.push({
+            type: "mrkdwn",
+            text: `*Medium:*\n${utmInfo.utm_medium}`
+        });
+        if (utmInfo.utm_content) utmFields.push({
+            type: "mrkdwn",
+            text: `*Content:*\n${utmInfo.utm_content}`
+        });
+
+        // Construire les blocks du message
+        const blocks = [
+            {
+                type: "header",
+                text: {
+                    type: "plain_text",
+                    text: "🎯 Nouveau lead Funnel SEO",
+                    emoji: true
+                }
+            },
+            {
+                type: "section",
+                fields: [
+                    {
+                        type: "mrkdwn",
+                        text: `*Email:*\n${lead.email}`
+                    },
+                    {
+                        type: "mrkdwn",
+                        text: `*Source:*\n${sourceLabels[lead.source] || lead.source}`
+                    }
+                ]
+            },
+            {
+                type: "section",
+                fields: [
+                    {
+                        type: "mrkdwn",
+                        text: `*Variante:*\n${variantLabels[lead.variant] || lead.variant}`
+                    },
+                    {
+                        type: "mrkdwn",
+                        text: `*Date:*\n${new Date(lead.createdAt).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`
+                    }
+                ]
+            }
+        ];
+
+        // Ajouter les UTM si disponibles
+        if (utmFields.length > 0) {
+            blocks.push({
+                type: "section",
+                fields: utmFields
+            });
+        }
+
+        blocks.push({
+            type: "divider"
+        });
 
         const message = {
-            blocks: [
-                {
-                    type: "header",
-                    text: {
-                        type: "plain_text",
-                        text: "🎯 Nouveau lead Funnel SEO",
-                        emoji: true
-                    }
-                },
-                {
-                    type: "section",
-                    fields: [
-                        {
-                            type: "mrkdwn",
-                            text: `*Email:*\n${lead.email}`
-                        },
-                        {
-                            type: "mrkdwn",
-                            text: `*Source:*\n${sourceLabels[lead.source] || lead.source}`
-                        }
-                    ]
-                },
-                {
-                    type: "section",
-                    fields: [
-                        {
-                            type: "mrkdwn",
-                            text: `*Variante:*\n${variantLabels[lead.variant] || lead.variant}`
-                        },
-                        {
-                            type: "mrkdwn",
-                            text: `*Date:*\n${new Date(lead.createdAt).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`
-                        }
-                    ]
-                },
-                ${utmFields.length > 0 ? `
-                {
-                    type: "section",
-                    fields: ${JSON.stringify(utmFields.map(field => ({
-                        type: "mrkdwn",
-                        text: field
-                    })))}
-                },
-                ` : ''}
-                {
-                    type: "divider"
-                },
+            blocks: blocks,
                 {
                     type: "section",
                     text: {
