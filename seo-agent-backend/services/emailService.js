@@ -576,14 +576,6 @@ const sendSlackNewLeadNotification = async (lead) => {
 
         const message = {
             blocks: blocks
-                {
-                    type: "section",
-                    text: {
-                        type: "mrkdwn",
-                        text: `📊 <https://agent-seo.netlify.app/funnel/results|Voir le plan SEO généré>`
-                    }
-                }
-            ]
         };
 
         const response = await axios.post(slackWebhookUrl, message);
