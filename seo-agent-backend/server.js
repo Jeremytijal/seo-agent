@@ -2023,19 +2023,60 @@ app.get('/api/wordpress/:siteId/categories', async (req, res) => {
 
 app.post('/api/leads', async (req, res) => {
     try {
-        const { email, source = 'meta', variant = 'A' } = req.body;
+        const { email, source, variant, utm_params } = req.body;
 
         if (!email || !email.includes('@')) {
             return res.status(400).json({ error: 'Email invalide' });
         }
+
+        // Déterminer source et variant depuis les UTM si non fournis
+        let finalSource = source;
+        let finalVariant = variant || 'A';
+        
+        if (utm_params) {
+            // Source depuis UTM
+            if (!finalSource) {
+                if (utm_params.fbclid) {
+                    finalSource = 'meta';
+                } else if (utm_params.gclid) {
+                    finalSource = 'google';
+                } else if (utm_params.utm_source) {
+                    finalSource = utm_params.utm_source.toLowerCase();
+                } else {
+                    finalSource = 'direct';
+                }
+            }
+            
+            // Variant depuis utm_content si non fourni
+            if (!finalVariant && utm_params.utm_content) {
+                finalVariant = utm_params.utm_content;
+            }
+        }
+        
+        // Valeurs par défaut
+        finalSource = finalSource || 'meta';
+        finalVariant = finalVariant || 'A';
+
+        // Préparer les métadonnées avec les UTM
+        const metadata = {
+            utm_source: utm_params?.utm_source || null,
+            utm_medium: utm_params?.utm_medium || null,
+            utm_campaign: utm_params?.utm_campaign || null,
+            utm_content: utm_params?.utm_content || null,
+            utm_term: utm_params?.utm_term || null,
+            fbclid: utm_params?.fbclid || null,
+            gclid: utm_params?.gclid || null,
+            ref: utm_params?.ref || null
+        };
 
         // Sauvegarder le lead dans Supabase
         const { data, error } = await supabase
             .from('leads')
             .insert({
                 email: email.toLowerCase().trim(),
-                source,
-                variant,
+                source: finalSource,
+                variant: finalVariant,
+                metadata: metadata,
                 created_at: new Date().toISOString()
             })
             .select()
@@ -2054,14 +2095,23 @@ app.post('/api/leads', async (req, res) => {
             throw error;
         }
 
-        console.log(`Nouveau lead enregistré: ${email} (source: ${source}, variant: ${variant})`);
+        console.log(`Nouveau lead enregistré: ${email} (source: ${finalSource}, variant: ${finalVariant})`);
+        if (utm_params) {
+            console.log(`  UTM:`, {
+                source: utm_params.utm_source,
+                medium: utm_params.utm_medium,
+                campaign: utm_params.utm_campaign,
+                content: utm_params.utm_content
+            });
+        }
 
         // Envoyer les notifications de manière asynchrone (ne pas bloquer la réponse)
         const leadData = {
             email: email.toLowerCase().trim(),
-            source,
-            variant,
-            createdAt: data.created_at || new Date().toISOString()
+            source: finalSource,
+            variant: finalVariant,
+            createdAt: data.created_at || new Date().toISOString(),
+            utm: utm_params || {}
         };
 
         // Notification Slack (asynchrone)

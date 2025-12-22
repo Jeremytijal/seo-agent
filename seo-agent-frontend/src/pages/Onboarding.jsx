@@ -193,8 +193,8 @@ const Onboarding = () => {
                     if (keywordData) {
                         try {
                             await fetch(`${API_URL}/api/keywords/favorites/${user.id}`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(keywordData)
                             });
                         } catch (e) {
@@ -254,7 +254,7 @@ const Onboarding = () => {
     const renderStepContent = () => {
         switch (step) {
             case 0: // Welcome
-                return (
+    return (
                     <motion.div 
                         className="step-content welcome-step"
                         initial={{ opacity: 0, y: 20 }}
@@ -262,7 +262,7 @@ const Onboarding = () => {
                     >
                         <div className="welcome-icon">
                             <Sparkles size={48} />
-                        </div>
+                </div>
                         <h1>Bienvenue sur SEO Agent ! 🚀</h1>
                         <p className="welcome-subtitle">
                             En 2 minutes, on va analyser votre marché et trouver les meilleurs mots-clés pour votre business.
@@ -274,23 +274,23 @@ const Onboarding = () => {
                                 <div>
                                     <strong>Analyse de vos concurrents</strong>
                                     <span>On identifie les opportunités</span>
+                                    </div>
                                 </div>
-                            </div>
                             <div className="feature-item">
                                 <Target size={24} />
                                 <div>
                                     <strong>Mots-clés stratégiques</strong>
                                     <span>Les meilleurs pour vous</span>
-                                </div>
-                            </div>
+                                        </div>
+                                    </div>
                             <div className="feature-item">
                                 <TrendingUp size={24} />
                                 <div>
                                     <strong>Contenu optimisé</strong>
                                     <span>Articles qui rankent</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
                     </motion.div>
                 );
 
@@ -310,14 +310,14 @@ const Onboarding = () => {
                                     <Globe size={18} />
                                     Votre site web *
                                 </label>
-                                <input
+                                                <input
                                     type="url"
                                     placeholder="https://votresite.com"
                                     value={formData.websiteUrl}
                                     onChange={(e) => setFormData(prev => ({ ...prev, websiteUrl: e.target.value }))}
                                     autoFocus
                                 />
-                            </div>
+                                        </div>
 
                             <div className="competitors-section">
                                 <label>
@@ -329,16 +329,16 @@ const Onboarding = () => {
                                 {formData.competitors.map((comp, index) => (
                                     <div key={index} className="site-input-group competitor">
                                         <span className="competitor-number">{index + 1}</span>
-                                        <input
+                                                <input
                                             type="url"
                                             placeholder={`https://concurrent${index + 1}.com`}
                                             value={comp}
                                             onChange={(e) => updateCompetitor(index, e.target.value)}
                                         />
-                                    </div>
+                                        </div>
                                 ))}
-                            </div>
-                        </div>
+                                            </div>
+                                        </div>
 
                         <button 
                             className="btn-analyze"
@@ -372,7 +372,7 @@ const Onboarding = () => {
                         
                         <div className="keywords-grid">
                             {suggestedKeywords.map((kw, index) => (
-                                <button
+                                                    <button
                                     key={index}
                                     className={`keyword-card ${selectedKeywords.includes(kw.keyword) ? 'selected' : ''} ${kw.opportunity ? `opportunity-${kw.opportunity}` : ''}`}
                                     onClick={() => toggleKeyword(kw.keyword)}
@@ -383,7 +383,7 @@ const Onboarding = () => {
                                         {selectedKeywords.includes(kw.keyword) && (
                                             <CheckCircle2 size={18} className="check" />
                                         )}
-                                    </div>
+                                                </div>
                                     {kw.opportunity && (
                                         <div className="keyword-opportunity">
                                             <span className={`opportunity-badge ${kw.opportunity}`}>
@@ -391,12 +391,12 @@ const Onboarding = () => {
                                                  kw.opportunity === 'medium' ? '⭐ Opportunité' : 
                                                  '💡 Potentiel'}
                                             </span>
-                                        </div>
+                                            </div>
                                     )}
                                     {kw.reason && (
                                         <div className="keyword-reason" title={kw.reason}>
                                             {kw.reason}
-                                        </div>
+                                    </div>
                                     )}
                                     <div className="keyword-stats">
                                         <span className="stat">
@@ -407,15 +407,15 @@ const Onboarding = () => {
                                             KD: {kw.difficulty}
                                         </span>
                                     </div>
-                                </button>
+                                                </button>
                             ))}
-                        </div>
+                                </div>
 
                         {selectedKeywords.length > 0 && (
                             <div className="selected-count">
                                 <CheckCircle2 size={16} />
                                 {selectedKeywords.length} mot(s)-clé(s) sélectionné(s)
-                            </div>
+                                        </div>
                         )}
                     </motion.div>
                 );
@@ -431,7 +431,7 @@ const Onboarding = () => {
                             <>
                                 <div className="generating-icon">
                                     <Loader2 size={48} className="spin" />
-                                </div>
+                                            </div>
                                 <h2>Création de votre planning... ✨</h2>
                                 <p>Nous préparons votre calendrier et générons votre premier article.</p>
                                 
@@ -439,25 +439,25 @@ const Onboarding = () => {
                                     <div className="status-item done">
                                         <CheckCircle2 size={18} />
                                         <span>{selectedKeywords.length} mots-clés sélectionnés</span>
-                                    </div>
+                                            </div>
                                     <div className="status-item active">
                                         <Loader2 size={18} className="spin" />
                                         <span>Génération du 1er article...</span>
-                                    </div>
-                                </div>
+                                        </div>
+                                            </div>
                             </>
                         ) : (
                             <>
                                 <div className="calendar-header">
                                     <div className="calendar-header-icon">
                                         <Calendar size={28} />
-                                    </div>
+                                            </div>
                                     <div>
                                         <h2>Votre calendrier de contenu</h2>
                                         <p>Voici vos articles planifiés. Le premier est en cours de génération !</p>
-                                    </div>
-                                </div>
-                                
+                                        </div>
+                                        </div>
+
                                 <div className="calendar-preview">
                                     {getCalendarPreview().map((item, index) => (
                                         <div key={index} className={`calendar-item ${item.status}`}>
@@ -469,14 +469,14 @@ const Onboarding = () => {
                                                 <div className="keyword-name">
                                                     {index === 0 && <Loader2 size={14} className="spin" />}
                                                     {item.keyword}
-                                                </div>
+                                        </div>
                                                 <div className="keyword-meta">
                                                     <span>{item.volume}/mois</span>
                                                     <span className={`difficulty ${item.difficulty < 30 ? 'easy' : item.difficulty < 50 ? 'medium' : 'hard'}`}>
                                                         KD: {item.difficulty}
-                                                    </span>
-                                                </div>
-                                            </div>
+                                        </span>
+                                    </div>
+                                </div>
                                             <div className="calendar-status">
                                                 {index === 0 ? (
                                                     <span className="badge generating">En génération</span>
@@ -484,20 +484,20 @@ const Onboarding = () => {
                                                     <span className="badge scheduled">Planifié</span>
                                                 )}
                                             </div>
+                                                    </div>
+                                                ))}
                                         </div>
-                                    ))}
-                                </div>
 
                                 <div className="activation-cta">
                                     <Sparkles size={20} />
                                     <div>
                                         <strong>Activez votre agent pour continuer</strong>
                                         <p>Votre 1er article sera prêt après l'activation !</p>
-                                    </div>
-                                </div>
+                                            </div>
+                                                    </div>
                             </>
                         )}
-                    </motion.div>
+                        </motion.div>
                 );
 
             default:
@@ -512,7 +512,7 @@ const Onboarding = () => {
                 <div className="logo">
                     <img src="/seo-agent-icon.png" alt="SEO Agent" />
                     <span>SEO Agent</span>
-                </div>
+                                        </div>
                 <div className="progress-steps">
                     {steps.map((s, index) => (
                         <div 
@@ -521,33 +521,33 @@ const Onboarding = () => {
                         >
                             <div className="step-indicator">
                                 {index < step ? <Check size={14} /> : <s.icon size={14} />}
-                            </div>
+                                                    </div>
                             <span className="step-label">{s.title}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                                                    </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
 
             {/* Main Content */}
             <div className="onboarding-content">
                 <AnimatePresence mode="wait">
                     {renderStepContent()}
                 </AnimatePresence>
-            </div>
+                                    </div>
 
             {/* Navigation Footer */}
             <div className="onboarding-footer">
-                <button 
+                                                                    <button 
                     className="btn-back"
                     onClick={prevStep}
                     disabled={step === 0}
-                >
+                                                                    >
                     <ArrowLeft size={18} />
                     Retour
-                </button>
+                                                                    </button>
 
                 {step === steps.length - 1 ? (
-                    <button 
+                                                    <button
                         className="btn-finish"
                         onClick={handleFinish}
                         disabled={loading}
@@ -560,26 +560,27 @@ const Onboarding = () => {
                         ) : (
                             <>
                                 Choisir mon plan
-                                <ArrowRight size={18} />
+                                                <ArrowRight size={18} />
                             </>
                         )}
-                    </button>
+                                        </button>
                 ) : step === 1 ? (
                     <div></div>
                 ) : (
-                    <button 
+                                            <button
                         className="btn-next"
                         onClick={nextStep}
                         disabled={!canProceed()}
                     >
                         Suivant
                         <ArrowRight size={18} />
-                    </button>
+                                            </button>
                 )}
-            </div>
-        </div>
+                                        </div>
+                                    </div>
     );
 };
 
 export default Onboarding;
+
 

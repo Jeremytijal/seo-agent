@@ -1,14 +1,31 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, TrendingUp, Clock, Zap, CheckCircle } from 'lucide-react';
 import { API_URL } from '../config';
 import './FunnelLanding.css';
 
 const FunnelLanding = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [utmParams, setUtmParams] = useState({});
+
+    // Capturer les UTM et paramètres de tracking depuis l'URL
+    useEffect(() => {
+        const utm = {
+            utm_source: searchParams.get('utm_source') || null,
+            utm_medium: searchParams.get('utm_medium') || null,
+            utm_campaign: searchParams.get('utm_campaign') || null,
+            utm_content: searchParams.get('utm_content') || null,
+            utm_term: searchParams.get('utm_term') || null,
+            fbclid: searchParams.get('fbclid') || null,
+            gclid: searchParams.get('gclid') || null,
+            ref: searchParams.get('ref') || null
+        };
+        setUtmParams(utm);
+    }, [searchParams]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,6 +39,10 @@ const FunnelLanding = () => {
         setError('');
 
         try {
+            // Déterminer source et variant depuis les UTM
+            const source = utmParams.utm_source || (utmParams.fbclid ? 'meta' : 'direct');
+            const variant = utmParams.utm_content || 'A';
+
             // Appel API pour sauvegarder le lead et déclencher les notifications
             const response = await fetch(`${API_URL}/api/leads`, {
                 method: 'POST',
@@ -30,8 +51,9 @@ const FunnelLanding = () => {
                 },
                 body: JSON.stringify({
                     email,
-                    source: 'meta',
-                    variant: 'A'
+                    source,
+                    variant,
+                    utm_params: utmParams
                 })
             });
 

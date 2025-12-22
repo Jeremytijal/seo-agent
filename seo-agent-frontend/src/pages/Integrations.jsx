@@ -244,7 +244,7 @@ const Integrations = () => {
                             <p>Choisissez une plateforme, publication manuelle ou demandez l'aide d'un expert</p>
                         </div>
                     </div>
-                    <button 
+                            <button 
                         className="btn-banner-connect"
                         onClick={() => setShowConnectModal(true)}
                     >
@@ -303,13 +303,13 @@ const Integrations = () => {
                                                 <ExternalLink size={16} />
                                             </a>
                                         </button>
-                                        <button 
+                        <button
                                             className="btn-icon danger" 
                                             title="Déconnecter"
                                             onClick={() => deleteSite(site.id)}
-                                        >
+                        >
                                             <Trash2 size={16} />
-                                        </button>
+                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -383,8 +383,8 @@ const Integrations = () => {
                                 <ArrowRight size={20} className="platform-arrow" />
                             ) : (
                                 <span className="coming-badge">Bientôt</span>
-                            )}
-                        </div>
+                        )}
+                    </div>
                     ))}
                 </div>
             </section>
@@ -407,8 +407,8 @@ const Integrations = () => {
                         <div className="modal-body">
                             <div className="form-group">
                                 <label>URL de votre site</label>
-                                <input
-                                    type="url"
+                        <input
+                            type="url"
                                     placeholder="https://monsite.com"
                                     value={connectionForm.siteUrl}
                                     onChange={(e) => setConnectionForm({ ...connectionForm, siteUrl: e.target.value })}
@@ -481,7 +481,7 @@ const Integrations = () => {
                             >
                                 {connecting ? <Loader2 className="spin" size={16} /> : <CheckCircle size={16} />}
                                 {connecting ? 'Connexion...' : 'Connecter ce site'}
-                            </button>
+                        </button>
                         </div>
 
                         <div className="modal-help">
@@ -505,7 +505,7 @@ const Integrations = () => {
                             </div>
                             <h2>Aide gratuite d'un expert</h2>
                             <p>Un expert SEO Agent vous contactera sous 24h pour vous aider à connecter votre site.</p>
-                        </div>
+                    </div>
 
                         <div className="modal-body">
                             <div className="form-group">
@@ -519,12 +519,12 @@ const Integrations = () => {
                                     <option value="framer">Framer</option>
                                     <option value="autre">Autre</option>
                                 </select>
-                            </div>
+                    </div>
 
                             <div className="form-group">
                                 <label>URL de votre site (optionnel)</label>
-                                <input
-                                    type="url"
+                        <input
+                            type="url"
                                     placeholder="https://monsite.com"
                                     value={expertForm.siteUrl}
                                     onChange={(e) => setExpertForm({ ...expertForm, siteUrl: e.target.value })}
@@ -567,7 +567,7 @@ const Integrations = () => {
                             <button className="btn-secondary" onClick={() => setShowExpertModal(false)}>
                                 Annuler
                             </button>
-                            <button 
+                        <button
                                 className="btn-primary expert-btn"
                                 onClick={submitExpertRequest}
                                 disabled={submittingExpert || !expertForm.phone}
@@ -577,7 +577,7 @@ const Integrations = () => {
                                 ) : (
                                     <><Headphones size={16} /> Demander un rappel</>
                                 )}
-                            </button>
+                        </button>
                         </div>
                     </div>
                 </div>

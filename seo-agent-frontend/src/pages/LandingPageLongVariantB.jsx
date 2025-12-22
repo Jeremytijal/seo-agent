@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, CheckCircle, Clock, Zap, TrendingUp, Search, Target, Calendar, Shield, Mail } from 'lucide-react';
 import { API_URL } from '../config';
 import './LandingPageLongVariantB.css';
@@ -13,14 +13,31 @@ const track = (eventName, payload = {}) => {
 
 const LandingPageLongVariantB = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [utmParams, setUtmParams] = useState({});
 
+    // Capturer les UTM et paramètres de tracking depuis l'URL
     useEffect(() => {
-        // Track page view
-        track('lp_view', { variant: 'B', source: 'meta' });
-    }, []);
+        const utm = {
+            utm_source: searchParams.get('utm_source') || null,
+            utm_medium: searchParams.get('utm_medium') || null,
+            utm_campaign: searchParams.get('utm_campaign') || null,
+            utm_content: searchParams.get('utm_content') || null,
+            utm_term: searchParams.get('utm_term') || null,
+            fbclid: searchParams.get('fbclid') || null,
+            gclid: searchParams.get('gclid') || null,
+            ref: searchParams.get('ref') || null
+        };
+        setUtmParams(utm);
+
+        // Track page view avec UTM
+        const source = utm.utm_source || (utm.fbclid ? 'meta' : 'direct');
+        const variant = utm.utm_content || 'B';
+        track('lp_view', { variant, source, ...utm });
+    }, [searchParams]);
 
     const validateEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,6 +57,10 @@ const LandingPageLongVariantB = () => {
         setError('');
 
         try {
+            // Déterminer source et variant depuis les UTM
+            const source = utmParams.utm_source || (utmParams.fbclid ? 'meta' : 'direct');
+            const variant = utmParams.utm_content || 'B';
+
             // Appel API pour sauvegarder le lead
             const response = await fetch(`${API_URL}/api/leads`, {
                 method: 'POST',
@@ -48,8 +69,9 @@ const LandingPageLongVariantB = () => {
                 },
                 body: JSON.stringify({
                     email,
-                    source: 'meta',
-                    variant: 'B'
+                    source,
+                    variant,
+                    utm_params: utmParams
                 })
             });
 

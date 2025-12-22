@@ -484,9 +484,14 @@ const sendSlackNewLeadNotification = async (lead) => {
     try {
         const sourceLabels = {
             'meta': 'Meta Ads',
+            'facebook': 'Facebook',
+            'instagram': 'Instagram',
             'google': 'Google Ads',
             'direct': 'Direct',
-            'organic': 'Organique'
+            'organic': 'Organique',
+            'email': 'Email',
+            'linkedin': 'LinkedIn',
+            'twitter': 'Twitter'
         };
 
         const variantLabels = {
@@ -494,6 +499,13 @@ const sendSlackNewLeadNotification = async (lead) => {
             'B': 'Variante B',
             'C': 'Variante C'
         };
+        
+        // Afficher les UTM dans la notification si disponibles
+        const utmInfo = lead.utm || {};
+        const utmFields = [];
+        if (utmInfo.utm_campaign) utmFields.push(`*Campagne:*\n${utmInfo.utm_campaign}`);
+        if (utmInfo.utm_medium) utmFields.push(`*Medium:*\n${utmInfo.utm_medium}`);
+        if (utmInfo.utm_content) utmFields.push(`*Content:*\n${utmInfo.utm_content}`);
 
         const message = {
             blocks: [
@@ -531,6 +543,15 @@ const sendSlackNewLeadNotification = async (lead) => {
                         }
                     ]
                 },
+                ${utmFields.length > 0 ? `
+                {
+                    type: "section",
+                    fields: ${JSON.stringify(utmFields.map(field => ({
+                        type: "mrkdwn",
+                        text: field
+                    })))}
+                },
+                ` : ''}
                 {
                     type: "divider"
                 },

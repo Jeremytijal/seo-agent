@@ -235,7 +235,7 @@ const LandingPage = () => {
                         <div className="hero-proof-text">
                             <div className="stars">
                                 {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="#FBBF24" color="#FBBF24" />)}
-                            </div>
+                </div>
                             <span>Utilisé par <strong>500+</strong> créateurs de contenu</span>
                         </div>
                     </div>
@@ -247,9 +247,9 @@ const LandingPage = () => {
                         <div className="dash-header-preview">
                             <div className="dash-dots">
                                 <span></span><span></span><span></span>
-                            </div>
+                    </div>
                             <span className="dash-title">Agent SEO — Tableau de bord</span>
-                        </div>
+                                    </div>
                         <div className="dash-content-preview">
                             <div className="dash-sidebar-mini">
                                 <div className="sidebar-item active"><Search size={14} /></div>
@@ -257,7 +257,7 @@ const LandingPage = () => {
                                 <div className="sidebar-item"><PenTool size={14} /></div>
                                 <div className="sidebar-item"><Image size={14} /></div>
                                 <div className="sidebar-item"><Send size={14} /></div>
-                            </div>
+                                </div>
                             <div className="dash-main-preview">
                                 <div className="dash-card-mini score">
                                     <span className="card-label">Score SEO</span>
@@ -270,23 +270,23 @@ const LandingPage = () => {
                                 <div className="dash-card-mini">
                                     <span className="card-label">Mots-clés suivis</span>
                                     <span className="card-value">156</span>
-                                </div>
+                            </div>
                                 <div className="dash-article-preview">
                                     <div className="article-row">
                                         <FileText size={14} />
                                         <span>10 Techniques SEO pour 2025</span>
                                         <span className="status published">Publié</span>
-                                    </div>
+                                        </div>
                                     <div className="article-row">
                                         <FileText size={14} />
                                         <span>Guide du référencement local</span>
                                         <span className="status scheduled">Programmé</span>
-                                    </div>
-                                </div>
+                                        </div>
+                            </div>
                             </div>
                         </div>
                     </div>
-                        </div>
+                </div>
             </section>
 
             {/* Logos Section */}
@@ -372,18 +372,18 @@ const LandingPage = () => {
                                                 <FileText size={14} />
                                                 <span>Guide SEO 2025</span>
                                                 <span className="preview-status published">Publié</span>
-                                            </div>
+                                </div>
                                             <div className="preview-article-item">
                                                 <FileText size={14} />
                                                 <span>Marketing digital</span>
                                                 <span className="preview-status scheduled">Programmé</span>
-                                            </div>
-                                        </div>
                                     </div>
+                                </div>
+                                    </div>
+                                </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
                     {/* Planner Screenshot */}
                     <div className="benefit-item-screenshot reverse">
@@ -465,10 +465,10 @@ const LandingPage = () => {
                                                             )}
                                                         </div>
                                                     )}
-                                                </div>
+                                </div>
                                             );
                                         })}
-                                    </div>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -532,7 +532,7 @@ const LandingPage = () => {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -591,15 +591,15 @@ const LandingPage = () => {
                             <h4>Framer</h4>
                             <p>Connectez votre site Framer et publiez vos articles automatiquement.</p>
                             <div className="cms-badge">✓ Intégré</div>
-                        </div>
+                                </div>
                         <div className="cms-platform-card">
                             <div className="cms-platform-icon wix">W</div>
                             <h4>Wix</h4>
                             <p>Intégration en cours. Bientôt disponible pour tous les sites Wix.</p>
                             <div className="cms-badge coming">Bientôt</div>
-                        </div>
-                    </div>
-                </div>
+                                </div>
+                            </div>
+                                </div>
             </section>
 
             {/* Features Section */}
@@ -609,7 +609,7 @@ const LandingPage = () => {
                         <span className="section-tag">Fonctionnalités</span>
                         <h2>Tout ce dont vous avez besoin<br />pour dominer le SEO</h2>
                         <p>Un agent IA complet qui gère votre stratégie de contenu de A à Z.</p>
-                    </div>
+                                </div>
 
                     <div className="features-grid-outrank">
                         {features.map((feature, index) => (
