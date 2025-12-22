@@ -566,8 +566,16 @@ const sendSlackNewLeadNotification = async (lead) => {
             type: "divider"
         });
 
+        blocks.push({
+            type: "section",
+            text: {
+                type: "mrkdwn",
+                text: `📊 <https://agent-seo.netlify.app/funnel/results|Voir le plan SEO généré>`
+            }
+        });
+
         const message = {
-            blocks: blocks,
+            blocks: blocks
                 {
                     type: "section",
                     text: {
