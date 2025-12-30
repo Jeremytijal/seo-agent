@@ -1,9 +1,10 @@
 /* ==========================================================================
    LANDING PAGE - Outrank Style (Light Theme)
-   Modern, Clean, Gradient
+   Modern, Clean, Minimal
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
 
 .landing-outrank {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -11,6 +12,67 @@
     color: #111111;
     overflow-x: hidden;
     line-height: 1.6;
+}
+
+/* ==========================================================================
+   ANIMATIONS
+   ========================================================================== */
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered animations for children */
+.animate-on-scroll.animate-in > *:nth-child(1) { transition-delay: 0ms; }
+.animate-on-scroll.animate-in > *:nth-child(2) { transition-delay: 100ms; }
+.animate-on-scroll.animate-in > *:nth-child(3) { transition-delay: 200ms; }
+.animate-on-scroll.animate-in > *:nth-child(4) { transition-delay: 300ms; }
+.animate-on-scroll.animate-in > *:nth-child(5) { transition-delay: 400ms; }
+.animate-on-scroll.animate-in > *:nth-child(6) { transition-delay: 500ms; }
+
+/* ==========================================================================
+   HANDWRITTEN NOTES - Outrank Style
+   ========================================================================== */
+
+.handwritten-note {
+    font-family: 'Caveat', cursive;
+    font-size: 1.25rem;
+    color: #6B7280;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+}
+
+.handwritten-note.top-right {
+    top: -40px;
+    right: -20px;
+}
+
+.handwritten-note.bottom-right {
+    bottom: -30px;
+    right: 20px;
+}
+
+.handwritten-note.small {
+    font-size: 1rem;
+}
+
+.handwritten-note.inline {
+    position: relative;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.handwritten-note svg {
+    color: #9CA3AF;
 }
 
 /* ==========================================================================
@@ -165,7 +227,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 140px 32px 80px;
+    padding: 120px 32px 60px;
     overflow: hidden;
     background: linear-gradient(180deg, #f8fffe 0%, #ffffff 100%);
 }
@@ -538,18 +600,245 @@
 }
 
 /* ==========================================================================
+   HOW IT WORKS VISUAL SECTION
+   ========================================================================== */
+
+.how-it-works-visual {
+    padding: 80px 0;
+    background: #ffffff;
+}
+
+.how-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.how-card {
+    background: #ffffff;
+    border: 1px solid #E5E7EB;
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.how-card:hover {
+    border-color: #10B981;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.1);
+}
+
+.how-card-visual {
+    background: #F9FAFB;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.how-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #111111;
+    margin: 0 0 8px 0;
+}
+
+.how-card p {
+    font-size: 0.9rem;
+    color: #6B7280;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* How Card Visuals */
+.how-input-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.how-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.how-input-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #111111;
+}
+
+.how-input-field svg {
+    color: #9CA3AF;
+}
+
+.how-analyze-btn {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.how-cursor-icon {
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    color: #374151;
+}
+
+/* Calendar Demo */
+.how-calendar-demo {
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #F9FAFB;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.cal-day {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111111;
+}
+
+.cal-label {
+    font-size: 0.85rem;
+    color: #10B981;
+    font-weight: 600;
+}
+
+.calendar-article {
+    padding: 16px;
+}
+
+.cal-status {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #ECFDF5;
+    color: #059669;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.cal-title {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111111;
+    margin-bottom: 8px;
+}
+
+.cal-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 0.75rem;
+    color: #6B7280;
+}
+
+/* Score Demo */
+.how-score-demo {
+    text-align: center;
+}
+
+.score-title {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 16px;
+}
+
+.score-circle {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 12px;
+}
+
+.score-circle svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.score-bg {
+    fill: none;
+    stroke: #E5E7EB;
+    stroke-width: 8;
+}
+
+.score-fill {
+    fill: none;
+    stroke: #10B981;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 251;
+    stroke-dashoffset: 10;
+}
+
+.score-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #10B981;
+}
+
+.score-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 0.75rem;
+    color: #6B7280;
+}
+
+.how-cta-center {
+    text-align: center;
+}
+
+/* ==========================================================================
    SECTIONS COMMON
    ========================================================================== */
 
 .section-container {
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 0 32px;
+    padding: 0 24px;
 }
 
 .section-header-outrank {
     text-align: center;
-    margin-bottom: 64px;
+    margin-bottom: 48px;
+    position: relative;
 }
 
 .section-tag {
@@ -565,129 +854,78 @@
 }
 
 .section-header-outrank h2 {
-    font-size: 2.75rem;
-    font-weight: 700;
+    font-size: 2.5rem;
+    font-weight: 800;
     color: #111111;
-    margin: 0 0 16px 0;
+    margin: 0 0 12px 0;
     letter-spacing: -0.02em;
     line-height: 1.2;
 }
 
 .section-header-outrank p {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     color: #6B7280;
     margin: 0;
-    max-width: 600px;
+    max-width: 550px;
     margin-left: auto;
     margin-right: auto;
 }
 
 /* ==========================================================================
-   FEATURES SECTION
+   CMS PLATFORMS ROW - Simplified
    ========================================================================== */
 
-.features-outrank {
-    padding: 120px 0;
-    background: #ffffff;
-}
-
-.features-grid-outrank {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-}
-
-.feature-card-outrank {
-    padding: 32px;
-    background: #ffffff;
-    border: 1px solid #E5E7EB;
-    border-radius: 20px;
-    transition: all 0.3s;
-}
-
-.feature-card-outrank:hover {
-    border-color: #10B981;
-    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.1);
-    transform: translateY(-4px);
-}
-
-.feature-icon-outrank {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
+.cms-platforms-row {
     display: flex;
-    align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    gap: 32px;
+    flex-wrap: wrap;
 }
 
-.feature-card-outrank h3 {
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: #111111;
-    margin: 0 0 12px 0;
-}
-
-.feature-card-outrank p {
-    font-size: 0.95rem;
-    color: #6B7280;
-    margin: 0;
-    line-height: 1.6;
-}
-
-/* ==========================================================================
-   HOW IT WORKS
-   ========================================================================== */
-
-.hiw-outrank {
-    padding: 120px 0;
-    background: #FAFAFA;
-}
-
-.steps-outrank {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-}
-
-.step-outrank {
-    text-align: center;
-    padding: 40px 24px;
-    background: #ffffff;
+.cms-platform-mini {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px 32px;
+    background: white;
     border: 1px solid #E5E7EB;
-    border-radius: 20px;
-    transition: all 0.3s;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
-.step-outrank:hover {
+.cms-platform-mini:hover {
     border-color: #10B981;
-    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.1);
-    transform: translateY(-4px);
+    transform: translateY(-2px);
 }
 
-.step-visual {
-    font-size: 3rem;
-    margin-bottom: 16px;
+.cms-platform-mini.coming {
+    opacity: 0.6;
 }
 
-.step-number {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #10B981;
-    margin-bottom: 12px;
+.cms-platform-mini .cms-platform-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
 }
 
-.step-outrank h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #111111;
-    margin: 0 0 8px 0;
-}
-
-.step-outrank p {
+.cms-platform-mini span {
     font-size: 0.9rem;
-    color: #6B7280;
-    margin: 0;
+    font-weight: 600;
+    color: #374151;
+}
+
+.coming-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 4px 8px;
+    background: #F59E0B;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
 }
 
 /* ==========================================================================
@@ -695,34 +933,32 @@
    ========================================================================== */
 
 .stats-outrank {
-    padding: 80px 0;
-    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
-    border-top: 1px solid #A7F3D0;
-    border-bottom: 1px solid #A7F3D0;
+    padding: 48px 0;
+    background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
 }
 
 .stats-grid-outrank {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 32px;
+    gap: 24px;
     text-align: center;
 }
 
 .stat-outrank {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 }
 
 .stat-value-big {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 800;
     color: #065F46;
     letter-spacing: -0.02em;
 }
 
 .stat-label {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: #047857;
 }
 
@@ -807,7 +1043,7 @@
    ========================================================================== */
 
 .pricing-outrank {
-    padding: 120px 0;
+    padding: 80px 0;
     background: #FAFAFA;
 }
 
@@ -973,7 +1209,7 @@
    ========================================================================== */
 
 .faq-outrank {
-    padding: 120px 0;
+    padding: 80px 0;
     background: #ffffff;
 }
 
@@ -1039,10 +1275,10 @@
    ========================================================================== */
 
 .cta-outrank {
-    padding: 120px 32px;
+    padding: 80px 32px;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
 }
 
 .cta-container-outrank {
@@ -1125,21 +1361,35 @@
     border-color: #10B981;
 }
 
+.cta-guarantee {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    color: #047857;
+    font-size: 0.9rem;
+}
+
+.cta-guarantee svg {
+    color: #10B981;
+}
+
 /* ==========================================================================
    BENEFITS SCREENSHOTS SECTION
    ========================================================================== */
 
 .benefits-screenshots {
-    padding: 120px 0;
-    background: #FAFAFA;
+    padding: 80px 0;
+    background: #ffffff;
 }
 
 .benefit-item-screenshot {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 60px;
+    gap: 48px;
     align-items: center;
-    margin-bottom: 120px;
+    margin-bottom: 80px;
 }
 
 .benefit-item-screenshot:last-child {
@@ -1622,7 +1872,7 @@
    ========================================================================== */
 
 .problem-solution-section {
-    padding: 120px 0;
+    padding: 80px 0;
     background: #ffffff;
     position: relative;
 }
@@ -1767,7 +2017,7 @@
    ========================================================================== */
 
 .expert-setup-section {
-    padding: 120px 0;
+    padding: 80px 0;
     background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 50%, #ffffff 100%);
     position: relative;
     overflow: hidden;
@@ -1971,7 +2221,7 @@
    ========================================================================== */
 
 .article-examples-section {
-    padding: 120px 0;
+    padding: 80px 0;
     background: #FAFAFA;
 }
 
@@ -2208,7 +2458,7 @@
    ========================================================================== */
 
 .testimonials-xl-section {
-    padding: 120px 0;
+    padding: 80px 0;
     background: #ffffff;
 }
 
@@ -2562,8 +2812,8 @@
    ========================================================================== */
 
 .cms-integration {
-    padding: 120px 0;
-    background: linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 100%);
+    padding: 60px 0;
+    background: #FAFAFA;
 }
 
 .cms-flow {
@@ -2796,12 +3046,10 @@
         font-size: 3rem;
     }
     
-    .features-grid-outrank,
     .pricing-grid-outrank {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    .steps-outrank,
     .stats-grid-outrank {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -2817,11 +3065,11 @@
 
     .expert-setup-content {
         grid-template-columns: 1fr;
-        gap: 60px;
+        gap: 48px;
     }
 
     .expert-setup-text h2 {
-        font-size: 2.25rem;
+        font-size: 2rem;
     }
 
     .article-examples-grid {
@@ -2843,6 +3091,10 @@
 
     .metric-divider {
         display: none;
+    }
+
+    .how-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -2953,7 +3205,7 @@
 
     /* Testimonials XL */
     .testimonials-xl-section {
-        padding: 80px 0;
+        padding: 60px 0;
     }
 
     .twitter-testimonials-grid {
@@ -2971,6 +3223,33 @@
 
     .metric-value {
         font-size: 1.5rem;
+    }
+
+    /* How it works */
+    .how-cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .how-card-visual {
+        min-height: 150px;
+    }
+
+    /* CMS Platforms */
+    .cms-platforms-row {
+        gap: 16px;
+    }
+
+    .cms-platform-mini {
+        padding: 16px 24px;
+    }
+
+    /* Handwritten notes */
+    .handwritten-note {
+        display: none;
+    }
+
+    .handwritten-note.inline {
+        display: flex;
     }
 }
 

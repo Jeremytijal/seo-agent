@@ -26,6 +26,28 @@ const LandingPageRedacteur = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Scroll animations with Intersection Observer
+    useEffect(() => {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        return () => observer.disconnect();
+    }, []);
+
     const features = [
         {
             icon: <Search size={28} />,
@@ -309,18 +331,18 @@ const LandingPageRedacteur = () => {
                     
                     <p className="hero-desc">
                         L'IA génère des articles SEO de qualité professionnelle en 30 secondes. 
-                        Fini les délais, les révisions et les coûts élevés. Passez à l'IA et économisez 95% sur vos coûts de rédaction.
+                        Fini les délais, les révisions et les coûts élevés.
                     </p>
 
                     <div className="hero-cta-group">
-                        <Link to="/signup" className="btn-hero-primary">
+                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-primary">
+                            <Phone size={18} />
+                            Réserver ma démo gratuite
+                        </a>
+                        <Link to="/signup" className="btn-hero-secondary">
                             Essayer gratuitement
                             <ArrowRight size={18} />
                         </Link>
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-secondary">
-                            <Play size={18} />
-                            Voir la démo
-                        </a>
                     </div>
 
                     <div className="hero-proof">
@@ -339,8 +361,15 @@ const LandingPageRedacteur = () => {
                     </div>
                 </div>
 
-                {/* Hero Visual */}
-                <div className="hero-visual">
+                {/* Hero Visual - App Screenshot Style */}
+                <div className="hero-visual animate-on-scroll">
+                    <div className="handwritten-note top-right">
+                        <span>Tableau de bord</span>
+                        <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
+                            <path d="M35 5C25 8 15 15 8 25" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <path d="M8 25L12 20M8 25L5 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                    </div>
                     <div className="hero-dashboard">
                         <div className="dash-header-preview">
                             <div className="dash-dots">
@@ -360,7 +389,7 @@ const LandingPageRedacteur = () => {
                                 <div className="dash-card-mini score">
                                     <span className="card-label">Score SEO</span>
                                     <span className="card-value green">87</span>
-                        </div>
+                                </div>
                                 <div className="dash-card-mini">
                                     <span className="card-label">Articles ce mois</span>
                                     <span className="card-value">30</span>
@@ -384,7 +413,7 @@ const LandingPageRedacteur = () => {
                             </div>
                         </div>
                     </div>
-                        </div>
+                </div>
             </section>
 
             {/* Logos Section */}
@@ -403,12 +432,12 @@ const LandingPageRedacteur = () => {
             {/* Problem / Solution Section */}
             <section className="problem-solution-section">
                 <div className="section-container">
-                    <div className="section-header-outrank">
+                    <div className="section-header-outrank animate-on-scroll">
                         <span className="section-tag">Le problème</span>
                         <h2>Votre problème<br /><span className="gradient-text">Notre solution</span></h2>
                     </div>
 
-                    <div className="problem-solution-grid">
+                    <div className="problem-solution-grid animate-on-scroll">
                         {/* Problems Column */}
                         <div className="problems-column">
                             <div className="problem-card">
@@ -480,7 +509,7 @@ const LandingPageRedacteur = () => {
             {/* Expert Setup Section */}
             <section className="expert-setup-section">
                 <div className="section-container">
-                    <div className="expert-setup-content">
+                    <div className="expert-setup-content animate-on-scroll">
                         <div className="expert-setup-text">
                             <span className="section-tag">Accompagnement personnalisé</span>
                             <h2>Un expert configure <span className="gradient-text">tout pour vous</span></h2>
@@ -572,17 +601,103 @@ const LandingPageRedacteur = () => {
                 </div>
             </section>
 
+            {/* How it Works - Simplified Visual */}
+            <section className="how-it-works-visual">
+                <div className="section-container">
+                    <div className="section-header-outrank animate-on-scroll">
+                        <span className="section-tag">Comment ça marche</span>
+                        <h2>Comment on fait <span className="gradient-text">la magie</span></h2>
+                        <p>On gère le SEO pour vous. Relaxez pendant qu'on crée du contenu qui rank.</p>
+                    </div>
+
+                    <div className="how-cards-grid animate-on-scroll">
+                        <div className="how-card">
+                            <div className="how-card-visual">
+                                <div className="how-input-demo">
+                                    <span className="how-label">Site à analyser</span>
+                                    <div className="how-input-field">
+                                        <Globe size={16} />
+                                        <span>votresite.com</span>
+                                    </div>
+                                    <button className="how-analyze-btn">
+                                        Analyser votre site
+                                    </button>
+                                </div>
+                                <div className="how-cursor-icon">
+                                    <MousePointer size={20} />
+                                </div>
+                            </div>
+                            <h3>Analyse approfondie de votre business</h3>
+                            <p>On explore votre niche, vos concurrents et votre audience cible. Découvrez des mots-clés cachés à fort potentiel.</p>
+                        </div>
+
+                        <div className="how-card">
+                            <div className="how-card-visual">
+                                <div className="how-calendar-demo">
+                                    <div className="calendar-header">
+                                        <span className="cal-day">4</span>
+                                        <span className="cal-label">Sam</span>
+                                    </div>
+                                    <div className="calendar-article">
+                                        <span className="cal-status">Publié</span>
+                                        <span className="cal-title">Comment écrire des articles SEO</span>
+                                        <div className="cal-stats">
+                                            <span>Volume: 2154</span>
+                                            <span>Difficulté: 9</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="handwritten-note bottom-right small">
+                                    <span>Plan automatique</span>
+                                </div>
+                            </div>
+                            <h3>Un plan de contenu sur 30 jours</h3>
+                            <p>Créez un calendrier stratégique où chaque jour cible un mot-clé à fort potentiel pour votre business.</p>
+                        </div>
+
+                        <div className="how-card">
+                            <div className="how-card-visual">
+                                <div className="how-score-demo">
+                                    <span className="score-title">SEO Content Score</span>
+                                    <div className="score-circle">
+                                        <svg viewBox="0 0 100 100">
+                                            <circle cx="50" cy="50" r="40" className="score-bg" />
+                                            <circle cx="50" cy="50" r="40" className="score-fill" />
+                                        </svg>
+                                        <span className="score-value">97%</span>
+                                    </div>
+                                    <div className="score-meta">
+                                        <span>Mots: 2,554</span>
+                                        <span>Headings: 7</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h3>Articles générés en autopilote</h3>
+                            <p>On crée et publie des articles optimisés SEO basés sur vos mots-clés. Votre blog grandit automatiquement.</p>
+                        </div>
+                    </div>
+
+                    <div className="how-cta-center animate-on-scroll">
+                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-primary">
+                            <Phone size={18} />
+                            Réserver ma démo gratuite
+                            <ArrowRight size={18} />
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             {/* Benefits Section with Screenshots */}
             <section className="benefits-screenshots">
                 <div className="section-container">
-                    <div className="section-header-outrank">
-                        <span className="section-tag">Bénéfices</span>
-                        <h2>Voyez SEO Agent en action</h2>
-                        <p>Découvrez comment notre agent IA transforme votre workflow SEO</p>
+                    <div className="section-header-outrank animate-on-scroll">
+                        <span className="section-tag">Fonctionnalités</span>
+                        <h2>Débloquez votre <span className="gradient-text">croissance SEO</span></h2>
+                        <p>Des articles optimisés chaque jour, sans effort.</p>
                     </div>
 
                     {/* Dashboard Screenshot */}
-                    <div className="benefit-item-screenshot">
+                    <div className="benefit-item-screenshot animate-on-scroll">
                         <div className="benefit-content">
                             <div className="benefit-icon-large">
                                 <BarChart3 size={32} />
@@ -656,7 +771,7 @@ const LandingPageRedacteur = () => {
                     </div>
 
                     {/* Planner Screenshot */}
-                    <div className="benefit-item-screenshot reverse">
+                    <div className="benefit-item-screenshot reverse animate-on-scroll">
                         <div className="benefit-content">
                             <div className="benefit-icon-large">
                                 <Calendar size={32} />
@@ -745,7 +860,7 @@ const LandingPageRedacteur = () => {
                     </div>
 
                     {/* Content Creation Screenshot */}
-                    <div className="benefit-item-screenshot">
+                    <div className="benefit-item-screenshot animate-on-scroll">
                         <div className="benefit-content">
                             <div className="benefit-icon-large">
                                 <PenTool size={32} />
@@ -808,110 +923,32 @@ const LandingPageRedacteur = () => {
                 </div>
             </section>
 
-            {/* CMS Integration Section */}
-            <section className="cms-integration">
+            {/* CMS Integration Section - Simplified */}
+            <section id="features" className="cms-integration">
                 <div className="section-container">
-                    <div className="section-header-outrank">
-                        <span className="section-tag">Publication automatique</span>
-                        <h2>Publiez directement sur votre CMS</h2>
-                        <p>Connectez votre site une fois, publiez automatiquement à chaque fois</p>
+                    <div className="section-header-outrank animate-on-scroll">
+                        <span className="section-tag">Intégrations</span>
+                        <h2>Publiez sur votre CMS <span className="gradient-text">en 1 clic</span></h2>
                     </div>
 
-                    <div className="cms-flow">
-                        <div className="cms-step">
-                            <div className="cms-icon">
-                                <Zap size={24} />
-                            </div>
-                            <h3>1. Connectez votre CMS</h3>
-                            <p>WordPress, Webflow, Framer ou Wix. Une seule connexion suffit.</p>
-                        </div>
-                        <div className="cms-arrow">→</div>
-                        <div className="cms-step">
-                            <div className="cms-icon">
-                                <FileText size={24} />
-                            </div>
-                            <h3>2. Générez votre article</h3>
-                            <p>L'IA crée le contenu optimisé avec images et meta tags.</p>
-                        </div>
-                        <div className="cms-arrow">→</div>
-                        <div className="cms-step">
-                            <div className="cms-icon">
-                                <Send size={24} />
-                            </div>
-                            <h3>3. Publication automatique</h3>
-                            <p>Un clic et votre article est en ligne avec toutes les optimisations.</p>
-                        </div>
-                    </div>
-
-                    <div className="cms-platforms-grid">
-                        <div className="cms-platform-card">
+                    <div className="cms-platforms-row animate-on-scroll">
+                        <div className="cms-platform-mini">
                             <div className="cms-platform-icon wordpress">W</div>
-                            <h4>WordPress</h4>
-                            <p>Publiez directement via l'API REST. Images, catégories et tags inclus.</p>
-                            <div className="cms-badge">✓ Intégré</div>
+                            <span>WordPress</span>
                         </div>
-                        <div className="cms-platform-card">
+                        <div className="cms-platform-mini">
                             <div className="cms-platform-icon webflow">W</div>
-                            <h4>Webflow</h4>
-                            <p>Publication automatique avec gestion des collections et des champs personnalisés.</p>
-                            <div className="cms-badge">✓ Intégré</div>
+                            <span>Webflow</span>
                         </div>
-                        <div className="cms-platform-card">
+                        <div className="cms-platform-mini">
                             <div className="cms-platform-icon framer">F</div>
-                            <h4>Framer</h4>
-                            <p>Connectez votre site Framer et publiez vos articles automatiquement.</p>
-                            <div className="cms-badge">✓ Intégré</div>
+                            <span>Framer</span>
                         </div>
-                        <div className="cms-platform-card">
+                        <div className="cms-platform-mini coming">
                             <div className="cms-platform-icon wix">W</div>
-                            <h4>Wix</h4>
-                            <p>Intégration en cours. Bientôt disponible pour tous les sites Wix.</p>
-                            <div className="cms-badge coming">Bientôt</div>
+                            <span>Wix</span>
+                            <span className="coming-badge">Bientôt</span>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Features Section */}
-            <section id="features" className="features-outrank">
-                <div className="section-container">
-                    <div className="section-header-outrank">
-                        <span className="section-tag">Fonctionnalités</span>
-                        <h2>Tout ce dont vous avez besoin<br />pour dominer le SEO</h2>
-                        <p>Un agent IA complet qui gère votre stratégie de contenu de A à Z.</p>
-                    </div>
-
-                    <div className="features-grid-outrank">
-                        {features.map((feature, index) => (
-                            <div key={index} className="feature-card-outrank">
-                                <div className="feature-icon-outrank" style={{ background: `${feature.color}20`, color: feature.color }}>
-                                    {feature.icon}
-                                </div>
-                                <h3>{feature.title}</h3>
-                                <p>{feature.description}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* How it Works */}
-            <section id="how-it-works" className="hiw-outrank">
-                <div className="section-container">
-                    <div className="section-header-outrank">
-                        <span className="section-tag">Comment ça marche</span>
-                        <h2>4 étapes vers le succès SEO</h2>
-                    </div>
-
-                    <div className="steps-outrank">
-                        {steps.map((step, index) => (
-                            <div key={index} className="step-outrank">
-                                <div className="step-visual">{step.visual}</div>
-                                <div className="step-number">{step.number}</div>
-                                <h3>{step.title}</h3>
-                                <p>{step.desc}</p>
-                            </div>
-                        ))}
                     </div>
                 </div>
             </section>
@@ -919,22 +956,22 @@ const LandingPageRedacteur = () => {
             {/* Stats Section */}
             <section className="stats-outrank">
                 <div className="section-container">
-                    <div className="stats-grid-outrank">
+                    <div className="stats-grid-outrank animate-on-scroll">
                         <div className="stat-outrank">
                             <span className="stat-value-big">30</span>
-                            <span className="stat-label">Articles/mois automatiques</span>
+                            <span className="stat-label">Articles/mois</span>
                         </div>
                         <div className="stat-outrank">
-                            <span className="stat-value-big">500%</span>
-                            <span className="stat-label">Gain de temps</span>
+                            <span className="stat-value-big">95%</span>
+                            <span className="stat-label">Économies</span>
                         </div>
                         <div className="stat-outrank">
-                            <span className="stat-value-big">3</span>
-                            <span className="stat-label">CMS intégrés</span>
+                            <span className="stat-value-big">2min</span>
+                            <span className="stat-label">Par article</span>
                         </div>
                         <div className="stat-outrank">
-                            <span className="stat-value-big">24/7</span>
-                            <span className="stat-label">Automatisation</span>
+                            <span className="stat-value-big">97%</span>
+                            <span className="stat-label">Score SEO</span>
                         </div>
                     </div>
                 </div>
@@ -943,13 +980,20 @@ const LandingPageRedacteur = () => {
             {/* Article Examples Section */}
             <section className="article-examples-section">
                 <div className="section-container">
-                    <div className="section-header-outrank">
+                    <div className="section-header-outrank animate-on-scroll">
                         <span className="section-tag">Exemples de contenu</span>
                         <h2>Du contenu IA que <span className="gradient-text">les humains adorent lire</span></h2>
-                        <p>Découvrez des articles générés par Agent SEO, impossibles à distinguer d'un rédacteur pro</p>
+                        <p>Impossible à distinguer d'un rédacteur pro</p>
+                        <div className="handwritten-note inline">
+                            <svg width="30" height="25" viewBox="0 0 30 25" fill="none">
+                                <path d="M5 15C10 10 15 8 25 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                <path d="M25 5L20 8M25 5L22 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                            <span>Voir exemples</span>
+                        </div>
                     </div>
 
-                    <div className="article-examples-grid">
+                    <div className="article-examples-grid animate-on-scroll">
                         {/* Article List */}
                         <div className="article-list">
                             {articleExamples.map((article, index) => (
@@ -1030,14 +1074,13 @@ const LandingPageRedacteur = () => {
             {/* Testimonials XL - Twitter Style */}
             <section className="testimonials-xl-section">
                 <div className="section-container">
-                    <div className="section-header-outrank">
+                    <div className="section-header-outrank animate-on-scroll">
                         <span className="section-tag">Témoignages</span>
                         <h2>Adoré par les <span className="gradient-text">entrepreneurs ambitieux</span></h2>
-                        <p>Découvrez ce que nos utilisateurs disent de leur expérience avec Agent SEO</p>
                     </div>
 
                     {/* Metrics Banner */}
-                    <div className="testimonials-metrics-banner">
+                    <div className="testimonials-metrics-banner animate-on-scroll">
                         <div className="metric-item">
                             <span className="metric-value">+500</span>
                             <span className="metric-label">Utilisateurs actifs</span>
@@ -1055,7 +1098,7 @@ const LandingPageRedacteur = () => {
                     </div>
 
                     {/* Twitter-style Testimonials Grid */}
-                    <div className="twitter-testimonials-grid">
+                    <div className="twitter-testimonials-grid animate-on-scroll">
                         {twitterTestimonials.map((tweet, index) => (
                             <div key={index} className="twitter-card">
                                 <div className="twitter-card-header">
@@ -1169,18 +1212,17 @@ const LandingPageRedacteur = () => {
             {/* Pricing Section */}
             <section id="pricing" className="pricing-outrank">
                 <div className="section-container">
-                    <div className="section-header-outrank">
+                    <div className="section-header-outrank animate-on-scroll">
                         <span className="section-tag">Tarifs</span>
-                        <h2>Simple, transparent, sans surprise</h2>
-                        <p>Commencez gratuitement, évoluez selon vos besoins.</p>
+                        <h2>Simple et transparent</h2>
                     </div>
 
-                    <div className="pricing-banner-outrank">
+                    <div className="pricing-banner-outrank animate-on-scroll">
                         <Zap size={20} />
                         <span><strong>Offre de lancement :</strong> -50% pendant 3 mois pour les 100 premiers inscrits</span>
                     </div>
 
-                    <div className="pricing-grid-outrank">
+                    <div className="pricing-grid-outrank animate-on-scroll">
                         {/* Starter */}
                         <div className="pricing-card-outrank">
                             <div className="pricing-tier">Starter</div>
@@ -1286,18 +1328,20 @@ const LandingPageRedacteur = () => {
 
             {/* CTA Section */}
             <section className="cta-outrank">
-                <div className="cta-container-outrank">
+                <div className="cta-container-outrank animate-on-scroll">
                     <div className="cta-glow"></div>
-                    <h2>Prêt à remplacer votre rédacteur ?</h2>
-                    <p>Rejoignez les créateurs qui économisent des milliers d'euros avec l'IA.</p>
+                    <h2>Prêt à automatiser votre SEO ?</h2>
+                    <p>Un expert configure tout pour vous gratuitement.</p>
                     <div className="cta-buttons">
-                        <Link to="/signup" className="btn-cta-main">
-                            Commencer gratuitement
+                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-cta-main">
+                            <Phone size={18} />
+                            Réserver ma démo gratuite
                             <ArrowRight size={18} />
-                        </Link>
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-cta-alt">
-                            Réserver une démo
                         </a>
+                    </div>
+                    <div className="cta-guarantee">
+                        <Shield size={16} />
+                        <span>100% gratuit • Paramétrage offert • Sans engagement</span>
                     </div>
                 </div>
             </section>
