@@ -311,27 +311,91 @@ const LandingPageRedacteur = () => {
                 )}
             </nav>
 
-            {/* Hero Section */}
-            <section className="hero-outrank">
+            {/* Hero Section - Outrank Style with Floating Cards */}
+            <section className="hero-outrank hero-floating">
                 <div className="hero-bg-effects">
                     <div className="hero-glow"></div>
                     <div className="hero-grid"></div>
                 </div>
-                
-                <div className="hero-content-outrank">
-                    <div className="hero-badge-new">
-                        <Sparkles size={14} />
-                        <span>Propulsé par l'IA</span>
+
+                {/* Floating Cards - Left Side */}
+                <div className="floating-cards-left">
+                    {/* SEO Score Card */}
+                    <div className="floating-card seo-score-card">
+                        <span className="floating-card-label">SEO Content Score</span>
+                        <div className="floating-score-circle">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="40" className="score-bg" />
+                                <circle cx="50" cy="50" r="40" className="score-fill" />
+                            </svg>
+                            <span className="floating-score-value">97%</span>
+                        </div>
                     </div>
 
+                    {/* Keywords Card */}
+                    <div className="floating-card keywords-card">
+                        <Target size={16} className="floating-card-icon" />
+                        <span>Mots-clés puissants</span>
+                    </div>
+
+                    {/* Calendar Card */}
+                    <div className="floating-card calendar-card">
+                        <div className="floating-cal-header">
+                            <span className="floating-cal-day">5</span>
+                            <span className="floating-cal-label">Dim</span>
+                        </div>
+                        <div className="floating-cal-content">
+                            <span className="floating-cal-title">comment monétiser blog</span>
+                            <div className="floating-cal-meta">
+                                <span>Volume: 1950</span>
+                                <span>Difficulté: 12</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Floating Cards - Right Side */}
+                <div className="floating-cards-right">
+                    {/* Images AI Card */}
+                    <div className="floating-card images-card">
+                        <Image size={16} className="floating-card-icon" />
+                        <span>Images IA uniques</span>
+                    </div>
+
+                    {/* Article Card */}
+                    <div className="floating-card article-card">
+                        <div className="floating-article-header">
+                            <span className="floating-article-day">4</span>
+                            <span className="floating-article-sat">Sam</span>
+                        </div>
+                        <div className="floating-article-content">
+                            <span className="floating-article-status">Publié</span>
+                            <span className="floating-article-title">comment écrire des articles SEO</span>
+                            <div className="floating-article-meta">
+                                <span>Volume: 2154</span>
+                                <span>Difficulté: 9</span>
+                            </div>
+                            <button className="floating-article-btn">Voir l'article</button>
+                        </div>
+                    </div>
+
+                    {/* Auto-publish Card */}
+                    <div className="floating-card publish-card">
+                        <Send size={16} className="floating-card-icon" />
+                        <span>Publication auto</span>
+                    </div>
+                </div>
+                
+                {/* Main Hero Content */}
+                <div className="hero-content-outrank">
                     <h1>
-                        Tu paies encore un rédacteur SEO<br />
-                        <span className="gradient-text">en 2025 ?</span>
+                        Booste ton trafic SEO<br />
+                        <span className="gradient-text">en autopilote</span>
                     </h1>
                     
                     <p className="hero-desc">
-                        L'IA génère des articles SEO de qualité professionnelle en 30 secondes. 
-                        Fini les délais, les révisions et les coûts élevés.
+                        L'IA analyse ton site, trouve les meilleurs mots-clés, génère des articles optimisés 
+                        et les publie automatiquement. Tu dors, ton blog grandit.
                     </p>
 
                     <div className="hero-cta-group">
@@ -347,70 +411,16 @@ const LandingPageRedacteur = () => {
 
                     <div className="hero-proof">
                         <div className="hero-avatars">
-                            <div className="avatar">M</div>
-                            <div className="avatar">T</div>
-                            <div className="avatar">S</div>
-                            <div className="avatar">+</div>
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" className="avatar-img" />
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" className="avatar-img" />
+                            <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="User" className="avatar-img" />
+                            <div className="avatar-more">+</div>
                         </div>
                         <div className="hero-proof-text">
                             <div className="stars">
                                 {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="#FBBF24" color="#FBBF24" />)}
                             </div>
-                            <span>Utilisé par <strong>500+</strong> créateurs de contenu</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Hero Visual - App Screenshot Style */}
-                <div className="hero-visual animate-on-scroll">
-                    <div className="handwritten-note top-right">
-                        <span>Tableau de bord</span>
-                        <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
-                            <path d="M35 5C25 8 15 15 8 25" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                            <path d="M8 25L12 20M8 25L5 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                    </div>
-                    <div className="hero-dashboard">
-                        <div className="dash-header-preview">
-                            <div className="dash-dots">
-                                <span></span><span></span><span></span>
-                            </div>
-                            <span className="dash-title">Agent SEO — Tableau de bord</span>
-                        </div>
-                        <div className="dash-content-preview">
-                            <div className="dash-sidebar-mini">
-                                <div className="sidebar-item active"><Search size={14} /></div>
-                                <div className="sidebar-item"><Target size={14} /></div>
-                                <div className="sidebar-item"><PenTool size={14} /></div>
-                                <div className="sidebar-item"><Image size={14} /></div>
-                                <div className="sidebar-item"><Send size={14} /></div>
-                            </div>
-                            <div className="dash-main-preview">
-                                <div className="dash-card-mini score">
-                                    <span className="card-label">Score SEO</span>
-                                    <span className="card-value green">87</span>
-                                </div>
-                                <div className="dash-card-mini">
-                                    <span className="card-label">Articles ce mois</span>
-                                    <span className="card-value">30</span>
-                                </div>
-                                <div className="dash-card-mini">
-                                    <span className="card-label">Mots-clés suivis</span>
-                                    <span className="card-value">156</span>
-                                </div>
-                                <div className="dash-article-preview">
-                                    <div className="article-row">
-                                        <FileText size={14} />
-                                        <span>10 Techniques SEO pour 2025</span>
-                                        <span className="status published">Publié</span>
-                                    </div>
-                                    <div className="article-row">
-                                        <FileText size={14} />
-                                        <span>Guide du référencement local</span>
-                                        <span className="status scheduled">Programmé</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <span><strong>10K+</strong> articles générés</span>
                         </div>
                     </div>
                 </div>
