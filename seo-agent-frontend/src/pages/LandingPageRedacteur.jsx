@@ -6,7 +6,9 @@ import {
     Shield, TrendingUp, Play, Star, ChevronRight, Menu, X,
     ChevronDown, ExternalLink, Bot, PenTool, Zap,
     Send, Layout, Rocket, Mail, Linkedin, Twitter, Users,
-    Clock, Award, Layers, MousePointer, Plus, Eye, Loader2
+    Clock, Award, Layers, MousePointer, Plus, Eye, Loader2,
+    UserCheck, Headphones, Settings, Gift, Quote, TrendingDown,
+    DollarSign, AlertCircle, Coffee, Phone, Video, BookOpen
 } from 'lucide-react';
 import { CALENDLY_URL } from '../config';
 import './LandingPage.css';
@@ -95,19 +97,115 @@ const LandingPageRedacteur = () => {
             quote: "J'ai multiplié mon trafic organique par 5 en 3 mois. L'IA génère du contenu que Google adore.",
             author: "Marie Dupont",
             role: "Fondatrice, TechStartup.io",
-            avatar: "MD"
+            avatar: "MD",
+            platform: "twitter"
         },
         {
             quote: "On publie 50 articles/mois au lieu de 5. La qualité est bluffante, mes clients sont ravis.",
             author: "Thomas Martin",
             role: "CEO, Agence Digitale",
-            avatar: "TM"
+            avatar: "TM",
+            platform: "twitter"
         },
         {
             quote: "L'intégration WordPress est parfaite. Je génère, je valide, c'est en ligne. Simple et efficace.",
             author: "Sophie Bernard",
             role: "Blogueuse Pro",
-            avatar: "SB"
+            avatar: "SB",
+            platform: "twitter"
+        }
+    ];
+
+    // Témoignages Twitter style (plus détaillés avec métriques)
+    const twitterTestimonials = [
+        {
+            name: "Romain L.",
+            handle: "@romainbuilds",
+            avatar: "RL",
+            content: "On a fait passer le Domain Authority de notre site de 12 à 34 en 4 mois grâce à Agent SEO. Les articles générés sont vraiment de qualité pro.",
+            metric: { label: "Domain Rating", before: "12", after: "34" },
+            date: "Dec 28, 2025",
+            likes: 24,
+            verified: true
+        },
+        {
+            name: "Alex P.",
+            handle: "@alexpro_seo",
+            avatar: "AP",
+            content: "J'étais sceptique sur l'IA pour le SEO... 3 mois plus tard : +4600 visiteurs organiques. Le contenu est indétectable et rank super bien.",
+            metric: { label: "Trafic organique", before: "800", after: "5,400" },
+            date: "Dec 15, 2025",
+            likes: 47,
+            verified: true
+        },
+        {
+            name: "Julie M.",
+            handle: "@juliemkt",
+            avatar: "JM",
+            content: "L'accompagnement avec l'expert était top. Tout configuré en 30min, mes premiers articles publiés le jour même. Je recommande !",
+            date: "Dec 20, 2025",
+            likes: 18,
+            verified: false
+        },
+        {
+            name: "Marc D.",
+            handle: "@marcdupont_dev",
+            avatar: "MD",
+            content: "60% de notre trafic vient maintenant du SEO. On publie 30 articles/mois en autopilote. Le ROI est dingue.",
+            metric: { label: "Articles/mois", before: "3", after: "30" },
+            date: "Dec 22, 2025",
+            likes: 33,
+            verified: true
+        },
+        {
+            name: "Sarah K.",
+            handle: "@sarahkontent",
+            avatar: "SK",
+            content: "En tant que blogueuse, je passais des heures à écrire. Maintenant l'IA me génère des brouillons parfaits que j'adapte en 10 min. Game changer.",
+            date: "Dec 18, 2025",
+            likes: 29,
+            verified: false
+        },
+        {
+            name: "Pierre B.",
+            handle: "@pierrebiz",
+            avatar: "PB",
+            content: "Le setup avec l'expert m'a permis de tout comprendre rapidement. Support hyper réactif. Mon site WordPress publie maintenant automatiquement.",
+            metric: { label: "Temps gagné", before: "20h", after: "2h/semaine" },
+            date: "Dec 25, 2025",
+            likes: 41,
+            verified: true
+        }
+    ];
+
+    // Exemples d'articles générés
+    const articleExamples = [
+        {
+            title: "10 Stratégies de Marketing Digital pour 2025",
+            site: "MarketingPro.fr",
+            siteIcon: "🎯",
+            type: "Listicle",
+            seoScore: 94,
+            words: 2847,
+            excerpt: "Le marketing digital évolue rapidement. Découvrez les 10 stratégies incontournables pour booster votre visibilité en ligne et générer plus de leads qualifiés..."
+        },
+        {
+            title: "Comment Créer une Stratégie SEO Efficace : Guide Complet",
+            site: "TechStartup.io",
+            siteIcon: "🚀",
+            type: "Guide",
+            seoScore: 97,
+            words: 3254,
+            excerpt: "Une stratégie SEO bien pensée peut transformer votre acquisition de trafic. Ce guide détaille étape par étape comment construire une présence organique durable..."
+        },
+        {
+            title: "WordPress vs Webflow : Quel CMS Choisir en 2025 ?",
+            site: "DevBlog.com",
+            siteIcon: "💻",
+            type: "Comparatif",
+            seoScore: 91,
+            words: 2156,
+            excerpt: "Le choix d'un CMS impacte directement votre productivité et vos résultats SEO. Analyse complète des forces et faiblesses de WordPress et Webflow..."
         }
     ];
 
@@ -299,6 +397,178 @@ const LandingPageRedacteur = () => {
                             <span>{logo.name}</span>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* Problem / Solution Section */}
+            <section className="problem-solution-section">
+                <div className="section-container">
+                    <div className="section-header-outrank">
+                        <span className="section-tag">Le problème</span>
+                        <h2>Votre problème<br /><span className="gradient-text">Notre solution</span></h2>
+                    </div>
+
+                    <div className="problem-solution-grid">
+                        {/* Problems Column */}
+                        <div className="problems-column">
+                            <div className="problem-card">
+                                <div className="problem-avatar">
+                                    <DollarSign size={20} />
+                                </div>
+                                <div className="problem-content">
+                                    <p>Les abonnements aux outils SEO (<strong>Ahrefs</strong>, <strong>SEMrush</strong>, etc.) coûtent <span className="problem-highlight">+500€/mois</span> de budget marketing.</p>
+                                </div>
+                            </div>
+
+                            <div className="problem-card">
+                                <div className="problem-avatar">
+                                    <AlertCircle size={20} />
+                                </div>
+                                <div className="problem-content">
+                                    <p>Jongler entre <strong>ChatGPT</strong>, <strong>Canva</strong>, et d'autres services — <span className="problem-highlight">perte de temps et d'efficacité</span>.</p>
+                                </div>
+                            </div>
+
+                            <div className="problem-card">
+                                <div className="problem-avatar">
+                                    <Coffee size={20} />
+                                </div>
+                                <div className="problem-content">
+                                    <p><span className="problem-highlight">Des heures perdues à apprendre les outils SEO</span> au lieu de développer votre business.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Solution Column */}
+                        <div className="solution-column">
+                            <div className="solution-card">
+                                <div className="solution-header">
+                                    <div className="solution-logo">
+                                        <Layers size={24} />
+                                    </div>
+                                    <span>Agent SEO</span>
+                                </div>
+                                <p className="solution-tagline">Remplacez tous vos outils par une seule plateforme :</p>
+                                <ul className="solution-features">
+                                    <li>
+                                        <CheckCircle size={18} />
+                                        <span>Recherche de mots-clés</span>
+                                    </li>
+                                    <li>
+                                        <CheckCircle size={18} />
+                                        <span>Génération de contenu IA</span>
+                                    </li>
+                                    <li>
+                                        <CheckCircle size={18} />
+                                        <span>Optimisation SEO automatique</span>
+                                    </li>
+                                    <li>
+                                        <CheckCircle size={18} />
+                                        <span>Images IA incluses</span>
+                                    </li>
+                                    <li>
+                                        <CheckCircle size={18} />
+                                        <span>Publication automatique</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Expert Setup Section */}
+            <section className="expert-setup-section">
+                <div className="section-container">
+                    <div className="expert-setup-content">
+                        <div className="expert-setup-text">
+                            <span className="section-tag">Accompagnement personnalisé</span>
+                            <h2>Un expert configure <span className="gradient-text">tout pour vous</span></h2>
+                            <p className="expert-setup-desc">
+                                Pas envie de passer des heures à configurer ? Notre équipe s'occupe de tout. 
+                                Réservez un appel et bénéficiez d'une démo personnalisée + paramétrage complet offert.
+                            </p>
+
+                            <div className="expert-benefits">
+                                <div className="expert-benefit">
+                                    <div className="expert-benefit-icon">
+                                        <Video size={24} />
+                                    </div>
+                                    <div className="expert-benefit-content">
+                                        <h4>Démo personnalisée</h4>
+                                        <p>Découvrez Agent SEO adapté à votre cas d'usage spécifique</p>
+                                    </div>
+                                </div>
+
+                                <div className="expert-benefit">
+                                    <div className="expert-benefit-icon">
+                                        <Settings size={24} />
+                                    </div>
+                                    <div className="expert-benefit-content">
+                                        <h4>Paramétrage offert</h4>
+                                        <p>Connexion CMS, configuration des mots-clés, personnalisation du ton</p>
+                                    </div>
+                                </div>
+
+                                <div className="expert-benefit">
+                                    <div className="expert-benefit-icon">
+                                        <BookOpen size={24} />
+                                    </div>
+                                    <div className="expert-benefit-content">
+                                        <h4>Formation incluse</h4>
+                                        <p>Apprenez à tirer le maximum de l'outil en 30 minutes</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="expert-cta-btn">
+                                <Phone size={20} />
+                                Réserver mon appel gratuit
+                                <ArrowRight size={18} />
+                            </a>
+
+                            <div className="expert-guarantee">
+                                <Shield size={16} />
+                                <span>100% gratuit • Sans engagement • 30 min chrono</span>
+                            </div>
+                        </div>
+
+                        <div className="expert-setup-visual">
+                            <div className="expert-card-preview">
+                                <div className="expert-card-header">
+                                    <div className="expert-avatar-large">
+                                        <UserCheck size={32} />
+                                    </div>
+                                    <div className="expert-card-info">
+                                        <h4>Votre Expert SEO</h4>
+                                        <p>Disponible pour vous accompagner</p>
+                                    </div>
+                                </div>
+                                <div className="expert-card-features">
+                                    <div className="expert-card-feature">
+                                        <CheckCircle size={16} />
+                                        <span>Analyse de votre site</span>
+                                    </div>
+                                    <div className="expert-card-feature">
+                                        <CheckCircle size={16} />
+                                        <span>Stratégie de mots-clés</span>
+                                    </div>
+                                    <div className="expert-card-feature">
+                                        <CheckCircle size={16} />
+                                        <span>Configuration complète</span>
+                                    </div>
+                                    <div className="expert-card-feature">
+                                        <CheckCircle size={16} />
+                                        <span>Support prioritaire</span>
+                                    </div>
+                                </div>
+                                <div className="expert-card-badge">
+                                    <Gift size={16} />
+                                    <span>Offert</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -670,30 +940,228 @@ const LandingPageRedacteur = () => {
                 </div>
             </section>
 
-            {/* Testimonials */}
-            <section className="testimonials-outrank">
+            {/* Article Examples Section */}
+            <section className="article-examples-section">
+                <div className="section-container">
+                    <div className="section-header-outrank">
+                        <span className="section-tag">Exemples de contenu</span>
+                        <h2>Du contenu IA que <span className="gradient-text">les humains adorent lire</span></h2>
+                        <p>Découvrez des articles générés par Agent SEO, impossibles à distinguer d'un rédacteur pro</p>
+                    </div>
+
+                    <div className="article-examples-grid">
+                        {/* Article List */}
+                        <div className="article-list">
+                            {articleExamples.map((article, index) => (
+                                <div key={index} className={`article-example-card ${index === 0 ? 'active' : ''}`}>
+                                    <div className="article-example-header">
+                                        <h4>{article.title}</h4>
+                                        <span className="article-type-badge">{article.type}</span>
+                                    </div>
+                                    <div className="article-example-meta">
+                                        <span className="article-site">
+                                            <span className="site-icon">{article.siteIcon}</span>
+                                            {article.site}
+                                        </span>
+                                    </div>
+                                    <div className="article-example-stats">
+                                        <div className="article-stat">
+                                            <span className="stat-label">Score SEO</span>
+                                            <span className="stat-value seo-score">{article.seoScore}%</span>
+                                        </div>
+                                        <div className="article-stat">
+                                            <span className="stat-label">Mots</span>
+                                            <span className="stat-value">{article.words.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Article Preview */}
+                        <div className="article-preview-panel">
+                            <div className="article-preview-header">
+                                <div className="preview-browser-bar">
+                                    <div className="preview-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <div className="preview-url">marketingpro.fr/blog/strategies-2025</div>
+                                </div>
+                            </div>
+                            <div className="article-preview-content">
+                                <div className="preview-article-image">
+                                    <div className="preview-image-placeholder">
+                                        <Image size={32} />
+                                        <span>Image IA générée</span>
+                                    </div>
+                                </div>
+                                <h3>{articleExamples[0].title}</h3>
+                                <p className="preview-excerpt">{articleExamples[0].excerpt}</p>
+                                <div className="preview-article-body">
+                                    <h4>1. L'Intelligence Artificielle au service du marketing</h4>
+                                    <p>En 2025, l'IA n'est plus une option mais une nécessité. Les entreprises qui l'adoptent constatent une augmentation moyenne de 40% de leur productivité marketing...</p>
+                                    <h4>2. Le SEO conversationnel</h4>
+                                    <p>Avec l'essor des assistants vocaux et des chatbots, optimiser pour les requêtes conversationnelles devient crucial pour capturer le trafic de demain...</p>
+                                </div>
+                            </div>
+                            <div className="article-preview-footer">
+                                <div className="preview-score-badge">
+                                    <CheckCircle size={16} />
+                                    <span>Score SEO : 94%</span>
+                                </div>
+                                <div className="preview-human-badge">
+                                    <Users size={16} />
+                                    <span>Indétectable IA</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="article-examples-cta">
+                        <p>Envie de voir d'autres exemples personnalisés pour votre niche ?</p>
+                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-secondary">
+                            <Play size={18} />
+                            Demander une démo
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            {/* Testimonials XL - Twitter Style */}
+            <section className="testimonials-xl-section">
                 <div className="section-container">
                     <div className="section-header-outrank">
                         <span className="section-tag">Témoignages</span>
-                        <h2>Ils nous font confiance</h2>
+                        <h2>Adoré par les <span className="gradient-text">entrepreneurs ambitieux</span></h2>
+                        <p>Découvrez ce que nos utilisateurs disent de leur expérience avec Agent SEO</p>
                     </div>
 
-                    <div className="testimonials-grid">
-                        {testimonials.map((t, index) => (
-                            <div key={index} className="testimonial-card">
-                                <div className="testimonial-stars">
-                                    {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="#FBBF24" color="#FBBF24" />)}
+                    {/* Metrics Banner */}
+                    <div className="testimonials-metrics-banner">
+                        <div className="metric-item">
+                            <span className="metric-value">+500</span>
+                            <span className="metric-label">Utilisateurs actifs</span>
                                 </div>
-                                <p className="testimonial-quote">"{t.quote}"</p>
-                                <div className="testimonial-author">
-                                    <div className="author-avatar">{t.avatar}</div>
-                                    <div className="author-info">
-                                        <span className="author-name">{t.author}</span>
-                                        <span className="author-role">{t.role}</span>
+                        <div className="metric-divider"></div>
+                        <div className="metric-item">
+                            <span className="metric-value">4.9/5</span>
+                            <span className="metric-label">Note moyenne</span>
+                        </div>
+                        <div className="metric-divider"></div>
+                        <div className="metric-item">
+                            <span className="metric-value">+250%</span>
+                            <span className="metric-label">Trafic moyen gagné</span>
+                        </div>
+                    </div>
+
+                    {/* Twitter-style Testimonials Grid */}
+                    <div className="twitter-testimonials-grid">
+                        {twitterTestimonials.map((tweet, index) => (
+                            <div key={index} className="twitter-card">
+                                <div className="twitter-card-header">
+                                    <div className="twitter-avatar">{tweet.avatar}</div>
+                                    <div className="twitter-user-info">
+                                        <div className="twitter-name">
+                                            {tweet.name}
+                                            {tweet.verified && (
+                                                <CheckCircle size={14} className="verified-badge" />
+                                            )}
+                                        </div>
+                                        <div className="twitter-handle">{tweet.handle}</div>
+                                    </div>
+                                    <div className="twitter-logo">
+                                        <Twitter size={18} />
+                                    </div>
+                                </div>
+
+                                <div className="twitter-content">
+                                    <p>{tweet.content}</p>
+                                </div>
+
+                                {tweet.metric && (
+                                    <div className="twitter-metric-card">
+                                        <div className="twitter-metric-label">{tweet.metric.label}</div>
+                                        <div className="twitter-metric-values">
+                                            <span className="metric-before">{tweet.metric.before}</span>
+                                            <ArrowRight size={16} className="metric-arrow" />
+                                            <span className="metric-after">{tweet.metric.after}</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="twitter-footer">
+                                    <span className="twitter-date">{tweet.date}</span>
+                                    <div className="twitter-likes">
+                                        <Star size={14} />
+                                        <span>{tweet.likes}</span>
                                     </div>
                                 </div>
                             </div>
                         ))}
+                    </div>
+
+                    {/* Results Screenshots Section */}
+                    <div className="results-showcase">
+                        <h3>Des résultats concrets et mesurables</h3>
+                        <div className="results-cards">
+                            <div className="result-card">
+                                <div className="result-card-header">
+                                    <TrendingUp size={24} />
+                                    <span>Croissance trafic</span>
+                                </div>
+                                <div className="result-graph">
+                                    <div className="graph-bars">
+                                        <div className="graph-bar" style={{ height: '20%' }}><span>J1</span></div>
+                                        <div className="graph-bar" style={{ height: '25%' }}><span>S1</span></div>
+                                        <div className="graph-bar" style={{ height: '35%' }}><span>S2</span></div>
+                                        <div className="graph-bar" style={{ height: '50%' }}><span>M1</span></div>
+                                        <div className="graph-bar" style={{ height: '65%' }}><span>M2</span></div>
+                                        <div className="graph-bar highlight" style={{ height: '90%' }}><span>M3</span></div>
+                                    </div>
+                                </div>
+                                <div className="result-stat">
+                                    <span className="result-stat-value">+340%</span>
+                                    <span className="result-stat-label">en 3 mois</span>
+                                </div>
+                            </div>
+
+                            <div className="result-card">
+                                <div className="result-card-header">
+                                    <Target size={24} />
+                                    <span>Domain Rating</span>
+                                </div>
+                                <div className="result-dr-display">
+                                    <div className="dr-circle">
+                                        <svg viewBox="0 0 100 100">
+                                            <circle cx="50" cy="50" r="45" className="dr-bg" />
+                                            <circle cx="50" cy="50" r="45" className="dr-progress" strokeDasharray="283" strokeDashoffset="100" />
+                                        </svg>
+                                        <div className="dr-value">38</div>
+                                    </div>
+                                </div>
+                                <div className="result-stat">
+                                    <span className="result-stat-value">+21 points</span>
+                                    <span className="result-stat-label">depuis le début</span>
+                                </div>
+                            </div>
+
+                            <div className="result-card">
+                                <div className="result-card-header">
+                                    <FileText size={24} />
+                                    <span>Score SEO moyen</span>
+                                </div>
+                                <div className="result-seo-score">
+                                    <div className="seo-score-bar">
+                                        <div className="seo-score-fill" style={{ width: '94%' }}></div>
+                                    </div>
+                                    <div className="seo-score-value">94%</div>
+                                </div>
+                                <div className="result-stat">
+                                    <span className="result-stat-value">2,500+ mots</span>
+                                    <span className="result-stat-label">par article en moyenne</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
