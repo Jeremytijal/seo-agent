@@ -10,7 +10,6 @@ import {
     UserCheck, Headphones, Settings, Gift, Quote, TrendingDown,
     DollarSign, AlertCircle, Coffee, Phone, Video, BookOpen
 } from 'lucide-react';
-import { CALENDLY_URL } from '../config';
 import './LandingPage.css';
 
 const LandingPageRedacteur = () => {
@@ -390,10 +389,10 @@ const LandingPageRedacteur = () => {
                     </p>
 
                     <div className="hero-cta-group">
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-primary">
+                        <Link to="/landing/redacteur/demo" className="btn-hero-primary">
                             <Phone size={18} />
-                            Réserver ma démo gratuite
-                        </a>
+                            Demander une démo gratuite
+                        </Link>
                         <Link to="/signup" className="btn-hero-secondary">
                             Essayer gratuitement
                             <ArrowRight size={18} />
@@ -621,11 +620,11 @@ const LandingPageRedacteur = () => {
                                 </div>
                             </div>
 
-                            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="expert-cta-btn">
+                            <Link to="/landing/redacteur/demo" className="expert-cta-btn">
                                 <Phone size={20} />
                                 Réserver mon appel gratuit
                                 <ArrowRight size={18} />
-                            </a>
+                            </Link>
 
                             <div className="expert-guarantee">
                                 <Shield size={16} />
@@ -780,10 +779,10 @@ const LandingPageRedacteur = () => {
                     </div>
 
                     <div className="before-after-cta animate-on-scroll">
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-primary">
+                        <Link to="/landing/redacteur/demo" className="btn-hero-primary">
                             <Phone size={18} />
                             Voir une démo personnalisée
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -865,11 +864,11 @@ const LandingPageRedacteur = () => {
                     </div>
 
                     <div className="how-cta-center animate-on-scroll">
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-primary">
+                        <Link to="/landing/redacteur/demo" className="btn-hero-primary">
                             <Phone size={18} />
-                            Réserver ma démo gratuite
+                            Demander ma démo gratuite
                             <ArrowRight size={18} />
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -1250,10 +1249,10 @@ const LandingPageRedacteur = () => {
 
                     <div className="article-examples-cta">
                         <p>Envie de voir d'autres exemples personnalisés pour votre niche ?</p>
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-secondary">
+                        <Link to="/landing/redacteur/demo" className="btn-hero-secondary">
                             <Play size={18} />
                             Demander une démo
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -1348,16 +1347,6 @@ const LandingPageRedacteur = () => {
                                                     alt={tweet.screenshot.title}
                                                     className="screenshot-img"
                                                 />
-                                                <div className="twitter-screenshot-overlay">
-                                                    <div className="twitter-screenshot-metrics">
-                                                        {tweet.screenshot.metrics.map((metric, idx) => (
-                                                            <div key={idx} className="twitter-screenshot-metric">
-                                                                <span className="screenshot-metric-label">{metric.label}</span>
-                                                                <span className="screenshot-metric-value">{metric.value}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
                                             </div>
                                             <div className="twitter-screenshot-caption">
                                                 <strong>{tweet.screenshot.caption}</strong>
@@ -1650,10 +1639,10 @@ const LandingPageRedacteur = () => {
                         </div>
 
                         <div className="risk-reversal-cta">
-                            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-hero-primary">
+                            <Link to="/landing/redacteur/demo" className="btn-hero-primary">
                                 <Phone size={18} />
                                 Tester gratuitement maintenant
-                            </a>
+                            </Link>
                             <p className="risk-reversal-note">
                                 <Shield size={16} />
                                 <span>Aucune carte bancaire requise • 100% gratuit • Sans engagement</span>
@@ -1737,9 +1726,9 @@ const LandingPageRedacteur = () => {
                                 <li><CheckCircle size={18} /> White-label</li>
                                 <li><CheckCircle size={18} /> Account manager</li>
                             </ul>
-                            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="btn-pricing-outrank">
+                            <Link to="/landing/redacteur/demo" className="btn-pricing-outrank">
                                 Nous contacter
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -1793,17 +1782,15 @@ const LandingPageRedacteur = () => {
                                 </div>
                             </div>
 
-                            <a 
-                                href={CALENDLY_URL} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
+                            <Link 
+                                to="/landing/redacteur/demo"
                                 className="cta-expert-btn"
                                 aria-label="Réserver un appel gratuit avec un expert"
                             >
                                 <Phone size={20} aria-hidden="true" />
-                                <span>Réserver mon appel gratuit</span>
+                                <span>Demander ma démo gratuite</span>
                                 <ArrowRight size={18} aria-hidden="true" />
-                            </a>
+                            </Link>
 
                             <p className="cta-expert-guarantee">
                                 <span>100% gratuit</span>
@@ -1908,10 +1895,10 @@ const LandingPageRedacteur = () => {
                         <span className="floating-cta-subtitle">Essai gratuit 7 jours • Sans engagement</span>
                     </div>
                     <div className="floating-cta-buttons">
-                        <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="floating-cta-primary">
+                        <Link to="/landing/redacteur/demo" className="floating-cta-primary">
                             <Phone size={16} />
-                            Réserver une démo
-                        </a>
+                            Demander une démo
+                        </Link>
                         <Link to="/signup" className="floating-cta-secondary">
                             Essayer gratuitement
                         </Link>

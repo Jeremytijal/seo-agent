@@ -57,6 +57,9 @@ export const endpoints = {
     createCheckoutSession: `${API_URL}/api/stripe/create-checkout-session`,
     createPortalSession: `${API_URL}/api/stripe/create-portal-session`,
     
+    // Demo Requests
+    demoRequests: `${API_URL}/api/demo-requests`,
+    
     // Templates
     templates: (userId) => `${API_URL}/api/templates/${userId}`,
     

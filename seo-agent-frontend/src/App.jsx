@@ -16,6 +16,8 @@ import LandingPageRedacteur from './pages/LandingPageRedacteur';
 import LandingPageAutomation from './pages/LandingPageAutomation';
 import LandingPageTraffic from './pages/LandingPageTraffic';
 import LandingPagePrix from './pages/LandingPagePrix';
+import FunnelDemoRedacteur from './pages/FunnelDemoRedacteur';
+import FunnelDemoThankYou from './pages/FunnelDemoThankYou';
 import Subscription from './pages/Subscription';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
@@ -42,6 +44,8 @@ function App() {
         <Routes>
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/landing/redacteur" element={<LandingPageRedacteur />} />
+          <Route path="/landing/redacteur/demo" element={<FunnelDemoRedacteur />} />
+          <Route path="/landing/redacteur/merci" element={<FunnelDemoThankYou />} />
           <Route path="/landing/automation" element={<LandingPageAutomation />} />
           <Route path="/landing/traffic" element={<LandingPageTraffic />} />
           <Route path="/landing/prix" element={<LandingPagePrix />} />

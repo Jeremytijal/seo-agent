@@ -2971,6 +2971,147 @@ app.post('/api/articles/:userId', async (req, res) => {
     }
 });
 
+// =============================================================================
+// DEMO REQUESTS API (avec notification Slack)
+// =============================================================================
+
+// Submit demo request with Slack notification
+app.post('/api/demo-requests', async (req, res) => {
+    try {
+        const { prenom, nom, email, site_internet, telephone, source } = req.body;
+
+        // Validate required fields
+        if (!prenom || !nom || !email || !site_internet) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Save to Supabase
+        const { data, error: dbError } = await supabase
+            .from('demo_requests')
+            .insert([{
+                prenom,
+                nom,
+                email: email.toLowerCase(),
+                site_internet,
+                telephone: telephone || null,
+                source: source || 'landing_redacteur',
+                status: 'new',
+                created_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+
+        if (dbError) {
+            console.error('Database error:', dbError);
+        }
+
+        // Send Slack notification
+        const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
+        if (slackWebhookUrl) {
+            try {
+                const slackMessage = {
+                    blocks: [
+                        {
+                            type: "header",
+                            text: {
+                                type: "plain_text",
+                                text: "🎉 Nouvelle demande de démo !",
+                                emoji: true
+                            }
+                        },
+                        {
+                            type: "section",
+                            fields: [
+                                {
+                                    type: "mrkdwn",
+                                    text: `*Nom:*\n${prenom} ${nom}`
+                                },
+                                {
+                                    type: "mrkdwn",
+                                    text: `*Email:*\n${email}`
+                                }
+                            ]
+                        },
+                        {
+                            type: "section",
+                            fields: [
+                                {
+                                    type: "mrkdwn",
+                                    text: `*Site internet:*\n<${site_internet}|${site_internet}>`
+                                },
+                                {
+                                    type: "mrkdwn",
+                                    text: `*Téléphone:*\n${telephone || 'Non renseigné'}`
+                                }
+                            ]
+                        },
+                        {
+                            type: "context",
+                            elements: [
+                                {
+                                    type: "mrkdwn",
+                                    text: `📍 Source: ${source || 'landing_redacteur'} | 🕐 ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`
+                                }
+                            ]
+                        },
+                        {
+                            type: "divider"
+                        },
+                        {
+                            type: "actions",
+                            elements: [
+                                {
+                                    type: "button",
+                                    text: {
+                                        type: "plain_text",
+                                        text: "📧 Contacter",
+                                        emoji: true
+                                    },
+                                    url: `mailto:${email}?subject=Votre%20demande%20de%20démo%20Agent%20SEO`,
+                                    action_id: "contact_email"
+                                },
+                                {
+                                    type: "button",
+                                    text: {
+                                        type: "plain_text",
+                                        text: "🌐 Voir le site",
+                                        emoji: true
+                                    },
+                                    url: site_internet,
+                                    action_id: "view_site"
+                                }
+                            ]
+                        }
+                    ]
+                };
+
+                await fetch(slackWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(slackMessage)
+                });
+
+                console.log('✅ Slack notification sent for demo request:', email);
+            } catch (slackError) {
+                console.error('Slack notification error:', slackError);
+                // Don't fail the request if Slack fails
+            }
+        } else {
+            console.log('⚠️ SLACK_WEBHOOK_URL not configured - skipping notification');
+        }
+
+        res.json({ 
+            success: true, 
+            message: 'Demo request submitted successfully',
+            id: data?.id 
+        });
+
+    } catch (error) {
+        console.error('Error submitting demo request:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
